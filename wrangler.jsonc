@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "tinystudio-io-public",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-05-29",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "tinystudio.io", "custom_domain": true },
+    { "pattern": "www.tinystudio.io", "custom_domain": true }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/llms.txt", "/offer.md", "/robots.txt", "/sitemap.xml", "/health"]
+  }
+}

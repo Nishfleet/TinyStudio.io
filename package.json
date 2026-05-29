@@ -1,0 +1,20 @@
+{
+  "name": "tinystudio-io",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Public buyer page for TinyStudio.io.",
+  "scripts": {
+    "dev": "python3 -m http.server 4173 --directory public",
+    "check": "node scripts/check-site.mjs",
+    "test": "npm run check",
+    "deploy:dry-run": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "wrangler": "^4.93.0"
+  }
+}
