@@ -55,16 +55,18 @@ for (const claim of forbiddenClaims) {
   }
 }
 
-for (const route of ["tinystudio.io", "www.tinystudio.io"]) {
+for (const route of ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", "api.tinystudio.io"]) {
   if (!wrangler.includes(`"pattern": "${route}"`)) {
     failures.push(`Missing Cloudflare route: ${route}`);
   }
 }
 
-for (const route of ["app.tinystudio.io", "api.tinystudio.io"]) {
-  if (wrangler.includes(route)) {
-    failures.push(`Cloudflare config must not touch private route: ${route}`);
-  }
+if (!read("src/worker.js").includes("TinyStudio app retired")) {
+  failures.push("Missing app retirement response.");
+}
+
+if (!read("src/worker.js").includes("The old TinyStudio API has been retired")) {
+  failures.push("Missing API retirement response.");
 }
 
 if (failures.length) {

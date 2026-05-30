@@ -2,7 +2,7 @@
 
 ## Scope
 
-Build a small static website served by Cloudflare Workers Static Assets. Keep it independent from private app/API surfaces.
+Build a small static website served by Cloudflare Workers Static Assets. Own the full TinyStudio.io domain family and intentionally retire the old app/API surfaces.
 
 ## Pieces
 
@@ -12,7 +12,8 @@ Build a small static website served by Cloudflare Workers Static Assets. Keep it
 - `public/assets/proof-board.svg` provides the primary visual asset.
 - `public/llms.txt` and `public/offer.md` expose agent-readable public offer truth.
 - `src/worker.js` serves static assets with security headers and index fallback.
-- `wrangler.jsonc` defines only the apex/www public routes.
+- `src/worker.js` returns retired responses for `app.tinystudio.io` and `api.tinystudio.io`.
+- `wrangler.jsonc` defines apex, www, app, and api routes.
 - `scripts/check-site.mjs` validates required content and claim safety.
 
 ## Verification

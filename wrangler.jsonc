@@ -7,7 +7,9 @@
   "preview_urls": false,
   "routes": [
     { "pattern": "tinystudio.io", "custom_domain": true },
-    { "pattern": "www.tinystudio.io", "custom_domain": true }
+    { "pattern": "www.tinystudio.io", "custom_domain": true },
+    { "pattern": "app.tinystudio.io", "custom_domain": true },
+    { "pattern": "api.tinystudio.io", "custom_domain": true }
   ],
   "observability": {
     "enabled": true,

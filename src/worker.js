@@ -19,6 +19,61 @@ function withSecurityHeaders(response) {
   });
 }
 
+function retiredAppResponse() {
+  return withSecurityHeaders(
+    new Response(
+      `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TinyStudio App Retired</title>
+    <style>
+      body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fffdf7;color:#171713;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+      main{width:min(720px,calc(100% - 40px));padding:48px;border:1px solid rgba(23,23,19,.14);border-radius:8px;background:#fff}
+      h1{margin:0;font-size:clamp(38px,6vw,72px);line-height:1;letter-spacing:0}
+      p{color:#57534b;font-size:18px;line-height:1.55}
+      a{display:inline-flex;align-items:center;min-height:46px;padding:0 16px;border-radius:8px;background:#171713;color:#fffdf7;font-weight:800;text-decoration:none}
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>TinyStudio app retired.</h1>
+      <p>The old Website Manager app has been retired as part of the TinyStudio.io overhaul. The public TinyStudio buyer page is now the source of truth.</p>
+      <a href="https://tinystudio.io/">Go to TinyStudio.io</a>
+    </main>
+  </body>
+</html>`,
+      {
+        status: 410,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store"
+        }
+      }
+    )
+  );
+}
+
+function retiredApiResponse() {
+  return withSecurityHeaders(
+    Response.json(
+      {
+        ok: false,
+        status: "retired",
+        message: "The old TinyStudio API has been retired as part of the TinyStudio.io overhaul.",
+        publicSite: "https://tinystudio.io/"
+      },
+      {
+        status: 410,
+        headers: {
+          "Cache-Control": "no-store"
+        }
+      }
+    )
+  );
+}
+
 function assetRequest(url, request, pathname) {
   const nextUrl = new URL(url);
   nextUrl.pathname = pathname;
@@ -28,13 +83,22 @@ function assetRequest(url, request, pathname) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const host = url.hostname.toLowerCase();
+
+    if (host === "app.tinystudio.io") {
+      return retiredAppResponse();
+    }
+
+    if (host === "api.tinystudio.io") {
+      return retiredApiResponse();
+    }
 
     if (url.pathname === "/health") {
       return withSecurityHeaders(
         Response.json({
           ok: true,
           service: "tinystudio-io-public",
-          routes: ["tinystudio.io", "www.tinystudio.io"]
+          routes: ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", "api.tinystudio.io"]
         })
       );
     }

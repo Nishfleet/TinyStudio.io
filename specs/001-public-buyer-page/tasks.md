@@ -5,6 +5,7 @@
 - [x] Add exact buyer-page copy.
 - [x] Add primary visual asset.
 - [x] Add Cloudflare Worker/static assets config.
+- [x] Add app/api retirement routing.
 - [x] Add agent-readable public copy.
 - [x] Add claim-safety/content checks.
 - [x] Run local and browser verification.

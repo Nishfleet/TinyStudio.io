@@ -11,7 +11,7 @@ Qualified buyers can visit `tinystudio.io`, understand the exact TinyStudio spri
 - Add a lead database or CRM.
 - Replace sales calls or Loom audits.
 - Promise revenue, ROAS, rankings, AI visibility, or sales lift.
-- Touch private app/API subdomains.
+- Keep the old private app/API subdomains alive.
 
 ## Requirements
 
@@ -25,14 +25,16 @@ Qualified buyers can visit `tinystudio.io`, understand the exact TinyStudio spri
 - Public page must include a contact path using `hello@tinystudio.io`.
 - Public page must disclose that outcomes are not guaranteed.
 - Public page must include agent-readable `/llms.txt` and `/offer.md`.
-- Cloudflare config must route only `tinystudio.io` and `www.tinystudio.io`.
+- Cloudflare config must route `tinystudio.io`, `www.tinystudio.io`, `app.tinystudio.io`, and `api.tinystudio.io`.
+- `app.tinystudio.io` must return an intentional retired notice.
+- `api.tinystudio.io` must return an intentional retired JSON response.
 
 ## Acceptance Checks
 
 - `npm test` passes.
 - The page includes offer, examples, price, timeline, FAQs, refund/guarantee terms, and contact CTA.
 - The copy avoids revenue, ROAS, ranking, AI visibility, conversion-lift, and sales-lift guarantees.
-- Cloudflare routes do not include `app.tinystudio.io` or `api.tinystudio.io`.
+- Cloudflare routes include `app.tinystudio.io` and `api.tinystudio.io` so the old Website Manager app/API are no longer exposed there.
 - Desktop and mobile browser checks render without obvious overlap or blank visual sections.
 
 ## Data Touched

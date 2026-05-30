@@ -16,12 +16,13 @@
 
 ## Deployment Boundary
 
-- The intended Cloudflare routes are the apex and www public domains only:
+- The intended Cloudflare routes now own the whole TinyStudio.io domain family:
   - `tinystudio.io`
   - `www.tinystudio.io`
-- Do not route or deploy over:
   - `app.tinystudio.io`
   - `api.tinystudio.io`
+- `app.tinystudio.io` should return an intentional retired notice.
+- `api.tinystudio.io` should return an intentional retired JSON response.
 
 ## Verification
 
