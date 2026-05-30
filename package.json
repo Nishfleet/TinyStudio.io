@@ -8,6 +8,8 @@
     "dev": "python3 -m http.server 4173 --directory public",
     "check": "node scripts/check-site.mjs",
     "test": "npm run check",
+    "leads:list": "wrangler d1 execute tinystudio_email_signups --remote --command \"SELECT email, source, page_path, created_at, updated_at FROM email_signups ORDER BY updated_at DESC LIMIT 100;\"",
+    "leads:export": "wrangler d1 execute tinystudio_email_signups --remote --command \"SELECT email, source, page_path, created_at, updated_at FROM email_signups ORDER BY updated_at DESC;\" --json",
     "deploy:dry-run": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy"
   },

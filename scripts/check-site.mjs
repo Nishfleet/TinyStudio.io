@@ -9,6 +9,9 @@ const wrangler = read("wrangler.jsonc");
 
 const requiredIndexCopy = [
   "TinyStudio Revenue Leak Sprint",
+  "Find the leak before the buyer does.",
+  "Unlock the first signal",
+  "data-signup-form",
   "Tangible Revenue Leak Sprint + Search Trust Layer",
   "Examples",
   "$1,000",
@@ -67,6 +70,18 @@ if (!read("src/worker.js").includes("TinyStudio app retired")) {
 
 if (!read("src/worker.js").includes("The old TinyStudio API has been retired")) {
   failures.push("Missing API retirement response.");
+}
+
+if (!read("src/worker.js").includes("email_signups")) {
+  failures.push("Missing email signup storage path.");
+}
+
+if (!wrangler.includes("\"database_name\": \"tinystudio_email_signups\"")) {
+  failures.push("Missing D1 signup database binding.");
+}
+
+if (!read("public/script.js").includes("/api/signups")) {
+  failures.push("Missing email signup form submission path.");
 }
 
 if (failures.length) {

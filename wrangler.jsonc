@@ -15,9 +15,16 @@
     "enabled": true,
     "head_sampling_rate": 1
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tinystudio_email_signups",
+      "database_id": "ff360a55-14fc-468c-895f-893c89e0db79"
+    }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/", "/llms.txt", "/offer.md", "/robots.txt", "/sitemap.xml", "/health"]
+    "run_worker_first": ["/", "/api/*", "/llms.txt", "/offer.md", "/robots.txt", "/sitemap.xml", "/health"]
   }
 }

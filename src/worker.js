@@ -19,6 +19,87 @@ function withSecurityHeaders(response) {
   });
 }
 
+function jsonResponse(body, init = {}) {
+  return withSecurityHeaders(
+    Response.json(body, {
+      ...init,
+      headers: {
+        "Cache-Control": "no-store",
+        ...(init.headers || {})
+      }
+    })
+  );
+}
+
+function cleanHeader(value, limit = 320) {
+  return value ? value.slice(0, limit) : "";
+}
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
+}
+
+async function readSignupEmail(request) {
+  const contentType = request.headers.get("Content-Type") || "";
+
+  if (contentType.includes("application/json")) {
+    const body = await request.json().catch(() => ({}));
+    return normalizeEmail(body.email);
+  }
+
+  const formData = await request.formData().catch(() => null);
+  return normalizeEmail(formData?.get("email"));
+}
+
+async function signupResponse(request, env, url) {
+  if (request.method === "OPTIONS") {
+    return jsonResponse({ ok: true });
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse({ ok: false, error: "method_not_allowed" }, { status: 405 });
+  }
+
+  if (!env.DB) {
+    return jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 });
+  }
+
+  const email = await readSignupEmail(request);
+
+  if (!isValidEmail(email)) {
+    return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
+  }
+
+  const now = new Date().toISOString();
+
+  await env.DB.prepare(
+    `INSERT INTO email_signups (email, source, page_path, referer, user_agent, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(email) DO UPDATE SET
+       source = excluded.source,
+       page_path = excluded.page_path,
+       referer = excluded.referer,
+       user_agent = excluded.user_agent,
+       updated_at = excluded.updated_at`
+  )
+    .bind(
+      email,
+      "cryptic-landing-page",
+      url.pathname,
+      cleanHeader(request.headers.get("Referer"), 500),
+      cleanHeader(request.headers.get("User-Agent"), 500),
+      now,
+      now
+    )
+    .run();
+
+  return jsonResponse({ ok: true, message: "signal_saved" }, { status: 201 });
+}
+
 function retiredAppResponse() {
   return withSecurityHeaders(
     new Response(
@@ -91,6 +172,10 @@ export default {
 
     if (host === "api.tinystudio.io") {
       return retiredApiResponse();
+    }
+
+    if (url.pathname === "/api/signups") {
+      return signupResponse(request, env, url);
     }
 
     if (url.pathname === "/health") {
