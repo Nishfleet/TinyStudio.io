@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "tinystudio.mobbin-reference-run.v1",
+  "date": "2026-05-30",
+  "sourceProvider": "Mobbin MCP",
+  "business": "TinyStudio.io public buyer page",
+  "visitorJob": "Founder-led buyer decides whether to email TinyStudio about a 7-day Revenue Leak Sprint.",
+  "queries": [
+    {
+      "query": "Intercom web homepage AI-first customer service landing page full bleed hero navigation CTA",
+      "returned": [
+        {"id": "d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e", "imageUrl": "https://mobbin.com/api/mcp/short/qmP10FQB"},
+        {"id": "7c2003c3-d242-428f-910f-8c6396018e7e", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/7c2003c3-d242-428f-910f-8c6396018e7e", "imageUrl": "https://mobbin.com/api/mcp/short/nqYBSU2p"},
+        {"id": "bd2da7f1-cc12-4242-baca-17e731259381", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/bd2da7f1-cc12-4242-baca-17e731259381", "imageUrl": "https://mobbin.com/api/mcp/short/VWXT8ckd"},
+        {"id": "2c086168-3f55-47dd-beb8-ffdf144d4ec3", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/2c086168-3f55-47dd-beb8-ffdf144d4ec3", "imageUrl": "https://mobbin.com/api/mcp/short/DcPzfiTS"},
+        {"id": "9f775dc5-41ab-4bd9-8f57-f66dc83ea760", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/9f775dc5-41ab-4bd9-8f57-f66dc83ea760", "imageUrl": "https://mobbin.com/api/mcp/short/veNeTqg7"},
+        {"id": "dfa39e1e-71de-4850-8459-c9fe4e5da2da", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/dfa39e1e-71de-4850-8459-c9fe4e5da2da", "imageUrl": "https://mobbin.com/api/mcp/short/3UqBzjcY"}
+      ]
+    },
+    {
+      "query": "Intercom web pricing page tabs pricing cards SaaS subscription checkout customer service",
+      "returned": [
+        {"id": "38741f9a-3a10-49f2-acdc-2b454b873038", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/38741f9a-3a10-49f2-acdc-2b454b873038", "imageUrl": "https://mobbin.com/api/mcp/short/lhO59zzE"},
+        {"id": "c71cdec3-ca82-4a3d-b44a-acb3ee7b57c0", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/c71cdec3-ca82-4a3d-b44a-acb3ee7b57c0", "imageUrl": "https://mobbin.com/api/mcp/short/rfGkRxyH"},
+        {"id": "98e2a7a7-ecee-4d03-a04a-0ae39d1c9ebe", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/98e2a7a7-ecee-4d03-a04a-0ae39d1c9ebe", "imageUrl": "https://mobbin.com/api/mcp/short/QPaAo7aO"}
+      ]
+    },
+    {
+      "query": "beautiful SaaS landing page full bleed illustrated hero pill navigation bold white headline pricing cards",
+      "returned": [
+        {"id": "167babb6-efc4-4793-8429-7a8ef087076f", "app": "v0", "mobbinUrl": "https://mobbin.com/screens/167babb6-efc4-4793-8429-7a8ef087076f", "imageUrl": "https://mobbin.com/api/mcp/short/jd0VwwKe"},
+        {"id": "327e98e7-442b-462c-b0f5-884af12e7d78", "app": "Craft", "mobbinUrl": "https://mobbin.com/screens/327e98e7-442b-462c-b0f5-884af12e7d78", "imageUrl": "https://mobbin.com/api/mcp/short/qorEqhNP"},
+        {"id": "a8eb45e6-ca91-450d-a459-5fcfc3a0325f", "app": "Fibery", "mobbinUrl": "https://mobbin.com/screens/a8eb45e6-ca91-450d-a459-5fcfc3a0325f", "imageUrl": "https://mobbin.com/api/mcp/short/dBEN3PIf"},
+        {"id": "d897d98e-42b2-4ff4-a3f7-03a12f079588", "app": "Visitors", "mobbinUrl": "https://mobbin.com/screens/d897d98e-42b2-4ff4-a3f7-03a12f079588", "imageUrl": "https://mobbin.com/api/mcp/short/tLoRvUtI"},
+        {"id": "ba0f9f3f-ccf6-4ee5-b834-4a1b80dfa3b4", "app": "Cloudflare", "mobbinUrl": "https://mobbin.com/screens/ba0f9f3f-ccf6-4ee5-b834-4a1b80dfa3b4", "imageUrl": "https://mobbin.com/api/mcp/short/5x4vtMZ1"},
+        {"id": "9a708696-6879-4c16-8264-2016b22bf86c", "app": "Pipedrive", "mobbinUrl": "https://mobbin.com/screens/9a708696-6879-4c16-8264-2016b22bf86c", "imageUrl": "https://mobbin.com/api/mcp/short/7MIrAVYM"},
+        {"id": "4eca18ed-9291-4bb2-8110-9b0f610bd86b", "app": "v0", "mobbinUrl": "https://mobbin.com/screens/4eca18ed-9291-4bb2-8110-9b0f610bd86b", "imageUrl": "https://mobbin.com/api/mcp/short/gIMjH9RO"},
+        {"id": "7d8b276e-b850-40f0-8692-ffe16dde5a8a", "app": "Wrangle", "mobbinUrl": "https://mobbin.com/screens/7d8b276e-b850-40f0-8692-ffe16dde5a8a", "imageUrl": "https://mobbin.com/api/mcp/short/puvMrDOL"}
+      ],
+      "note": "Adjacent SaaS visual references used only for quality calibration, not copied."
+    },
+    {
+      "query": "customer service AI support SaaS website hero product cards chat assistant landing page",
+      "returned": [
+        {"id": "11ce8b13-f136-4553-979e-695b5dded431", "app": "Gorgias", "mobbinUrl": "https://mobbin.com/screens/11ce8b13-f136-4553-979e-695b5dded431", "imageUrl": "https://mobbin.com/api/mcp/short/EJ3RRMro"},
+        {"id": "8bd236e3-49d1-4ab6-a838-342a7f11acbe", "app": "HubSpot", "mobbinUrl": "https://mobbin.com/screens/8bd236e3-49d1-4ab6-a838-342a7f11acbe", "imageUrl": "https://mobbin.com/api/mcp/short/HSVI6s8v"},
+        {"id": "846c9e64-dac8-465f-8dd5-87dd4a6cd0cc", "app": "Dialpad", "mobbinUrl": "https://mobbin.com/screens/846c9e64-dac8-465f-8dd5-87dd4a6cd0cc", "imageUrl": "https://mobbin.com/api/mcp/short/NbUFUiF9"},
+        {"id": "3cfeb1b0-d89a-4b34-8bc8-e677792ba8b6", "app": "Chatbase", "mobbinUrl": "https://mobbin.com/screens/3cfeb1b0-d89a-4b34-8bc8-e677792ba8b6", "imageUrl": "https://mobbin.com/api/mcp/short/oJp09VhD"},
+        {"id": "e2715f0b-d2aa-4c1a-8929-652de070a292", "app": "Sana AI", "mobbinUrl": "https://mobbin.com/screens/e2715f0b-d2aa-4c1a-8929-652de070a292", "imageUrl": "https://mobbin.com/api/mcp/short/LfXSEQJx"},
+        {"id": "d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e", "imageUrl": "https://mobbin.com/api/mcp/short/M8QTcp2x"},
+        {"id": "cf69146f-f96f-41ce-ac78-dba5aac058f0", "app": "Chatbase", "mobbinUrl": "https://mobbin.com/screens/cf69146f-f96f-41ce-ac78-dba5aac058f0", "imageUrl": "https://mobbin.com/api/mcp/short/h8S7i6zb"},
+        {"id": "ecfd5e82-fc6d-4e68-bc15-35f55ebc773a", "app": "Google Gemini", "mobbinUrl": "https://mobbin.com/screens/ecfd5e82-fc6d-4e68-bc15-35f55ebc773a", "imageUrl": "https://mobbin.com/api/mcp/short/PsXm3UHk"}
+      ],
+      "note": "Adjacent category references used to validate product-card and assistant-panel patterns."
+    },
+    {
+      "query": "SaaS website pricing page large cards tabbed plans bold rounded buttons beautiful enterprise software",
+      "returned": [
+        {"id": "4f7bf30d-8b61-43c5-a8ba-66532d2bd8b3", "app": "Rox", "mobbinUrl": "https://mobbin.com/screens/4f7bf30d-8b61-43c5-a8ba-66532d2bd8b3", "imageUrl": "https://mobbin.com/api/mcp/short/B1TKd35e"},
+        {"id": "d680aa56-978e-4563-ad6d-dd156a1a8e29", "app": "Amplitude", "mobbinUrl": "https://mobbin.com/screens/d680aa56-978e-4563-ad6d-dd156a1a8e29", "imageUrl": "https://mobbin.com/api/mcp/short/EItUAjPe"},
+        {"id": "fdb4a3ff-7ed0-447a-95bf-0b96fa7f8d2f", "app": "1Password", "mobbinUrl": "https://mobbin.com/screens/fdb4a3ff-7ed0-447a-95bf-0b96fa7f8d2f", "imageUrl": "https://mobbin.com/api/mcp/short/iLrYXE8r"},
+        {"id": "04522f3a-102f-48a1-9eb8-bb0415ac3358", "app": "1Password", "mobbinUrl": "https://mobbin.com/screens/04522f3a-102f-48a1-9eb8-bb0415ac3358", "imageUrl": "https://mobbin.com/api/mcp/short/jlzPWops"},
+        {"id": "5319913c-372c-4277-91fa-0e3a06ae922a", "app": "HBO Max", "mobbinUrl": "https://mobbin.com/screens/5319913c-372c-4277-91fa-0e3a06ae922a", "imageUrl": "https://mobbin.com/api/mcp/short/gYqon2bB"},
+        {"id": "6600ce46-3677-431f-96b7-60e7fbf0af1c", "app": "OpenPhone", "mobbinUrl": "https://mobbin.com/screens/6600ce46-3677-431f-96b7-60e7fbf0af1c", "imageUrl": "https://mobbin.com/api/mcp/short/tTeAnvJp"},
+        {"id": "51aa4c2b-8c5b-4421-92ba-cbb9a208aaab", "app": "Claude", "mobbinUrl": "https://mobbin.com/screens/51aa4c2b-8c5b-4421-92ba-cbb9a208aaab", "imageUrl": "https://mobbin.com/api/mcp/short/OFoFmKSm"},
+        {"id": "8a74b51d-ea06-476e-b511-6c8a12544cb6", "app": "Chatbase", "mobbinUrl": "https://mobbin.com/screens/8a74b51d-ea06-476e-b511-6c8a12544cb6", "imageUrl": "https://mobbin.com/api/mcp/short/kOHB7HhY"}
+      ],
+      "note": "Adjacent pricing references used to validate pricing-card density."
+    },
+    {
+      "query": "Intercom web product suite cards AI customer service company homepage dark hero product panels",
+      "returned": [
+        {"id": "7c2003c3-d242-428f-910f-8c6396018e7e", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/7c2003c3-d242-428f-910f-8c6396018e7e", "imageUrl": "https://mobbin.com/api/mcp/short/pH9EiXpQ"},
+        {"id": "0f6c2311-be9c-438a-8089-520247c78ace", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/0f6c2311-be9c-438a-8089-520247c78ace", "imageUrl": "https://mobbin.com/api/mcp/short/oxigpver"},
+        {"id": "c4675428-3a96-46d3-8025-0f19dc062dd4", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/c4675428-3a96-46d3-8025-0f19dc062dd4", "imageUrl": "https://mobbin.com/api/mcp/short/JtCJYxes"},
+        {"id": "d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e", "imageUrl": "https://mobbin.com/api/mcp/short/qPPqq40V"},
+        {"id": "12120836-5ca6-49af-be06-810e76093017", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/12120836-5ca6-49af-be06-810e76093017", "imageUrl": "https://mobbin.com/api/mcp/short/xYQd5PJr"},
+        {"id": "489839a3-007d-4f6b-9292-f41358fa5533", "app": "Intercom", "mobbinUrl": "https://mobbin.com/screens/489839a3-007d-4f6b-9292-f41358fa5533", "imageUrl": "https://mobbin.com/api/mcp/short/GjjVS1fF"}
+      ]
+    }
+  ],
+  "totals": {
+    "returnedScreens": 39,
+    "uniqueScreenIdsRecordedInDetail": 36,
+    "exactIntercomScreensRecordedInDetail": 13
+  },
+  "copyrightGuardrail": "Mobbin references were used for structure, spacing, rhythm, and quality calibration. No Intercom screenshots, logos, copy, or proprietary UI assets were reused."
+}
