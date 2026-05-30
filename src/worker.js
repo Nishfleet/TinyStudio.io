@@ -39,7 +39,7 @@ function retiredAppResponse() {
   <body>
     <main>
       <h1>TinyStudio app retired.</h1>
-      <p>The old Website Manager app has been retired as part of the TinyStudio.io overhaul. The public TinyStudio buyer page is now the source of truth.</p>
+      <p>The old TinyStudio app has been retired as part of the TinyStudio.io overhaul. The public TinyStudio buyer page is now the source of truth.</p>
       <a href="https://tinystudio.io/">Go to TinyStudio.io</a>
     </main>
   </body>
