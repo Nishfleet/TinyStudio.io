@@ -56,7 +56,7 @@ for (const claim of forbiddenClaims) {
 }
 
 for (const route of ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", "api.tinystudio.io"]) {
-  if (!wrangler.includes(`"pattern": "${route}"`)) {
+  if (!wrangler.includes(`"pattern": "${route}/*"`)) {
     failures.push(`Missing Cloudflare route: ${route}`);
   }
 }

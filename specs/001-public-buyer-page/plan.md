@@ -13,7 +13,7 @@ Build a small static website served by Cloudflare Workers Static Assets. Own the
 - `public/llms.txt` and `public/offer.md` expose agent-readable public offer truth.
 - `src/worker.js` serves static assets with security headers and index fallback.
 - `src/worker.js` returns retired responses for `app.tinystudio.io` and `api.tinystudio.io`.
-- `wrangler.jsonc` defines apex, www, app, and api routes.
+- `wrangler.jsonc` defines apex, www, app, and api route patterns. Existing DNS stays in place.
 - `scripts/check-site.mjs` validates required content and claim safety.
 
 ## Verification

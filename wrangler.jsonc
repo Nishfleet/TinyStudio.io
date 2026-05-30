@@ -6,10 +6,10 @@
   "workers_dev": false,
   "preview_urls": false,
   "routes": [
-    { "pattern": "tinystudio.io", "custom_domain": true },
-    { "pattern": "www.tinystudio.io", "custom_domain": true },
-    { "pattern": "app.tinystudio.io", "custom_domain": true },
-    { "pattern": "api.tinystudio.io", "custom_domain": true }
+    { "pattern": "tinystudio.io/*", "zone_name": "tinystudio.io" },
+    { "pattern": "www.tinystudio.io/*", "zone_name": "tinystudio.io" },
+    { "pattern": "app.tinystudio.io/*", "zone_name": "tinystudio.io" },
+    { "pattern": "api.tinystudio.io/*", "zone_name": "tinystudio.io" }
   ],
   "observability": {
     "enabled": true,

@@ -16,7 +16,7 @@
 
 ## Deployment Boundary
 
-- The intended Cloudflare routes now own the whole TinyStudio.io domain family:
+- The intended Cloudflare Worker route patterns now own the whole TinyStudio.io domain family:
   - `tinystudio.io`
   - `www.tinystudio.io`
   - `app.tinystudio.io`
