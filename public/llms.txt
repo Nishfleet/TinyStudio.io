@@ -11,6 +11,45 @@ TinyStudio runs a 7-day sprint for founder-led businesses that already have a we
 
 The sprint finds buyer-facing website leaks, rewrites priority page sections, reviews search trust basics, and produces a 30-day action plan.
 
+## Second Offer Lane
+
+TinyStudio Pipeline Sprint is a guided setup offer for high-ticket service, coaching, consulting, agency, course, and expert businesses that need a lead-to-call system before they need more ads.
+
+Canonical URL: https://tinystudio.io/pipeline-sprint/
+
+Pipeline Sprint installs the agency setup brain around offer diagnosis, funnel choice, competitor watch, ad angles, lead qualification, follow-up, booking, CRM stages, tracking checks, and weekly fix decisions.
+
+Best fit: businesses selling $1,000+ offers through calls, applications, WhatsApp, Instagram DMs, or a CRM.
+
+Poor fit: no offer, no proof, no sales capacity, very low-ticket products, no willingness to follow up leads, or requests for guaranteed outcomes.
+
+Pilot pricing ranges:
+
+- Self-serve waitlist: $49-$149/month, or INR 2,999-INR 9,999/month.
+- Guided setup sprint: $499-$1,499 one-time, or INR 25k-INR 75k.
+- Assisted operator package: $1,500-$3,000/month, or INR 75k-INR 2L/month.
+
+Pipeline Sprint does not guarantee ROAS, revenue, booked calls, or sales lift. It does not autonomously publish campaigns or change ad spend in the MVP.
+
+### India High-Ticket Test Plan Generator
+
+Pipeline Sprint includes an India-first test-plan module for high-ticket offers. It can draft a 7-day or 15-day validation plan using INR 500-INR 1,000/day as a small test budget range, four first creatives, a hook matrix, WhatsApp vs lead form vs profile traffic recommendation, lead-form questions, setter script, reminder/no-show sequence, metric tracker, and decision rules.
+
+The creative logic is: script is targeting. The first 5 seconds should call out the exact audience and pain, then move through problem, pain, proof, and CTA. Start with four creatives: two audiences by two pain points. Use simple raw founder video, plain Canva, or simple captioned video first. Iterate hooks before rewriting the full body.
+
+The India-first funnel path is WhatsApp message ads or Meta lead forms before landing pages for early validation. International channel preference should be adapted instead of assuming WhatsApp.
+
+## Workflow
+
+The workflow is the product:
+
+1. Intake: website, priority page, reviews, customer messages, competitors, analytics screenshots, and the buyer action to improve.
+2. Production system: the internal Growth Brain prepares the client brain, leak map, rewrite options, search-trust review, and starter assets.
+3. Human review: a human checks claims, proof, buyer logic, legal-sensitive copy, and whether the recommendation is actually worth shipping.
+4. Handoff loop: the client gets the changed asset, proof source, Loom walkthrough, measurement contract, and next 30-day action loop.
+
+Artifacts can include a client brain, leak map, rewrite pack, search trust ledger, starter assets, and weekly loop plan.
+
 ## Price
 
 - First proof clients: $1,000.
@@ -30,3 +69,5 @@ If an included deliverable is missing after work starts, TinyStudio will complet
 ## Human Review
 
 TinyStudio's operator records Loom audits. Internal systems prepare briefs, checklists, and proof ledgers, but a human reviews the page and explains recommendations.
+
+TinyStudio does not auto-publish client work, auto-send client messages, approve claims, change ad budgets, or treat owned-product proof as paid-client proof.
