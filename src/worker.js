@@ -4,8 +4,20 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
   "Content-Security-Policy":
-    "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; frame-ancestors 'none'; form-action 'self' mailto:"
+    "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
 };
+
+const PUBLIC_ASSET_PATHS = new Set([
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/script.js",
+  "/favicon.svg",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/llms.txt",
+  "/offer.md"
+]);
 
 function withSecurityHeaders(response) {
   const headers = new Headers(response.headers);
@@ -55,6 +67,32 @@ async function readSignupEmail(request) {
   return normalizeEmail(formData?.get("email"));
 }
 
+function wantsHtmlRedirect(request) {
+  const accept = request.headers.get("Accept") || "";
+  const contentType = request.headers.get("Content-Type") || "";
+  return accept.includes("text/html") && !contentType.includes("application/json");
+}
+
+function htmlRedirect(url, signal) {
+  const nextUrl = new URL(url);
+  nextUrl.pathname = "/";
+  nextUrl.search = `?signal=${encodeURIComponent(signal)}`;
+  return withSecurityHeaders(Response.redirect(nextUrl.toString(), 303));
+}
+
+function signupPagePath(request, fallback) {
+  const referer = request.headers.get("Referer");
+
+  if (!referer) return fallback;
+
+  try {
+    const refererUrl = new URL(referer);
+    return refererUrl.pathname || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 async function signupResponse(request, env, url) {
   if (request.method === "OPTIONS") {
     return jsonResponse({ ok: true });
@@ -71,6 +109,9 @@ async function signupResponse(request, env, url) {
   const email = await readSignupEmail(request);
 
   if (!isValidEmail(email)) {
+    if (wantsHtmlRedirect(request)) {
+      return htmlRedirect(url, "invalid");
+    }
     return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
   }
 
@@ -88,14 +129,18 @@ async function signupResponse(request, env, url) {
   )
     .bind(
       email,
-      "cryptic-landing-page",
-      url.pathname,
+      "locked-coming-soon",
+      signupPagePath(request, url.pathname),
       cleanHeader(request.headers.get("Referer"), 500),
       cleanHeader(request.headers.get("User-Agent"), 500),
       now,
       now
     )
     .run();
+
+  if (wantsHtmlRedirect(request)) {
+    return htmlRedirect(url, "saved");
+  }
 
   return jsonResponse({ ok: true, message: "signal_saved" }, { status: 201 });
 }
@@ -120,7 +165,7 @@ function retiredAppResponse() {
   <body>
     <main>
       <h1>TinyStudio app retired.</h1>
-      <p>The old TinyStudio app has been retired as part of the TinyStudio.io overhaul. The public TinyStudio buyer page is now the source of truth.</p>
+      <p>The old TinyStudio app has been retired. TinyStudio.io is currently closed while the next public surface is being built.</p>
       <a href="https://tinystudio.io/">Go to TinyStudio.io</a>
     </main>
   </body>
@@ -142,7 +187,7 @@ function retiredApiResponse() {
       {
         ok: false,
         status: "retired",
-        message: "The old TinyStudio API has been retired as part of the TinyStudio.io overhaul.",
+        message: "The old TinyStudio API has been retired. TinyStudio.io is currently closed while the next public surface is being built.",
         publicSite: "https://tinystudio.io/"
       },
       {
@@ -188,16 +233,12 @@ export default {
       );
     }
 
-    const assetResponse = await env.ASSETS.fetch(request);
-    if (assetResponse.status !== 404) {
+    if (PUBLIC_ASSET_PATHS.has(url.pathname)) {
+      const assetResponse = await env.ASSETS.fetch(request);
       return withSecurityHeaders(assetResponse);
     }
 
-    if (!url.pathname.includes(".")) {
-      const indexResponse = await env.ASSETS.fetch(assetRequest(url, request, "/index.html"));
-      return withSecurityHeaders(indexResponse);
-    }
-
-    return withSecurityHeaders(new Response("Not found", { status: 404 }));
+    const indexResponse = await env.ASSETS.fetch(assetRequest(url, request, "/index.html"));
+    return withSecurityHeaders(indexResponse);
   }
 };
