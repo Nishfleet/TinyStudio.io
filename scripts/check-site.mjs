@@ -1,68 +1,58 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 const index = read("public/index.html");
-const pipeline = read("public/pipeline-sprint/index.html");
+const styles = read("public/styles.css");
+const script = read("public/script.js");
 const llms = read("public/llms.txt");
 const offer = read("public/offer.md");
+const robots = read("public/robots.txt");
+const sitemap = read("public/sitemap.xml");
+const worker = read("src/worker.js");
 const wrangler = read("wrangler.jsonc");
 
+const failures = [];
+
 const requiredIndexCopy = [
-  "TinyStudio Revenue Leak Sprint",
-  "Find the leak before the buyer does.",
-  "Unlock the first signal",
+  "TinyStudio — Coming Soon",
+  "Something is being wired.",
+  "TinyStudio is dark while the next public surface is built.",
+  "action=\"/api/signups\"",
+  "method=\"post\"",
   "data-signup-form",
-  "The workflow is the product.",
-  "Production system",
-  "Search trust ledger",
-  "Tangible Revenue Leak Sprint + Search Trust Layer",
-  "Examples",
-  "$1,000",
+  "Email for launch access",
+  "Leave a signal",
+  "Launch access only"
+];
+
+const requiredScriptCopy = [
+  "/api/signups",
+  "Signal saved. We will write when the door opens.",
+  "That did not save. Try again in a moment."
+];
+
+const requiredWorkerCopy = [
+  "PUBLIC_ASSET_PATHS",
+  "locked-coming-soon",
+  "email_signups",
+  "wantsHtmlRedirect",
+  "The old TinyStudio API has been retired",
+  "TinyStudio app retired"
+];
+
+const oldPublicOfferCopy = [
+  "Revenue Leak Sprint",
+  "Pipeline Sprint",
+  "Tangible Revenue Leak Sprint",
+  "Search Trust Layer",
+  "India High-Ticket Test Plan Generator",
   "$2,500-$5,000",
-  "7 days from payment and completed intake",
-  "Refund and guarantee terms",
-  "Who records the Loom audits?",
-  "hello@tinystudio.io"
-];
-
-const requiredPipelineCopy = [
-  "TinyStudio Pipeline Sprint",
-  "Get a Pipeline Audit",
-  "See What Gets Installed",
-  "Offer Scorer",
-  "Funnel Router",
-  "Competitor Watch",
-  "Lead Qualification Builder",
-  "India Test Plan Generator",
-  "Follow-Up Builder",
-  "CRM Pipeline Builder",
-  "Tracking QA Checklist",
-  "Decision Report Generator",
-  "No autonomous campaign publishing in the MVP",
-  "does not save client data or connect to ad accounts",
-  "data-pipeline-intake-form",
-  "mailto:hello@tinystudio.io?subject=TinyStudio%20Pipeline%20Audit",
-  "enctype=\"text/plain\"",
-  "No client-side secrets"
-];
-
-const requiredTestPlanCopy = [
+  "$1,000",
   "INR 500-INR 1,000/day",
-  "4 first creatives",
-  "Script is targeting",
-  "WhatsApp or lead form first",
-  "Lead-to-call metric ladder",
-  "data-pipeline-audit-text",
-  "Advanced tracking stays guided"
-];
-
-const requiredPublicArtifacts = [
-  "does not promise revenue, ROAS, SEO rankings, AI visibility, conversion lift, or sales lift",
-  "TinyStudio's operator records Loom audits",
-  "does not auto-publish client work",
-  "Pipeline Sprint does not guarantee ROAS, revenue, booked calls, or sales lift",
-  "Fit guarantee before payment"
+  "Get a Pipeline Audit",
+  "Offer Scorer",
+  "Funnel Router"
 ];
 
 const forbiddenClaims = [
@@ -82,29 +72,27 @@ const forbiddenClaims = [
   "10%-18% close rate"
 ];
 
-const failures = [];
-
 for (const text of requiredIndexCopy) {
-  if (!index.includes(text)) failures.push(`Missing required page copy: ${text}`);
+  if (!index.includes(text)) failures.push(`Missing lockdown page copy: ${text}`);
 }
 
-for (const text of requiredPipelineCopy) {
-  if (!pipeline.includes(text)) failures.push(`Missing required Pipeline Sprint copy: ${text}`);
+for (const text of requiredScriptCopy) {
+  if (!script.includes(text)) failures.push(`Missing signup script copy: ${text}`);
 }
 
-for (const text of requiredTestPlanCopy) {
-  const testPlanHaystack = `${pipeline}\n${read("public/script.js")}\n${llms}\n${offer}`;
-  if (!testPlanHaystack.includes(text)) failures.push(`Missing required test-plan copy: ${text}`);
+for (const text of requiredWorkerCopy) {
+  if (!worker.includes(text)) failures.push(`Missing worker lock/save behavior: ${text}`);
 }
 
-for (const text of requiredPublicArtifacts) {
-  if (!index.includes(text) && !pipeline.includes(text) && !llms.includes(text) && !offer.includes(text)) {
-    failures.push(`Missing required public artifact copy: ${text}`);
+for (const text of oldPublicOfferCopy) {
+  const haystack = `${index}\n${script}\n${llms}\n${offer}\n${sitemap}`.toLowerCase();
+  if (haystack.includes(text.toLowerCase())) {
+    failures.push(`Old public offer copy still exposed: ${text}`);
   }
 }
 
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${pipeline}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }
@@ -116,28 +104,32 @@ for (const route of ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", 
   }
 }
 
-if (!read("src/worker.js").includes("TinyStudio app retired")) {
-  failures.push("Missing app retirement response.");
+if (!wrangler.includes("\"run_worker_first\": [\"/*\"]")) {
+  failures.push("Worker is not configured to run before all public assets.");
 }
 
-if (!read("src/worker.js").includes("The old TinyStudio API has been retired")) {
-  failures.push("Missing API retirement response.");
+if (!robots.includes("Disallow: /")) {
+  failures.push("Robots file should disallow indexing during lockdown.");
 }
 
-if (!read("src/worker.js").includes("email_signups")) {
-  failures.push("Missing email signup storage path.");
+if (sitemap.includes("pipeline-sprint") || sitemap.includes("offer.md") || sitemap.includes("llms.txt")) {
+  failures.push("Sitemap should only expose the root coming-soon URL.");
 }
 
-if (!wrangler.includes("\"database_name\": \"tinystudio_email_signups\"")) {
-  failures.push("Missing D1 signup database binding.");
+if (!llms.includes("temporarily closed") || !offer.includes("temporarily closed")) {
+  failures.push("Agent-readable files must say the public site is closed.");
 }
 
-if (!wrangler.includes("\"/pipeline-sprint/*\"")) {
-  failures.push("Missing worker-first route for Pipeline Sprint security headers.");
+if (!styles.includes(".lockdown-shell") || !styles.includes(".capture-form")) {
+  failures.push("Missing lockdown visual styles.");
 }
 
-if (!read("public/script.js").includes("/api/signups")) {
-  failures.push("Missing email signup form submission path.");
+if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
+  failures.push("Pipeline Sprint page should not remain as a public asset.");
+}
+
+if (existsSync(new URL("../public/assets/proof-board.svg", import.meta.url))) {
+  failures.push("Old public offer visual asset should not remain exposed.");
 }
 
 if (failures.length) {
@@ -145,4 +137,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("TinyStudio.io public site checks passed.");
+console.log("TinyStudio.io lockdown checks passed.");

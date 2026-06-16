@@ -1,21 +1,19 @@
 # TinyStudio.io
 
-Public buyer pages for TinyStudio's Tangible Revenue Leak Sprint + Search Trust Layer and the secondary Pipeline Sprint offer lane.
+Locked public coming-soon surface for TinyStudio.io.
 
 ## What This Repo Owns
 
-- The public `tinystudio.io` and `www.tinystudio.io` website.
+- The public `tinystudio.io` and `www.tinystudio.io` coming-soon page.
+- Email capture through `/api/signups`, stored in Cloudflare D1.
 - The intentional retirement responses for `app.tinystudio.io` and `api.tinystudio.io`.
-- The buyer-facing offer, price, timeline, FAQs, and refund/guarantee terms.
-- The secondary `/pipeline-sprint/` public offer page and guided audit intake helper.
-- The buyer-safe workflow/features view: intake, production system, human review, handoff loop, artifacts, and proof gates.
-- Agent-readable public copy at `/llms.txt` and `/offer.md`.
+- Agent-readable lockdown state at `/llms.txt` and `/offer.md`.
 
 ## What This Repo Does Not Own
 
 - Any live private TinyStudio app/API product.
 - Client data, prospect folders, analytics exports, or private sprint work.
-- Revenue, ROAS, ranking, or sales-lift promises.
+- Public sprint offers, pricing, revenue claims, ROAS claims, booked-call claims, ranking claims, or sales-lift promises while lockdown is active.
 
 ## Commands
 

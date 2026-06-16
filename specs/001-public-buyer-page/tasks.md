@@ -1,14 +1,14 @@
-# Tasks: Public Buyer Page
+# Tasks: Locked Coming-Soon Page
 
 - [x] Create new deployable public-site repo.
 - [x] Add Spec Kit project layer.
-- [x] Add exact buyer-page copy.
-- [x] Add primary visual asset.
+- [x] Add locked coming-soon copy.
+- [x] Add email capture.
 - [x] Add Cloudflare Worker/static assets config.
 - [x] Add app/api retirement routing.
-- [x] Add agent-readable public copy.
+- [x] Add agent-readable lockdown copy.
 - [x] Add claim-safety/content checks.
 - [x] Run local and browser verification.
-- [ ] Create GitHub repo and push.
+- [x] Create GitHub repo and push.
 - [x] Run Cloudflare dry run.
-- [ ] Deploy apex/www routes after live-write confirmation.
+- [ ] Deploy locked apex/www routes after review gate.

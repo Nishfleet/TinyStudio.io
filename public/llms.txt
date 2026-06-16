@@ -1,73 +1,18 @@
 # TinyStudio.io
 
-TinyStudio sells a Tangible Revenue Leak Sprint + Search Trust Layer.
+TinyStudio.io is temporarily closed while the next public surface is being built.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Offer
+## Current Public State
 
-TinyStudio runs a 7-day sprint for founder-led businesses that already have a website and real customer context such as traffic, sales, reviews, ads, emails, customer messages, or analytics.
+The public website is a cryptic coming-soon page with one email signup form for launch updates.
 
-The sprint finds buyer-facing website leaks, rewrites priority page sections, reviews search trust basics, and produces a 30-day action plan.
+The site is not currently publishing sprint offers, pricing, claims, public case studies, or automated product access.
 
-## Second Offer Lane
+## Email Capture
 
-TinyStudio Pipeline Sprint is a guided setup offer for high-ticket service, coaching, consulting, agency, course, and expert businesses that need a lead-to-call system before they need more ads.
+Visitors can leave an email through the public signup form. The form writes to TinyStudio's private launch list through `/api/signups`.
 
-Canonical URL: https://tinystudio.io/pipeline-sprint/
-
-Pipeline Sprint installs the agency setup brain around offer diagnosis, funnel choice, competitor watch, ad angles, lead qualification, follow-up, booking, CRM stages, tracking checks, and weekly fix decisions.
-
-Best fit: businesses selling $1,000+ offers through calls, applications, WhatsApp, Instagram DMs, or a CRM.
-
-Poor fit: no offer, no proof, no sales capacity, very low-ticket products, no willingness to follow up leads, or requests for guaranteed outcomes.
-
-Pilot pricing ranges:
-
-- Self-serve waitlist: $49-$149/month, or INR 2,999-INR 9,999/month.
-- Guided setup sprint: $499-$1,499 one-time, or INR 25k-INR 75k.
-- Assisted operator package: $1,500-$3,000/month, or INR 75k-INR 2L/month.
-
-Pipeline Sprint does not guarantee ROAS, revenue, booked calls, or sales lift. It does not autonomously publish campaigns or change ad spend in the MVP.
-
-### India High-Ticket Test Plan Generator
-
-Pipeline Sprint includes an India-first test-plan module for high-ticket offers. It can draft a 7-day or 15-day validation plan using INR 500-INR 1,000/day as a small test budget range, four first creatives, a hook matrix, WhatsApp vs lead form vs profile traffic recommendation, lead-form questions, setter script, reminder/no-show sequence, metric tracker, and decision rules.
-
-The creative logic is: script is targeting. The first 5 seconds should call out the exact audience and pain, then move through problem, pain, proof, and CTA. Start with four creatives: two audiences by two pain points. Use simple raw founder video, plain Canva, or simple captioned video first. Iterate hooks before rewriting the full body.
-
-The India-first funnel path is WhatsApp message ads or Meta lead forms before landing pages for early validation. International channel preference should be adapted instead of assuming WhatsApp.
-
-## Workflow
-
-The workflow is the product:
-
-1. Intake: website, priority page, reviews, customer messages, competitors, analytics screenshots, and the buyer action to improve.
-2. Production system: the internal Growth Brain prepares the client brain, leak map, rewrite options, search-trust review, and starter assets.
-3. Human review: a human checks claims, proof, buyer logic, legal-sensitive copy, and whether the recommendation is actually worth shipping.
-4. Handoff loop: the client gets the changed asset, proof source, Loom walkthrough, measurement contract, and next 30-day action loop.
-
-Artifacts can include a client brain, leak map, rewrite pack, search trust ledger, starter assets, and weekly loop plan.
-
-## Price
-
-- First proof clients: $1,000.
-- Standard sprint: $2,500-$5,000.
-- Weekly Growth Desk continuation: $2,000-$5,000/month.
-
-## Guarantees And Limits
-
-TinyStudio does not promise revenue, ROAS, SEO rankings, AI visibility, conversion lift, or sales lift.
-
-Before payment, if TinyStudio cannot name at least one concrete public-site leak worth investigating, it should not take the sprint.
-
-After payment, payment is refundable until intake is submitted or TinyStudio begins sprint work, whichever happens first.
-
-If an included deliverable is missing after work starts, TinyStudio will complete the missing item once at no extra charge within 5 business days.
-
-## Human Review
-
-TinyStudio's operator records Loom audits. Internal systems prepare briefs, checklists, and proof ledgers, but a human reviews the page and explains recommendations.
-
-TinyStudio does not auto-publish client work, auto-send client messages, approve claims, change ad budgets, or treat owned-product proof as paid-client proof.
+There is no public endpoint for reading collected emails.
