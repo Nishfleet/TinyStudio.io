@@ -3,14 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TinyStudio — Coming Soon</title>
+    <title>TinyStudio Agent Desk</title>
     <meta
       name="description"
-      content="TinyStudio is closed while the next surface is being built. Leave an email for launch access."
+      content="Self-serve AI agents for high-ticket pipeline setup: offer, funnel, creative, qualification, follow-up, CRM, tracking, and decision plans."
     />
-    <meta name="robots" content="noindex, nofollow" />
-    <meta property="og:title" content="TinyStudio — Coming Soon" />
-    <meta property="og:description" content="The room is closed. Leave an email for the first signal." />
+    <meta property="og:title" content="TinyStudio Agent Desk" />
+    <meta
+      property="og:description"
+      content="Build a high-ticket lead-to-call pipeline brief with Cloudflare-powered TinyStudio agents."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tinystudio.io/" />
     <link rel="canonical" href="https://tinystudio.io/" />
@@ -18,50 +20,139 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main class="lockdown-shell" id="top">
-      <div class="signal-field" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+    <main class="agent-shell" id="top">
+      <header class="app-header">
+        <a class="brand" href="/" aria-label="TinyStudio home">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>TinyStudio Agent Desk</span>
+        </a>
+        <div class="header-status" aria-label="System status">
+          <span>Cloudflare AI</span>
+          <span>Self-serve</span>
+          <span>Approval-gated</span>
+        </div>
+      </header>
 
-      <section class="lockdown-hero" aria-labelledby="lockdown-title">
-        <header class="lockdown-header">
-          <a class="brand" href="/" aria-label="TinyStudio home">
-            <span class="brand-mark" aria-hidden="true"></span>
-            <span>TinyStudio</span>
-          </a>
-          <p>Closed circuit. Launch signal pending.</p>
-        </header>
-
-        <div class="lockdown-copy">
-          <p class="section-label">Coming soon</p>
-          <h1 id="lockdown-title">Something is being wired.</h1>
-          <p class="hero-lede">
-            TinyStudio is dark while the next public surface is built. Leave an email and we will send the first signal when the door opens.
+      <section class="agent-grid" aria-labelledby="agent-title">
+        <div class="agent-copy">
+          <p class="section-label">TinyStudio Agent Desk</p>
+          <h1 id="agent-title">Build the pipeline system before you buy more ads.</h1>
+          <p class="agent-lede">
+            The agents turn your offer, audience, proof, funnel, follow-up, CRM, and market context into a practical lead-to-call plan. They draft the system; you still approve spend, publishing, and claims.
           </p>
+          <div class="agent-stack" aria-label="Agent stack">
+            <span>Offer Agent</span>
+            <span>Funnel Agent</span>
+            <span>Creative Agent</span>
+            <span>Qualification Agent</span>
+            <span>Follow-Up Agent</span>
+            <span>CRM Agent</span>
+            <span>Tracking Agent</span>
+            <span>Decision Agent</span>
+          </div>
         </div>
 
-        <form class="capture-form" action="/api/signups" method="post" data-signup-form>
-          <label for="signup-email">Email for launch access</label>
-          <div class="capture-row">
-            <input id="signup-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
-            <button type="submit">Leave a signal</button>
+        <form class="agent-form" action="/api/agent-audit" method="post" data-agent-form>
+          <div class="form-head">
+            <h2>Pipeline intake</h2>
+            <p>No ad account access. No spend changes. Do not paste passwords, API keys, or private ad-platform credentials.</p>
           </div>
-          <p class="form-note">Launch access only. No public sprint pitch, no spam, no shared list.</p>
-          <p class="form-status" data-signup-status role="status" aria-live="polite"></p>
-        </form>
 
-        <footer class="lockdown-footer">
-          <span>001 / not open yet</span>
-          <a href="mailto:hello@tinystudio.io">hello@tinystudio.io</a>
-        </footer>
+          <label>
+            <span>Email</span>
+            <input name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
+          </label>
+
+          <label>
+            <span>Business</span>
+            <textarea name="business" rows="3" placeholder="What do you sell, to whom, and where are you based?" required></textarea>
+          </label>
+
+          <label>
+            <span>High-ticket offer</span>
+            <textarea name="offer" rows="3" placeholder="Price, promise, delivery shape, and what must be true before someone buys." required></textarea>
+          </label>
+
+          <label>
+            <span>Target buyer</span>
+            <textarea name="audience" rows="3" placeholder="Who should the first 5 seconds call out? Include niche, status, pain, and urgency." required></textarea>
+          </label>
+
+          <div class="field-grid">
+            <label>
+              <span>Market</span>
+              <select name="market">
+                <option value="India-first validation">India-first validation</option>
+                <option value="US/UK/international validation">US/UK/international validation</option>
+                <option value="Mixed market">Mixed market</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Current funnel</span>
+              <select name="funnel">
+                <option value="No reliable funnel yet">No reliable funnel yet</option>
+                <option value="WhatsApp or DMs">WhatsApp or DMs</option>
+                <option value="Meta lead forms">Meta lead forms</option>
+                <option value="Application or calendar page">Application or calendar page</option>
+                <option value="Landing page">Landing page</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>Proof and assets</span>
+            <textarea name="proof" rows="3" placeholder="Case studies, founder authority, testimonials, videos, profile strength, or constraints around what can be claimed."></textarea>
+          </label>
+
+          <label>
+            <span>Follow-up and CRM today</span>
+            <textarea name="followup" rows="3" placeholder="Who calls leads, where leads land, booking/reminder flow, CRM stages, and gaps."></textarea>
+          </label>
+
+          <label>
+            <span>Constraints</span>
+            <textarea name="constraints" rows="3" placeholder="Budget ceiling, compliance concerns, market/channel preference, launch date, or what must stay human-approved."></textarea>
+          </label>
+
+          <button type="submit">Generate Pipeline Brief</button>
+          <p class="form-status" data-agent-status role="status" aria-live="polite"></p>
+        </form>
       </section>
+
+      <section class="output-panel" aria-labelledby="output-title">
+        <div>
+          <p class="section-label">Agent output</p>
+          <h2 id="output-title">Pipeline Brief</h2>
+        </div>
+        <div class="output-actions">
+          <button type="button" data-copy-output disabled>Copy brief</button>
+        </div>
+        <div class="output-empty" data-output-empty>
+          Your generated system will appear here: readiness diagnosis, funnel path, audience/pain map, four creative tests, lead form, follow-up, CRM, tracking, and decision rules.
+        </div>
+        <pre class="agent-output" data-agent-output hidden></pre>
+      </section>
+
+      <section class="safety-panel" aria-label="Safety rails">
+        <article>
+          <strong>Automated now</strong>
+          <span>Diagnosis, recommendations, hooks, lead forms, follow-up scripts, CRM stages, tracking checklist, and decision plan.</span>
+        </article>
+        <article>
+          <strong>Approval-gated</strong>
+          <span>Claims, ad spend, campaign publishing, platform connections, CRM outcome syncing, and anything compliance-sensitive.</span>
+        </article>
+        <article>
+          <strong>Stored</strong>
+          <span>Email and lightweight usage metadata, including daily rate-limit counters. The business brief is processed for the output and is not saved by this app.</span>
+        </article>
+      </section>
+
+      <footer class="agent-footer">
+        <span>Need guided setup?</span>
+        <a href="mailto:hello@tinystudio.io">hello@tinystudio.io</a>
+      </footer>
     </main>
 
     <script src="/script.js" defer></script>

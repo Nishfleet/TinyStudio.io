@@ -1,27 +1,35 @@
-# Feature Specification: Locked Coming-Soon Page
+# Feature Specification: Self-Serve Agent Desk
 
 ## User Outcome
 
-Visitors can visit `tinystudio.io`, understand that TinyStudio is temporarily closed, and leave an email for launch access.
+Visitors can visit `tinystudio.io`, submit high-ticket pipeline context, and receive an AI-generated Pipeline Brief without a sales call.
 
 ## Non-Goals
 
-- Build a SaaS app.
 - Add payment collection.
-- Publish the old sprint offers, pricing, or public delivery claims.
-- Replace sales calls or Loom audits.
+- Connect to ad accounts.
+- Publish campaigns.
+- Change ad spend.
+- Send prospect messages.
+- Sync CRM outcomes to ad platforms.
+- Store submitted business briefs.
+- Replace human approval for claims or compliance-sensitive decisions.
 - Promise revenue, ROAS, rankings, AI visibility, booked calls, or sales lift.
 - Keep the old private app/API subdomains alive.
 
 ## Requirements
 
-- Public page must be a cryptic coming-soon page.
-- Public page must collect emails through `/api/signups`.
-- Email capture must store emails in Cloudflare D1.
+- Public page must be a usable Agent Desk, not a marketing-only landing page.
+- Public page must collect enough context to generate a Pipeline Brief.
+- Agent generation must run server-side through Cloudflare Workers AI.
+- Agent generation must require a valid email.
+- Email capture and lightweight usage metadata must store in Cloudflare D1, including daily rate-limit counters.
+- The submitted business brief must not be stored by this app.
 - Public page must include a contact path using `hello@tinystudio.io`.
-- Public page must not publish old offers, pricing, deliverables, or claims while locked.
-- Old public paths must render the locked page rather than old offer pages.
-- Public page must include agent-readable `/llms.txt` and `/offer.md` that describe lockdown state.
+- Public page must not publish revenue, ROAS, booked-call, ranking, AI-visibility, conversion-lift, or sales-lift guarantees.
+- Public page must clearly mark ad spend, campaign publishing, platform connections, and compliance-sensitive actions as approval-gated.
+- Old public paths must render the Agent Desk rather than old offer pages.
+- Public page must include agent-readable `/llms.txt` and `/offer.md` that describe the current Agent Desk truth.
 - Cloudflare config must route `tinystudio.io`, `www.tinystudio.io`, `app.tinystudio.io`, and `api.tinystudio.io`.
 - `app.tinystudio.io` must return an intentional retired notice.
 - `api.tinystudio.io` must return an intentional retired JSON response.
@@ -29,8 +37,9 @@ Visitors can visit `tinystudio.io`, understand that TinyStudio is temporarily cl
 ## Acceptance Checks
 
 - `npm test` passes.
-- The page includes coming-soon copy, email form, and contact email.
-- `/pipeline-sprint/` and stale public paths no longer expose old offer details.
+- The page includes Agent Desk intake, Cloudflare AI positioning, agent stack, output panel, and safety rails.
+- `/api/agent-audit` generates a useful Pipeline Brief for a sample high-ticket scenario.
+- `/pipeline-sprint/` and stale public paths no longer expose separate old offer pages.
 - The copy avoids revenue, ROAS, ranking, AI visibility, booked-call, conversion-lift, and sales-lift guarantees.
 - Cloudflare routes include `app.tinystudio.io` and `api.tinystudio.io` so the old Website Manager app/API are no longer exposed there.
 - Desktop and mobile browser checks render without obvious overlap or blank visual sections.
@@ -39,8 +48,10 @@ Visitors can visit `tinystudio.io`, understand that TinyStudio is temporarily cl
 
 - Public website copy.
 - Email addresses submitted by visitors for launch access.
-- No customer, prospect folders, analytics exports, payment data, or private app data.
+- Lightweight agent usage metadata: email, source, page path, daily IP-derived rate-limit key, user agent, daily counters, and created timestamp.
+- No customer folders, analytics exports, payment data, or private app data.
+- No storage of submitted business briefs.
 
 ## Launch Risk
 
-The main risk is accidentally leaving old public offer pages live. The control is Worker-first routing for all public paths plus a content check that fails on old offer copy.
+The main risks are overclaiming automation, AI cost abuse, and storing sensitive business context. Controls: server-side Cloudflare AI, email requirement, D1 daily limits, no business-brief storage, approval-gated copy, and content checks.

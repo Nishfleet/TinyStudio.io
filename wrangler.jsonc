@@ -19,9 +19,13 @@
     {
       "binding": "DB",
       "database_name": "tinystudio_email_signups",
-      "database_id": "ff360a55-14fc-468c-895f-893c89e0db79"
+      "database_id": "ff360a55-14fc-468c-895f-893c89e0db79",
+      "preview_database_id": "478f4a89-8936-4a57-bdd0-5f273090b2e5"
     }
   ],
+  "ai": {
+    "binding": "AI"
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
