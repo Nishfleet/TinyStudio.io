@@ -2,26 +2,27 @@
 
 ## Current Shape
 
-- This repo is the new deployable public website source for `tinystudio.io`.
-- The Growth Brain operating repo remains at `/Users/nish/Documents/TINY STUDIO` and is the source of offer/delivery truth.
-- This repo should stay public-surface only: no client data, secrets, private prospect notes, or internal delivery folders.
-- As of the lockdown pass, `tinystudio.io` is a cryptic coming-soon page with email capture only. Do not re-expose old sprint pages, pricing, or offer details unless Nish explicitly asks to reopen the site.
+- This repo is the deployable public website source for `tinystudio.io`.
+- The Growth Brain operating repo remains at `/Users/nish/Documents/TINY STUDIO` and is the source of deeper offer/delivery truth.
+- As of the Agent Desk pass, `tinystudio.io` is reopening as a self-serve AI workspace for high-ticket pipeline setup.
+- Cloudflare Workers AI generates the Pipeline Brief from user-submitted context through `/api/agent-audit`.
 
 ## Product Truth
 
-- Public product truth during lockdown: TinyStudio.io is not publishing public sprint offers, pricing, claims, public case studies, or product access.
-- Email capture is the only public conversion path. Emails are stored in the `tinystudio_email_signups` D1 database through `/api/signups`.
-- Previous offer logic is private/backlog context while the site is locked.
+- TinyStudio Agent Desk generates readiness diagnosis, funnel path, audience/pain map, first creative tests, lead qualification, follow-up/setter flow, CRM/tracking checklist, and decision plan.
+- Email capture remains live through `/api/signups`.
+- The public app stores email and lightweight agent usage metadata in D1, including daily rate-limit counters and a daily IP-derived rate-limit key, but not the full submitted business brief.
 - Public copy must not promise revenue, ROAS, SEO ranking, AI visibility, conversion lift, booked calls, sales lift, autonomous ad buying, or unapproved ad spend changes.
 
-## Private Backlog Context
+## Agent Desk Safety
 
-- Previous offer work is private backlog context while the site is locked.
-- Do not publish offer details, pricing, test-plan mechanics, ad-platform language, or old product claims on TinyStudio.io until Nish explicitly reopens the public site.
+- Agents can generate planning assets and recommendations.
+- Human approval remains required for claims, ad spend, campaign publishing, platform connections, CRM outcome syncing, compliance-sensitive actions, and anything that would affect money or external accounts.
+- Client-side code must not call model providers, Cloudflare admin APIs, D1, ad-platform APIs, or private credentials directly.
 
 ## Deployment Boundary
 
-- The intended Cloudflare Worker route patterns now own the whole TinyStudio.io domain family:
+- The intended Cloudflare Worker route patterns own the whole TinyStudio.io domain family:
   - `tinystudio.io`
   - `www.tinystudio.io`
   - `app.tinystudio.io`
@@ -32,5 +33,7 @@
 ## Verification
 
 - Run `npm test` before any deploy.
-- For visual changes, run the local server and inspect desktop and mobile browser views.
-- During lockdown, verify old deep links such as `/pipeline-sprint/` render the same coming-soon page.
+- Apply D1 migrations locally and remotely before deploying schema-dependent Worker changes.
+- Verify `/api/agent-audit` with a sample high-ticket scenario before deploy.
+- For visual changes, run the Worker and inspect desktop and mobile browser views.
+- Verify old deep links such as `/pipeline-sprint/` render the Agent Desk, not stale public pages.

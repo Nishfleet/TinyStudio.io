@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Public buyer page for TinyStudio.io.",
+  "description": "Self-serve TinyStudio Agent Desk on Cloudflare Workers.",
   "scripts": {
-    "dev": "python3 -m http.server 4173 --directory public",
+    "dev": "wrangler dev --remote --ip 127.0.0.1 --port 8788 --persist-to /tmp/tinystudio-agent-worker",
     "check": "node scripts/check-site.mjs",
     "test": "npm run check",
     "leads:list": "wrangler d1 execute tinystudio_email_signups --remote --command \"SELECT email, source, page_path, created_at, updated_at FROM email_signups ORDER BY updated_at DESC LIMIT 100;\"",
     "leads:export": "wrangler d1 execute tinystudio_email_signups --remote --command \"SELECT email, source, page_path, created_at, updated_at FROM email_signups ORDER BY updated_at DESC;\" --json",
+    "migrate:remote": "wrangler d1 migrations apply tinystudio_email_signups --remote",
     "deploy:dry-run": "wrangler deploy --dry-run",
-    "deploy": "wrangler deploy"
+    "deploy": "npm run migrate:remote && wrangler deploy"
   },
   "engines": {
     "node": ">=20"

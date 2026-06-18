@@ -1,29 +1,32 @@
-# Implementation Plan: Locked Coming-Soon Page
+# Implementation Plan: Self-Serve Agent Desk
 
 ## Scope
 
-Serve a locked, cryptic coming-soon page from the TinyStudio.io domain family while preserving private email capture for launch access.
+Serve a self-serve AI Agent Desk from the TinyStudio.io domain family while keeping ad-platform actions, claims, and money-sensitive decisions approval-gated.
 
 ## Pieces
 
-- `public/index.html` contains the locked coming-soon page and email form.
+- `public/index.html` contains the Agent Desk intake and output surface.
 - `public/styles.css` contains the visual system.
-- `public/script.js` handles progressive email capture.
-- `public/llms.txt` and `public/offer.md` expose agent-readable lockdown truth, not offer details.
-- `src/worker.js` serves allowed assets with security headers and returns the locked page for stale public paths.
+- `public/script.js` posts intake to `/api/agent-audit` and renders the generated brief.
+- `public/llms.txt` and `public/offer.md` expose agent-readable Agent Desk truth.
+- `src/worker.js` serves allowed assets with security headers and returns the Agent Desk for stale public paths.
 - `src/worker.js` writes launch emails through `/api/signups`.
+- `src/worker.js` runs Cloudflare Workers AI through `env.AI`.
+- `src/worker.js` rate-limits agent runs with daily D1 counters and lightweight usage metadata.
 - `src/worker.js` returns retired responses for `app.tinystudio.io` and `api.tinystudio.io`.
-- `wrangler.jsonc` defines apex, www, app, and api route patterns. Existing DNS stays in place.
-- `scripts/check-site.mjs` validates lockdown content, email capture, stale-offer removal, and claim safety.
+- `wrangler.jsonc` defines apex, www, app, api route patterns, D1, assets, and Workers AI binding.
+- `scripts/check-site.mjs` validates Agent Desk content, AI binding, safety rails, and claim safety.
 
 ## Verification
 
 - Run `npm test`.
-- Run local static server.
+- Apply D1 migrations locally and remotely before live deploy.
+- Run Worker checks against `/`, `/api/agent-audit`, `/pipeline-sprint/`, and public artifacts.
 - Use browser checks at desktop and mobile viewport sizes.
 - Run `npm run deploy:dry-run` before live deploy.
-- After deploy, verify `/`, `/pipeline-sprint/`, and `/pipeline-sprint/index.html` show the locked page.
+- After deploy, verify `/`, `/api/agent-audit`, `/pipeline-sprint/`, and `/pipeline-sprint/index.html`.
 
 ## Fallback
 
-If Cloudflare route ownership blocks deployment, keep the repo and GitHub remote ready, then wire the routes manually from the Cloudflare dashboard or restore from the previous Worker route.
+If Cloudflare Workers AI is unavailable, keep the Agent Desk page behind the existing safe error state and do not claim live AI generation until the binding works.

@@ -1,14 +1,16 @@
-# Tasks: Locked Coming-Soon Page
+# Tasks: Self-Serve Agent Desk
 
 - [x] Create new deployable public-site repo.
 - [x] Add Spec Kit project layer.
-- [x] Add locked coming-soon copy.
+- [x] Add Agent Desk public surface.
 - [x] Add email capture.
+- [x] Add Cloudflare Workers AI generation.
+- [x] Add agent usage migration and rate limits.
 - [x] Add Cloudflare Worker/static assets config.
 - [x] Add app/api retirement routing.
-- [x] Add agent-readable lockdown copy.
+- [x] Add agent-readable public truth.
 - [x] Add claim-safety/content checks.
 - [x] Run local and browser verification.
 - [x] Create GitHub repo and push.
 - [x] Run Cloudflare dry run.
-- [ ] Deploy locked apex/www routes after review gate.
+- [ ] Deploy Agent Desk routes after review gate.

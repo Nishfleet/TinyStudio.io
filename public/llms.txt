@@ -1,18 +1,42 @@
 # TinyStudio.io
 
-TinyStudio.io is temporarily closed while the next public surface is being built.
+TinyStudio.io runs a self-serve AI Agent Desk for high-ticket pipeline setup.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Current Public State
+## Current Product
 
-The public website is a cryptic coming-soon page with one email signup form for launch updates.
+TinyStudio Agent Desk helps high-ticket coaches, consultants, service businesses, agencies, course sellers, and experts build a lead-to-call pipeline brief.
 
-The site is not currently publishing sprint offers, pricing, claims, public case studies, or automated product access.
+The public workflow asks for business context, offer, target buyer, proof/assets, market preference, current funnel, follow-up/CRM context, and constraints.
 
-## Email Capture
+Cloudflare Workers AI generates the Pipeline Brief server-side. Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
-Visitors can leave an email through the public signup form. The form writes to TinyStudio's private launch list through `/api/signups`.
+## Agent Outputs
 
-There is no public endpoint for reading collected emails.
+The Agent Desk can generate:
+
+- Readiness diagnosis
+- Recommended funnel path
+- Audience and pain map
+- First four creative tests
+- Lead qualification form
+- Follow-up and setter flow
+- CRM and tracking checklist
+- 7-day or 15-day decision plan
+- Approval gates and risks
+
+## Safety And Limits
+
+TinyStudio Agent Desk does not promise revenue, ROAS, profit, booked calls, rankings, AI visibility, conversion lift, or sales lift.
+
+The Agent Desk does not publish campaigns, change ad spend, connect to ad accounts, send prospect messages, sync CRM outcomes to ad platforms, or replace a sales team.
+
+Claims, ad spend, campaign publishing, platform connections, tracking implementation, and compliance-sensitive decisions remain approval-gated.
+
+## Data Handling
+
+The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. The business brief is processed to generate the output and is not stored by this app.
+
+There is no public endpoint for reading collected emails or usage metadata.
