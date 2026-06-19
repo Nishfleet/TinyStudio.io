@@ -313,6 +313,7 @@ async function enforceAgentLimits(request, env, email, url) {
     const emailCount = await incrementUsageCounter(env, `email:${bucket}:${email}`);
     if (emailCount > SOFT_AGENT_RUNS_PER_EMAIL_PER_DAY) {
       console.warn("tinystudio_agent_soft_email_limit", JSON.stringify({ emailCount }));
+      return { ok: false, response: jsonResponse({ ok: false, error: "daily_email_limit" }, { status: 429 }) };
     }
 
     await env.DB.prepare(

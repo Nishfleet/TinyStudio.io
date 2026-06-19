@@ -64,6 +64,7 @@ const requiredWorkerCopy = [
   "agent_usage_limits",
   "agent_runs",
   "agent-self-serve",
+  "daily_email_limit",
   "storesBusinessBrief: false",
   "noSpendChanges: true",
   "noAutopublishing: true"
