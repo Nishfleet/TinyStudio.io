@@ -1,4 +1,7 @@
 const SECURITY_HEADERS = {
+  // Verified missing on the live host before adding: HTTPS already works on
+  // tinystudio.io, www, and app, so a year-long max-age with subdomains is safe.
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -13,6 +16,8 @@ const PUBLIC_ASSET_PATHS = new Set([
   "/styles.css",
   "/script.js",
   "/favicon.svg",
+  "/apple-touch-icon.png",
+  "/og-image.png",
   "/robots.txt",
   "/sitemap.xml",
   "/llms.txt",
