@@ -5,13 +5,14 @@
 - This repo is the deployable public website source for `tinystudio.io`.
 - The Growth Brain operating repo remains at `/Users/nish/Documents/TINY STUDIO` and is the source of deeper offer/delivery truth.
 - As of the Agent Desk pass, `tinystudio.io` is reopening as a self-serve AI workspace for high-ticket pipeline setup.
-- Cloudflare Workers AI generates the Pipeline Brief from user-submitted context through `/api/agent-audit`.
+- Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report from user-submitted context through `/api/agent-audit`.
 
 ## Product Truth
 
-- TinyStudio Agent Desk generates readiness diagnosis, funnel path, audience/pain map, first creative tests, lead qualification, follow-up/setter flow, CRM/tracking checklist, and decision plan.
+- TinyStudio Agent Desk generates a Pipeline Brief, Implementation Checklist, and Weekly Fix Report covering readiness diagnosis, funnel path, audience/pain map, first creative tests, lead qualification, follow-up/setter flow, CRM/tracking checklist, weekly metrics, and decision plan.
+- The default customer intake is minimal: email plus business snapshot. Offer, buyer, funnel, proof, follow-up, CRM, constraints, and weekly metrics are optional detail inputs, and agents should infer missing context before asking blocker questions.
 - Email capture remains live through `/api/signups`.
-- The public app stores email and lightweight agent usage metadata in D1, including daily rate-limit counters and a daily IP-derived rate-limit key, but not the full submitted business brief.
+- The public app stores email and lightweight agent usage metadata in D1, including daily rate-limit counters and a daily IP-derived rate-limit key, but not the submitted business snapshot, optional details, weekly metrics, or generated artifacts.
 - Public copy must not promise revenue, ROAS, SEO ranking, AI visibility, conversion lift, booked calls, sales lift, autonomous ad buying, or unapproved ad spend changes.
 
 ## Agent Desk Safety

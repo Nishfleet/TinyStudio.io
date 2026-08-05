@@ -7,25 +7,21 @@ Contact: hello@tinystudio.io
 
 ## Current Product
 
-TinyStudio Agent Desk helps high-ticket coaches, consultants, service businesses, agencies, course sellers, and experts build a lead-to-call pipeline brief.
+TinyStudio Agent Desk helps high-ticket coaches, consultants, service businesses, agencies, course sellers, and experts build a lead-to-call pipeline loop.
 
-The public workflow asks for business context, offer, target buyer, proof/assets, market preference, current funnel, follow-up/CRM context, and constraints.
+The public workflow requires only email and a compact business snapshot. Offer, target buyer, proof/assets, market preference, current funnel, follow-up/CRM context, optional weekly lead-to-call metrics, bottleneck context, and constraints are optional detail inputs.
 
-Cloudflare Workers AI generates the Pipeline Brief server-side. Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
+The agents are expected to infer missing context, label assumptions, and ask only true blocker questions when missing information would prevent a useful next step.
+
+Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side. Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
 ## Agent Outputs
 
 The Agent Desk can generate:
 
-- Readiness diagnosis
-- Recommended funnel path
-- Audience and pain map
-- First four creative tests
-- Lead qualification form
-- Follow-up and setter flow
-- CRM and tracking checklist
-- 7-day or 15-day decision plan
-- Approval gates and risks
+- Pipeline Brief with readiness diagnosis, funnel path, audience and pain map, first four creative tests, lead qualification, follow-up, CRM, tracking, decision plan, and approval gates
+- Implementation Checklist for setup work across offer, funnel, creative, qualification, follow-up, booking/reminders, CRM stages, tracking events, and review cadence
+- Weekly Fix Report that uses supplied weekly metrics when available, otherwise provides contextual first-week guidance plus the metrics to collect
 
 ## Safety And Limits
 
@@ -37,6 +33,6 @@ Claims, ad spend, campaign publishing, platform connections, tracking implementa
 
 ## Data Handling
 
-The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. The business brief is processed to generate the output and is not stored by this app.
+The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. The business snapshot, optional details, weekly metrics, and generated artifacts are processed to generate the output and are not stored by this app.
 
 There is no public endpoint for reading collected emails or usage metadata.
