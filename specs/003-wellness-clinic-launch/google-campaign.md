@@ -10,24 +10,32 @@ if nobody buys.
 
 ---
 
-## Blocking decision before launch: currency and metro
+## Currency: solved by Dodo. Metro: still one decision.
 
-Every piece of evidence we have is **London** — the seven clinics researched,
-the specimen audit, the £72–£795 fee benchmarks. The site prices in **$2,500**.
+Pricing is localised at checkout through **Dodo Payments** (merchant of record —
+tax collected and remitted in 190+ jurisdictions, 80+ currencies).
 
-A London clinic owner reading a dollar price assumes an overseas supplier and
-prices in a timezone problem they do not want. **Recommendation: run London and
-price in sterling — £1,950/month, three-month minimum.** That is close to the
-dollar figure, sits naturally against the £795 top-line consultation fees these
-clinics already charge, and removes the friction.
+**Use Dodo's Localized Pricing, not Adaptive Currency.**
 
-If the answer is instead "target US clinics," the research restarts — the seven-
-clinic study, the specimen, and the fee benchmarks are all London and would not
-survive the move. Do not run US traffic against London evidence.
+| | What it does | Why not / why |
+|---|---|---|
+| Adaptive Currency | Converts the base price at live FX and passes a 2–4% FX fee to the buyer | Turns $2,500 into a ragged £1,84x that moves daily, and charges the buyer a visible surcharge. Wrong for a premium price. |
+| **Localized Pricing** | You set a fixed price per currency/country | Clean round numbers you control: **£1,950 UK · $2,500 US**. Stable, anchored, no surcharge. **Use this.** |
 
-Everything below assumes **London + £**. Swap both together if that changes.
+So the currency question is closed — the site can show sterling to London and
+dollars to the US without a rebuild or a second offer.
 
----
+**What Dodo does not solve: the evidence is London.** The seven-clinic study,
+the specimen audit and the £72–£795 fee benchmarks are all London. A US clinic
+landing on the page reads proof about a city it does not operate in. Localised
+checkout does not localise credibility.
+
+At £16/day the campaign can only fund **one metro** anyway. It should be the one
+the evidence is about.
+
+**Recommendation: run London, show £1,950 via Localized Pricing.** Everything
+below assumes that. Expanding to a second metro is a post-test decision that
+needs its own local study first — not a settings change.
 
 ## Structure
 
