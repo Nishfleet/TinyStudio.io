@@ -221,10 +221,33 @@ function wantsHtmlRedirect(request) {
   return accept.includes("text/html") && !contentType.includes("application/json");
 }
 
+function normalizeWebsite(value) {
+  if (typeof value !== "string") return null;
+  const raw = value.trim().slice(0, 300);
+  if (!raw) return null;
+  const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    if (!parsed.hostname.includes(".")) return null;
+    return parsed.origin + (parsed.pathname === "/" ? "" : parsed.pathname);
+  } catch {
+    return null;
+  }
+}
+
 function htmlRedirect(url, signal) {
   const nextUrl = new URL(url);
-  nextUrl.pathname = "/";
-  nextUrl.search = `?signal=${encodeURIComponent(signal)}`;
+  if (signal === "saved") {
+    // Success lands on the thank-you page, which is the only page that fires
+    // the Google Ads conversion. A no-JS browser must reach it too, or it
+    // converts silently and untracked.
+    nextUrl.pathname = "/brief-requested";
+    nextUrl.search = "";
+  } else {
+    nextUrl.pathname = "/";
+    nextUrl.search = `?signal=${encodeURIComponent(signal)}`;
+  }
   return withSecurityHeaders(Response.redirect(nextUrl.toString(), 303));
 }
 
@@ -241,14 +264,15 @@ function signupPagePath(request, fallback) {
   }
 }
 
-async function saveEmailSignup(request, env, url, email, source) {
+async function saveEmailSignup(request, env, url, email, source, website = null) {
   const now = new Date().toISOString();
 
   await env.DB.prepare(
-    `INSERT INTO email_signups (email, source, page_path, referer, user_agent, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO email_signups (email, source, page_path, referer, user_agent, created_at, updated_at, website)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(email) DO UPDATE SET
        source = excluded.source,
+       website = COALESCE(excluded.website, email_signups.website),
        page_path = excluded.page_path,
        referer = excluded.referer,
        user_agent = excluded.user_agent,
@@ -261,7 +285,8 @@ async function saveEmailSignup(request, env, url, email, source) {
       cleanHeader(request.headers.get("Referer"), 500),
       cleanHeader(request.headers.get("User-Agent"), 500),
       now,
-      now
+      now,
+      website
     )
     .run();
 }
@@ -293,6 +318,7 @@ async function signupResponse(request, env, url) {
     body = {};
   }
   const email = normalizeEmail(body.email);
+  const website = normalizeWebsite(body.website);
 
   if (!isValidEmail(email)) {
     if (wantsHtmlRedirect(request)) {
@@ -301,7 +327,7 @@ async function signupResponse(request, env, url) {
     return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
   }
 
-  await saveEmailSignup(request, env, url, email, "agent-self-serve");
+  await saveEmailSignup(request, env, url, email, "agent-self-serve", website);
 
   if (wantsHtmlRedirect(request)) {
     return htmlRedirect(url, "saved");
