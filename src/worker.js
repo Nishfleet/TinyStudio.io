@@ -13,6 +13,22 @@ const SECURITY_HEADERS = {
 const PUBLIC_ASSET_PATHS = new Set([
   "/",
   "/index.html",
+  // Leak-audit site. Extensionless twins are listed because the signup
+  // redirect targets /brief-requested and Cloudflare serves the .html for it.
+  "/audit.html",
+  "/audit",
+  "/agents.html",
+  "/agents",
+  "/pricing.html",
+  "/pricing",
+  "/specimen.html",
+  "/specimen",
+  "/brief-requested.html",
+  "/brief-requested",
+  "/shared.css",
+  // The Agent Desk, now the engine behind the free brief rather than the product.
+  "/agent-desk.html",
+  "/agent-desk",
   "/styles.css",
   "/script.js",
   "/favicon.svg",
