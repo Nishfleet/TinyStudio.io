@@ -5,26 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The leak audit — TinyStudio</title>
 <link rel="stylesheet" href="shared.css">
-<style>
-  .stat{font-family:'Fraunces',serif;font-weight:200;font-size:128px;line-height:.84;
-    letter-spacing:-.05em;color:#F2EADC;white-space:nowrap}
-  .stat s{text-decoration:none;color:var(--brass-lt)}
-  .bandgrid{display:grid;grid-template-columns:auto 1fr;gap:66px;align-items:center}
-  .checks{margin-top:54px;display:grid;grid-template-columns:repeat(4,1fr)}
-  .check{padding-right:32px;border-right:1px solid var(--hair)}
-  .check:last-child{border-right:0;padding-right:0}
-  .check:not(:first-child){padding-left:32px}
-  .num{font-family:'Fraunces',serif;font-style:italic;font-weight:200;font-size:36px;color:var(--brass-lt);
-    margin-bottom:14px;line-height:1}
-  .check h3{font-size:16.5px;font-weight:600;margin-bottom:9px;letter-spacing:-.008em}
-  .check p{font-size:14.5px;line-height:1.7;color:var(--muted)}
-  .rows{margin-top:34px;max-width:760px}
-  .row{display:flex;justify-content:space-between;align-items:baseline;gap:22px;padding:16px 0;
-    border-bottom:1px solid var(--hair);transition:padding-left var(--mid) var(--ease)}
-  .row:hover{padding-left:9px}
-  .row .t{font-size:15.5px;color:var(--soft)}
-  .row .v{font-family:'Fraunces',serif;font-size:15px;color:var(--brass);white-space:nowrap}
-</style>
+
+<link rel="stylesheet" href="audit.css">
 </head>
 <body>
 <div class="wrap">
@@ -55,8 +37,8 @@
     <div class="bandgrid">
       <div class="stat"><s>13</s> of 19</div>
       <div>
-        <h2>premium clinics across three cities give no price signal on their homepage.</h2>
-        <p>We read nineteen of them across London, New York and Miami. Thirteen served a homepage carrying no figure and no promise of one. The more useful finding is that it is not the same leak in every city: Miami mostly publishes prices and mostly has no answers section at all; New York does the reverse, and one clinic asks thirty form fields before it will accept an enquiry. We will hand you the whole study, city by city, before you decide anything.</p>
+        <h2>premium websites across three cities give no price signal on their homepage.</h2>
+        <p>We read nineteen of them across London, New York and Miami. Thirteen served a homepage carrying no figure and no promise of one. The more useful finding is that it is not the same leak in every city: Miami mostly publishes prices and mostly has no answers section at all; New York does the reverse, and one of them asks thirty form fields before it will accept an enquiry. We will hand you the whole study, city by city, before you decide anything.</p>
         <div class="note">Method: automated read of the served homepage HTML, August 2026 — 7 London, 6 New York, 6 Miami clinics offering longevity, IV or hormone services, followed by a hand audit of one. Inner pages are deliberately not counted; the finding is about the homepage, which is where the comparison happens. A homepage with no price may still have an excellent fee page one click deeper — that is itself one of the leaks.</div>
       </div>
     </div>
@@ -91,13 +73,13 @@
 
   <section>
     <h2>Then it is entirely your call</h2>
-    <p class="lede">Most of what we find is fixable by a competent developer in an afternoon — including one who is not us. If you would rather have it closed than merely found, month one is the <b>7-Day Sprint</b> — the fix in your hands inside seven working days. $2,500 a month, three-month minimum, with a delivery guarantee behind it. <a href="pricing.html" style="color:var(--brass)">See the terms →</a></p>
+    <p class="lede">Most of what we find is fixable by a competent developer in an afternoon — including one who is not us. If you would rather have it closed than merely found, the desk runs at $2,500 a month on a three-month minimum, with a delivery guarantee behind it. <a class="xa1" href="pricing.html">See the terms →</a></p>
   </section>
 
 
   <section id="confidential">
     <h2>Why there are no logos on this site</h2>
-    <p class="lede">We do not publish client work. No logos, no case studies, no testimonials, no "as seen at." If you engage us, nobody learns it from us — not on a site, not in a pitch deck, not in a conversation with your competitor down the road.<br><br><b>Market research is the opposite, and we share it freely.</b> The nineteen-clinic study reads public homepages of businesses that are not our clients and have no relationship with us — you are welcome to all of it, city by city. What we never share is anything belonging to someone who paid us. <a href="specimen.html" style="color:var(--brass)">Read the specimen &rarr;</a></p>
+    <p class="lede">We do not publish client work. No logos, no case studies, no testimonials, no "as seen at." If you engage us, nobody learns it from us — not on a site, not in a pitch deck, not in a conversation with your competitor down the road.<br><br><b>Market research is the opposite, and we share it freely.</b> The nineteen-clinic study reads public homepages of businesses that are not our clients and have no relationship with us — you are welcome to all of it, city by city. What we never share is anything belonging to someone who paid us. <a class="xa1" href="specimen.html">Read the specimen &rarr;</a></p>
   </section>
 
   <footer>
@@ -106,16 +88,7 @@
     <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
   </footer>
 </div>
-<script defer>
-(function(){var S='.phead h1,.phead .sub,form.lead,.micro,.urg,.band,section h2,section .lede,.check,.row';
-function r(){var e=[].slice.call(document.querySelectorAll(S));e.forEach(function(x){x.setAttribute('data-r','')});
-var io=new IntersectionObserver(function(en){en.forEach(function(v){if(!v.isIntersecting)return;
-var s=[].slice.call(v.target.parentNode.children).filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});
-v.target.style.transitionDelay=Math.min(Math.max(0,s.indexOf(v.target)),6)*90+'ms';
-v.target.classList.add('in');io.unobserve(v.target)})},{threshold:.08,rootMargin:'0px 0px -5% 0px'});
-e.forEach(function(x){io.observe(x)});
-setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(x){x.classList.add('in')})},1600)}
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()})();
-</script>
+
+<script src="audit.js" defer></script>
 </body>
 </html>

@@ -62,8 +62,8 @@ form.lead:hover,form.lead:focus-within{border-color:rgba(164,126,60,.42)}
 form.lead input{flex:1;border:0;background:transparent;outline:none;font-family:'Karla',sans-serif;
   font-size:16px;color:var(--ink);padding:12px 0}
 form.lead input::placeholder{color:#AC9E8B}
-form.lead button{border:0;cursor:pointer;border-radius:999px;padding:15px 27px;white-space:nowrap;
-  font-family:'Karla',sans-serif;font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;font-weight:600;
+form.lead button{border:0;cursor:pointer;border-radius:999px;padding:15px 20px;white-space:nowrap;
+  font-family:'Karla',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
   color:#FBF7EF;background:linear-gradient(168deg,#241D16,#100C09);
   box-shadow:0 6px 18px -8px rgba(25,20,16,.6);
   transition:transform var(--mid) var(--ease)}
@@ -99,7 +99,7 @@ footer a:hover{color:var(--ink)}
 }
 
 /* two-field lead form — website + email, still one line on desktop */
-form.lead.two{max-width:660px;padding:7px 7px 7px 0;overflow:hidden}
+form.lead.two{max-width:720px;padding:7px 7px 7px 0;overflow:hidden}
 form.lead.two input{flex:1 1 0;min-width:0;padding:12px 18px 12px 24px}
 form.lead.two input:first-child{border-right:1px solid var(--line)}
 form.lead.two button{flex:0 0 auto}

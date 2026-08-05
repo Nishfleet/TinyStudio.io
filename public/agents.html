@@ -5,39 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Desk — TinyStudio</title>
 <link rel="stylesheet" href="shared.css">
-<style>
-  .roster{margin-top:56px;border-top:1px solid var(--line)}
-  .ag{display:grid;grid-template-columns:56px 1.15fr 1.45fr auto;gap:34px;align-items:start;
-    padding:30px 0;border-bottom:1px solid var(--hair);
-    transition:padding-left var(--mid) var(--ease),background var(--mid) var(--ease)}
-  .ag:hover{padding-left:14px;background:rgba(255,253,248,.5)}
-  .ag .n{font-family:'Fraunces',serif;font-style:italic;font-weight:200;font-size:30px;color:var(--brass-lt);line-height:1}
-  .ag h3{font-size:19px;font-weight:600;letter-spacing:-.012em}
-  .ag .job{margin-top:7px;font-size:14.5px;line-height:1.65;color:var(--muted)}
-  .ag .reads{font-size:14px;line-height:1.72;color:var(--soft)}
-  .ag .reads b{display:block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--muted);font-weight:600;margin-bottom:7px}
-  .ag .gate{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
-    color:var(--brass);white-space:nowrap;padding-top:5px}
 
-  .gatebox{margin-top:96px;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);
-    border-radius:14px;overflow:hidden;background:linear-gradient(172deg,rgba(255,253,248,.9),rgba(235,225,207,.5))}
-  .gatebox>div{padding:38px 42px}
-  .gatebox>div:first-child{border-right:1px solid var(--line)}
-  .gatebox h4{font-family:'Fraunces',serif;font-weight:300;font-size:25px;letter-spacing:-.02em}
-  .gatebox ul{margin-top:18px;list-style:none}
-  .gatebox li{font-size:15px;line-height:1.55;color:var(--soft);padding:9px 0 9px 26px;position:relative}
-  .gatebox li::before{content:'';position:absolute;left:0;top:16px;width:9px;height:1px;background:var(--brass)}
-  .gatebox .never li::before{background:var(--sig);width:9px;height:9px;top:14px;border-radius:50%;
-    background:transparent;border:1px solid var(--sig)}
-
-  .stack{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--hair)}
-  .stack div{padding:26px 30px 26px 0;border-right:1px solid var(--hair)}
-  .stack div:last-child{border-right:0}
-  .stack div:not(:first-child){padding-left:30px}
-  .stack .k{font-family:'Fraunces',serif;font-size:21px;font-weight:300;letter-spacing:-.015em}
-  .stack .v{margin-top:8px;font-size:14px;line-height:1.65;color:var(--muted)}
-</style>
+<link rel="stylesheet" href="agents.css">
 </head>
 <body>
 <div class="wrap">
@@ -138,16 +107,7 @@
     <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
   </footer>
 </div>
-<script defer>
-(function(){var S='.phead h1,.phead .sub,.urg,.ag,.gatebox,section h2,section .lede,.stack div,.band';
-function r(){var e=[].slice.call(document.querySelectorAll(S));e.forEach(function(x){x.setAttribute('data-r','')});
-var io=new IntersectionObserver(function(en){en.forEach(function(v){if(!v.isIntersecting)return;
-var s=[].slice.call(v.target.parentNode.children).filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});
-v.target.style.transitionDelay=Math.min(Math.max(0,s.indexOf(v.target)),6)*90+'ms';
-v.target.classList.add('in');io.unobserve(v.target)})},{threshold:.08,rootMargin:'0px 0px -5% 0px'});
-e.forEach(function(x){io.observe(x)});
-setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(x){x.classList.add('in')})},1600)}
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()})();
-</script>
+
+<script src="agents.js" defer></script>
 </body>
 </html>

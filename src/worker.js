@@ -7,7 +7,7 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
   "Content-Security-Policy":
-    "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+    "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
 };
 
 const PUBLIC_ASSET_PATHS = new Set([
@@ -26,6 +26,18 @@ const PUBLIC_ASSET_PATHS = new Set([
   "/brief-requested.html",
   "/brief-requested",
   "/shared.css",
+  "/index.css",
+  "/index.js",
+  "/audit.css",
+  "/audit.js",
+  "/agents.css",
+  "/agents.js",
+  "/pricing.css",
+  "/pricing.js",
+  "/specimen.css",
+  "/specimen.js",
+  "/brief-requested.css",
+  "/brief-requested.js",
   // The Agent Desk, now the engine behind the free brief rather than the product.
   "/agent-desk.html",
   "/agent-desk",

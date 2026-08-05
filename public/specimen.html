@@ -5,29 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leak audit — specimen — TinyStudio</title>
 <link rel="stylesheet" href="shared.css">
-<style>
-  .doc{max-width:840px;margin-top:56px}
-  .dochead{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;
-    border-bottom:1px solid var(--ink);color:var(--muted)}
-  .stamp{color:var(--sig);border:1px solid var(--sig);padding:6px 12px;border-radius:2px}
-  .f{padding:34px 0;border-bottom:1px solid var(--hair)}
-  .f .top{display:flex;gap:18px;align-items:baseline}
-  .f .idx{font-family:'Fraunces',serif;font-style:italic;font-weight:200;font-size:30px;color:var(--brass-lt);line-height:1}
-  .f h3{font-size:22px;font-weight:600;letter-spacing:-.014em;line-height:1.3}
-  .f .body{margin-left:48px}
-  .f p{margin-top:12px;font-size:16px;line-height:1.74;color:var(--soft)}
-  .ev{margin-top:16px;background:rgba(255,253,248,.75);border:1px solid var(--hair);border-left:2px solid var(--brass);
-    border-radius:0 6px 6px 0;padding:16px 20px}
-  .ev b{display:block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
-    font-weight:600;margin-bottom:8px}
-  .ev span{font-size:14.5px;line-height:1.7;color:var(--soft)}
-  .fix{margin-top:14px;font-size:15.5px;line-height:1.7;color:var(--ink)}
-  .fix b{color:var(--brass);font-weight:600}
-  .notrun{margin-top:40px;background:rgba(176,74,46,.05);border:1px solid rgba(176,74,46,.22);
-    border-radius:10px;padding:26px 30px}
-  .notrun h4{font-family:'Fraunces',serif;font-weight:300;font-size:21px;letter-spacing:-.018em;color:var(--sig)}
-  .notrun p{margin-top:11px;font-size:15px;line-height:1.72;color:var(--soft)}
-</style>
+
+<link rel="stylesheet" href="specimen.css">
 </head>
 <body>
 <div class="wrap">
@@ -47,8 +26,8 @@
       <span class="sc">Read and signed by Nish &nbsp;·&nbsp; <span class="stamp">Client name withheld</span></span>
     </div>
 
-    <div class="phead" style="padding-top:44px">
-      <h1 style="font-size:56px">Four ways this clinic loses people <em>who were already sold.</em></h1>
+    <div class="phead xs1">
+      <h1 class="xs2">Four ways this clinic loses people <em>who were already sold.</em></h1>
       <p class="sub">A real audit with the name removed. This clinic does better work than its homepage admits — which is the expensive kind of problem, because the fix costs almost nothing.</p>
     </div>
 
@@ -105,16 +84,7 @@
     <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
   </footer>
 </div>
-<script defer>
-(function(){var S='.phead h1,.phead .sub,.f,.notrun,section h2,section .lede';
-function r(){var e=[].slice.call(document.querySelectorAll(S));e.forEach(function(x){x.setAttribute('data-r','')});
-var io=new IntersectionObserver(function(en){en.forEach(function(v){if(!v.isIntersecting)return;
-var s=[].slice.call(v.target.parentNode.children).filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});
-v.target.style.transitionDelay=Math.min(Math.max(0,s.indexOf(v.target)),6)*90+'ms';
-v.target.classList.add('in');io.unobserve(v.target)})},{threshold:.08,rootMargin:'0px 0px -5% 0px'});
-e.forEach(function(x){io.observe(x)});
-setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(x){x.classList.add('in')})},1600)}
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()})();
-</script>
+
+<script src="specimen.js" defer></script>
 </body>
 </html>
