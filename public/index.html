@@ -1,239 +1,357 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TinyStudio Agent Desk</title>
-    <meta
-      name="description"
-      content="Self-serve AI agents for high-ticket pipeline setup: Pipeline Brief, Implementation Checklist, and Weekly Fix Report."
-    />
-    <meta property="og:title" content="TinyStudio Agent Desk" />
-    <meta
-      property="og:description"
-      content="Build a high-ticket lead-to-call pipeline loop with Cloudflare-powered TinyStudio agents."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://tinystudio.io/" />
-    <link rel="canonical" href="https://tinystudio.io/" />
-    <meta property="og:image" content="https://tinystudio.io/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta
-      property="og:image:alt"
-      content="TinyStudio Agent Desk — self-serve AI agents for high-ticket pipeline setup"
-    />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TinyStudio Agent Desk" />
-    <meta
-      name="twitter:description"
-      content="Build a high-ticket lead-to-call pipeline brief with Cloudflare-powered TinyStudio agents."
-    />
-    <meta name="twitter:image" content="https://tinystudio.io/og-image.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/styles.css" />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "TinyStudio",
-        "url": "https://tinystudio.io/",
-        "logo": "https://tinystudio.io/apple-touch-icon.png",
-        "description": "Self-serve AI agents for high-ticket pipeline setup: offer, funnel, creative, qualification, follow-up, CRM, tracking, and decision plans."
-      }
-    </script>
-  </head>
-  <body>
-    <main class="agent-shell" id="top">
-      <header class="app-header">
-        <a class="brand" href="/" aria-label="TinyStudio home">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <span>TinyStudio Agent Desk</span>
-        </a>
-        <div class="header-status" aria-label="System status">
-          <span>Cloudflare AI</span>
-          <span>Self-serve</span>
-          <span>Approval-gated</span>
-        </div>
-      </header>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TinyStudio — The Leak Audit</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;1,9..144,200;1,9..144,300&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F0E5; --cream-2:#F1E9DB; --cream-3:#EBE1CF;
+    --ink:#191410; --soft:#5E5346; --muted:#8A7C6B;
+    --brass:#A47E3C; --brass-lt:#C9A566; --sig:#B04A2E;
+    --dark:#171310;
+    --line:rgba(25,20,16,.11); --hair:rgba(25,20,16,.07);
+    --ease:cubic-bezier(.16,1,.3,1); --slow:1.25s; --mid:.66s;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--ink);font-family:'Karla',sans-serif;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  body::after{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+    background:
+      radial-gradient(78% 50% at 50% 16%, #FFFCF5 0%, rgba(255,252,245,0) 60%),
+      radial-gradient(46% 38% at 90% 4%, rgba(201,165,102,.14) 0%, transparent 70%),
+      linear-gradient(180deg,var(--cream) 0%,var(--cream) 40%,var(--cream-2) 100%)}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;opacity:.19;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 60px}
+  .sc{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:600}
+  .fr{font-family:'Fraunces',serif}
 
-      <section class="agent-grid" aria-labelledby="agent-title">
-        <div class="agent-copy">
-          <p class="section-label">TinyStudio Agent Desk</p>
-          <h1 id="agent-title">Build the pipeline system before you buy more ads.</h1>
-          <p class="agent-lede">
-            The agents turn your offer, audience, proof, funnel, follow-up, CRM, weekly numbers, and market context into a Pipeline Brief, Implementation Checklist, and Weekly Fix Report. They draft the system; you still approve spend, publishing, and claims.
-          </p>
-          <div class="agent-stack" aria-label="Agent stack">
-            <span>Offer Agent</span>
-            <span>Funnel Agent</span>
-            <span>Creative Agent</span>
-            <span>Qualification Agent</span>
-            <span>Follow-Up Agent</span>
-            <span>CRM Agent</span>
-            <span>Tracking Agent</span>
-            <span>Decision Agent</span>
-          </div>
-        </div>
+  nav{display:flex;justify-content:space-between;align-items:center;padding:30px 0 0}
+  .logo{font-family:'Fraunces',serif;font-size:22px;font-weight:400;letter-spacing:.015em}
+  .logo span{color:var(--brass)}
+  .navlinks{display:flex;gap:36px;font-size:13.5px;color:var(--muted);font-weight:500}
+  .navlinks a{color:inherit;text-decoration:none;transition:color var(--mid) var(--ease)}
+  .navlinks a:hover{color:var(--ink)}
 
-        <form class="agent-form" action="/api/agent-audit" method="post" data-agent-form>
-          <div class="form-head">
-            <h2>Agent workspace</h2>
-            <p>Give the agent raw context. It infers the offer, funnel, follow-up, CRM, and weekly decision loop before asking for anything else. No ad account access. No spend changes. Do not paste passwords, API keys, or private ad-platform credentials.</p>
-          </div>
+  /* hero */
+  header{padding:92px 0 0;text-align:center;max-width:980px;margin:0 auto}
+  .orn{display:flex;align-items:center;justify-content:center;gap:15px;margin-bottom:28px;color:var(--brass)}
+  .orn i{display:block;width:44px;height:1px;background:linear-gradient(90deg,transparent,var(--brass-lt))}
+  .orn i:last-child{background:linear-gradient(90deg,var(--brass-lt),transparent)}
+  .orn b{width:4px;height:4px;transform:rotate(45deg);background:var(--brass);display:block}
+  h1{font-family:'Fraunces',serif;font-weight:200;font-size:84px;line-height:1.02;letter-spacing:-.032em}
+  h1 em{font-style:italic;font-weight:300;
+    background:linear-gradient(92deg,var(--brass) 12%,#C9A566 58%,var(--brass) 92%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:18.5px;line-height:1.72;color:var(--soft);margin:28px auto 0;max-width:530px}
+  form{margin:42px auto 0;max-width:500px;display:flex;align-items:center;
+    background:rgba(255,253,248,.74);border:1px solid var(--line);border-radius:999px;padding:7px 7px 7px 26px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 44px -26px rgba(25,20,16,.34);
+    transition:box-shadow var(--slow) var(--ease),border-color var(--slow) var(--ease)}
+  form:hover,form:focus-within{border-color:rgba(164,126,60,.42);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 26px 56px -26px rgba(25,20,16,.38)}
+  form input{flex:1;border:0;background:transparent;outline:none;font-family:'Karla',sans-serif;
+    font-size:16px;color:var(--ink);padding:12px 0}
+  form input::placeholder{color:#AC9E8B}
+  form button{border:0;cursor:pointer;border-radius:999px;padding:15px 27px;white-space:nowrap;
+    font-family:'Karla',sans-serif;font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;font-weight:600;
+    color:#FBF7EF;background:linear-gradient(168deg,#241D16,#100C09);
+    box-shadow:0 6px 18px -8px rgba(25,20,16,.6);
+    transition:transform var(--mid) var(--ease),box-shadow var(--mid) var(--ease)}
+  form button:hover{transform:translateY(-1.5px)}
+  .micro{margin-top:16px;font-size:13.5px;color:var(--muted)}
+  .meta{margin:54px auto 0;max-width:900px;display:grid;grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--hair);padding-top:22px}
+  .meta div{text-align:center;border-right:1px solid var(--hair)}
+  .meta div:last-child{border-right:0}
+  .meta .k{font-family:'Fraunces',serif;font-size:24px;font-weight:300;letter-spacing:-.02em}
+  .meta .v{margin-top:6px;color:var(--muted);font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;font-weight:600}
 
-          <label>
-            <span>Email</span>
-            <input name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
-          </label>
+  /* ── the finding: dark band, real number ───────── */
+  .finding{margin-top:110px;background:linear-gradient(168deg,#1C1712,#100C09);color:#F2EADC;
+    border-radius:16px;padding:64px 66px;display:grid;grid-template-columns:auto 1fr;gap:70px;align-items:center;
+    box-shadow:0 40px 90px -50px rgba(25,20,16,.6);position:relative;overflow:hidden}
+  .finding::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(60% 90% at 88% 10%,rgba(201,165,102,.20),transparent 68%)}
+  .finding .stat{font-family:'Fraunces',serif;font-weight:200;font-size:132px;line-height:.84;
+    letter-spacing:-.05em;color:#F2EADC;white-space:nowrap;position:relative;z-index:2}
+  .finding .stat s{text-decoration:none;color:var(--brass-lt)}
+  .finding .body{position:relative;z-index:2}
+  .finding h2{font-family:'Fraunces',serif;font-weight:200;font-size:34px;line-height:1.22;letter-spacing:-.02em;max-width:22ch}
+  .finding p{margin-top:18px;font-size:15.5px;line-height:1.75;color:#B3A794;max-width:52ch}
+  .finding .note{margin-top:20px;padding-top:16px;border-top:1px solid rgba(242,234,220,.14);
+    font-size:12px;line-height:1.6;color:#8C8171;max-width:56ch}
 
-          <label>
-            <span>Business snapshot</span>
-            <textarea name="business" rows="5" placeholder="Paste your website, Instagram bio, offer note, sales context, or a rough description of what you sell and who buys." required></textarea>
-          </label>
+  /* ── annotated specimen ────────────────────────── */
+  .spec{margin-top:112px;display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:start}
+  .browser{background:linear-gradient(176deg,#FFFDF8,#F7F1E6);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;position:relative;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 40px 84px -46px rgba(25,20,16,.34);
+    transition:transform var(--slow) var(--ease),box-shadow var(--slow) var(--ease)}
+  .browser:hover{transform:translateY(-6px)}
+  .chrome{display:flex;gap:6px;padding:12px 15px;border-bottom:1px solid var(--hair);background:rgba(235,225,207,.5)}
+  .dot{width:8px;height:8px;border-radius:50%;background:#D6C9B2}
+  .mock{padding:30px 30px 42px;position:relative}
+  .bar{background:#E4DACA;border-radius:3px}
+  .flag{position:absolute;display:flex;align-items:center;gap:8px;font-family:'Karla',sans-serif;
+    font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--sig);white-space:nowrap}
+  .pin{width:17px;height:17px;border-radius:50%;border:1px solid var(--sig);display:flex;
+    align-items:center;justify-content:center;font-size:9px;background:rgba(176,74,46,.09)}
+  .lk{position:absolute;height:1px;background:var(--sig);opacity:.42}
+  .specbody h2{font-family:'Fraunces',serif;font-weight:200;font-size:42px;letter-spacing:-.028em;line-height:1.1;max-width:14ch}
+  .specbody>p{margin-top:18px;font-size:15.5px;line-height:1.75;color:var(--muted);max-width:44ch}
+  .rows{margin-top:32px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:22px;padding:15px 0;
+    border-bottom:1px solid var(--hair);transition:padding-left var(--mid) var(--ease)}
+  .row:hover{padding-left:9px}
+  .row .t{font-size:15.5px;color:var(--soft)}
+  .row .v{font-family:'Fraunces',serif;font-size:15px;color:var(--brass);white-space:nowrap}
 
-          <details class="optional-panel">
-            <summary>
-              <span>Optional detail pack</span>
-              <small>Use it only if you already know the numbers or exact setup.</small>
-            </summary>
+  /* ── checks ────────────────────────────────────── */
+  .checks{margin-top:124px;padding-top:70px;border-top:1px solid var(--line)}
+  .lead{display:flex;justify-content:space-between;align-items:flex-end;gap:70px}
+  .checks h2{font-family:'Fraunces',serif;font-weight:200;font-size:47px;letter-spacing:-.028em;max-width:12ch;line-height:1.08}
+  .lead p{max-width:38ch;font-size:15.5px;line-height:1.75;color:var(--muted)}
+  .checkgrid{margin-top:56px;display:grid;grid-template-columns:repeat(4,1fr)}
+  .check{padding-right:34px;border-right:1px solid var(--hair)}
+  .check:last-child{border-right:0;padding-right:0}
+  .check:not(:first-child){padding-left:34px}
+  .num{font-family:'Fraunces',serif;font-style:italic;font-weight:200;font-size:36px;color:var(--brass-lt);margin-bottom:14px;line-height:1}
+  .check h3{font-size:16.5px;font-weight:600;margin-bottom:9px;letter-spacing:-.008em}
+  .check p{font-size:14.5px;line-height:1.7;color:var(--muted)}
 
-            <div class="optional-content">
-              <div class="field-grid">
-                <label>
-                  <span>Market</span>
-                  <select name="market">
-                    <option value="Let the agent infer">Let the agent infer</option>
-                    <option value="India-first validation">India-first validation</option>
-                    <option value="US/UK/international validation">US/UK/international validation</option>
-                    <option value="Mixed market">Mixed market</option>
-                  </select>
-                </label>
+  /* ── method timeline ───────────────────────────── */
+  .method{margin-top:118px;padding-top:70px;border-top:1px solid var(--line)}
+  .method h2{font-family:'Fraunces',serif;font-weight:200;font-size:47px;letter-spacing:-.028em;line-height:1.08;max-width:14ch}
+  .track{margin-top:52px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+  .track::before{content:'';position:absolute;top:9px;left:0;right:0;height:1px;background:var(--line)}
+  .stop{padding-right:32px;position:relative}
+  .stop::before{content:'';position:absolute;top:5px;left:0;width:9px;height:9px;border-radius:50%;
+    background:var(--cream);border:1px solid var(--brass)}
+  .stop.filled::before{background:var(--brass)}
+  .stop .d{margin-top:32px;color:var(--brass);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:700}
+  .stop h4{margin-top:11px;font-size:17px;font-weight:600;letter-spacing:-.008em}
+  .stop p{margin-top:8px;font-size:14.5px;line-height:1.68;color:var(--muted);max-width:26ch}
 
-                <label>
-                  <span>Current funnel</span>
-                  <select name="funnel">
-                    <option value="Let the agent infer">Let the agent infer</option>
-                    <option value="No reliable funnel yet">No reliable funnel yet</option>
-                    <option value="WhatsApp or DMs">WhatsApp or DMs</option>
-                    <option value="Meta lead forms">Meta lead forms</option>
-                    <option value="Application or calendar page">Application or calendar page</option>
-                    <option value="Landing page">Landing page</option>
-                  </select>
-                </label>
-              </div>
+  /* ── who ───────────────────────────────────────── */
+  .who{margin-top:110px;background:linear-gradient(172deg,rgba(255,253,248,.9),rgba(235,225,207,.55));
+    border:1px solid var(--hair);border-radius:14px;padding:40px 46px;display:flex;
+    justify-content:space-between;align-items:center;gap:50px;box-shadow:0 1px 0 rgba(255,255,255,.85) inset}
+  .who p{font-size:16.5px;line-height:1.7;color:var(--soft);max-width:64ch}
+  .who p b{font-weight:600;color:var(--ink)}
+  .who .sc{color:var(--brass);white-space:nowrap}
 
-              <label>
-                <span>High-ticket offer</span>
-                <textarea name="offer" rows="3" placeholder="Price, promise, delivery shape, buying trigger."></textarea>
-              </label>
+  /* ── terms ─────────────────────────────────────── */
+  .offer{margin-top:112px;border-top:1px solid var(--ink);padding-top:52px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:90px}
+  .offer h2{font-family:'Fraunces',serif;font-weight:200;font-size:44px;letter-spacing:-.028em;line-height:1.1;max-width:11ch}
+  .offer h2 em{font-style:italic;color:var(--brass)}
+  .offer p{font-size:16px;line-height:1.74;color:var(--muted);margin-top:20px;max-width:44ch}
+  .price{flex-shrink:0;text-align:right}
+  .price .big{font-family:'Fraunces',serif;font-weight:200;font-size:88px;letter-spacing:-.05em;line-height:.86}
+  .price .per{margin-top:14px;color:var(--muted)}
+  .guarantee{margin-top:28px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:13.5px;line-height:1.66;max-width:300px;text-align:left;color:var(--soft)}
+  .guarantee b{color:var(--brass);font-weight:600}
 
-              <label>
-                <span>Target buyer</span>
-                <textarea name="audience" rows="3" placeholder="Niche, status, pain, urgency."></textarea>
-              </label>
+  /* ── faq ───────────────────────────────────────── */
+  .faq{margin-top:118px;padding-top:70px;border-top:1px solid var(--line)}
+  .faq h2{font-family:'Fraunces',serif;font-weight:200;font-size:44px;letter-spacing:-.028em;margin-bottom:40px}
+  .q{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;padding:26px 0;border-top:1px solid var(--hair)}
+  .q:last-child{border-bottom:1px solid var(--hair)}
+  .q h4{font-size:18px;font-weight:600;letter-spacing:-.01em;max-width:24ch}
+  .q p{font-size:15.5px;line-height:1.74;color:var(--muted)}
 
-              <label>
-                <span>Proof and assets</span>
-                <textarea name="proof" rows="3" placeholder="Case studies, authority, testimonials, assets, claim limits."></textarea>
-              </label>
+  footer{margin-top:110px;padding:30px 0 66px;border-top:1px solid var(--hair);
+    display:flex;justify-content:space-between;color:var(--muted)}
 
-              <label>
-                <span>Follow-up and CRM today</span>
-                <textarea name="followup" rows="3" placeholder="Who calls leads, where they land, booking/reminders, CRM gaps."></textarea>
-              </label>
+  @media (prefers-reduced-motion:no-preference){
+    [data-r]{opacity:0;transform:translateY(24px);
+      transition:opacity var(--slow) var(--ease),transform var(--slow) var(--ease)}
+    [data-r].in{opacity:1;transform:none}
+  }
+  .logo{text-decoration:none;color:var(--ink)}
+  .navlinks a{color:inherit;text-decoration:none;transition:color .66s cubic-bezier(.16,1,.3,1)}
+  .navlinks a:hover{color:var(--ink)}
+  .navcta{border:1px solid var(--line);border-radius:999px;padding:9px 17px;color:var(--ink)!important}
+  .navcta:hover{border-color:var(--brass);background:rgba(255,253,248,.7)}
+  /* two-field lead form — website + email */
+  form.two{max-width:660px;padding:7px 7px 7px 0;overflow:hidden}
+  form.two input{flex:1 1 0;min-width:0;padding:12px 18px 12px 24px}
+  form.two input:first-of-type{border-right:1px solid var(--line)}
+  form.two button{flex:0 0 auto}
+  @media (max-width:760px){
+    form.two{flex-direction:column;align-items:stretch;border-radius:20px;padding:8px;max-width:100%}
+    form.two input{padding:14px 18px}
+    form.two input:first-of-type{border-right:0;border-bottom:1px solid var(--line)}
+    form.two button{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="index.html">Tiny<span>Studio</span></a>
+    <div class="navlinks"><a href="audit.html">The audit</a><a href="agents.html">The desk</a><a href="pricing.html">Pricing</a><a class="navcta" href="#start">Request an audit</a></div>
+  </nav>
 
-              <label>
-                <span>Hard limits</span>
-                <textarea name="constraints" rows="3" placeholder="Budget ceiling, compliance, channel preference, timing, approvals."></textarea>
-              </label>
+  <header>
+    <div class="orn"><i></i><span class="sc">The leak audit</span><b></b><i></i></div>
+    <h1>Most of them leave <em>before they ever get in touch.</em></h1>
+    <p class="sub">We read the one page your revenue depends on the way a stranger reads it, and show you the exact points at which they go.</p>
+    <form class="lead two" id="start" action="/api/agent-audit" method="post">
+      <input type="url" name="website" required placeholder="yourclinic.com">
+      <input type="email" name="email" required placeholder="Your work email">
+      <button>See if you qualify</button>
+    </form>
+    <p class="micro">Your website and your email. That is the whole form — no call needed to receive it.</p>
+    <div style="margin:26px auto 0;display:inline-flex;align-items:center;gap:13px;background:rgba(255,253,248,.8);border:1px solid var(--line);border-radius:999px;padding:11px 22px 11px 16px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 14px 34px -24px rgba(25,20,16,.35)">
+      <i style="width:7px;height:7px;border-radius:50%;background:#B04A2E;display:block;box-shadow:0 0 0 4px rgba(176,74,46,.14)"></i>
+      <span style="font-size:13.5px;color:var(--soft)"><b style="color:var(--ink);font-weight:600">Six a month.</b> When the sixth is taken, the intake closes until the next.</span>
+    </div>
+    <div class="meta">
+      <div><div class="k">Complimentary</div><div class="v">And yours to keep</div></div>
+      <div><div class="k">Six a month</div><div class="v">We look at fit first</div></div>
+      <div><div class="k">Five days</div><div class="v">From request to findings</div></div>
+    </div>
+  </header>
 
-              <fieldset class="metrics-fieldset">
-                <legend>Current weekly numbers <span>optional</span></legend>
-                <div class="metric-grid">
-                  <label>
-                    <span>Spend</span>
-                    <input name="weeklySpend" type="text" inputmode="decimal" placeholder="INR 7,000" />
-                  </label>
-                  <label>
-                    <span>Raw leads</span>
-                    <input name="rawLeads" type="number" min="0" step="1" placeholder="42" />
-                  </label>
-                  <label>
-                    <span>Qualified leads</span>
-                    <input name="qualifiedLeads" type="number" min="0" step="1" placeholder="18" />
-                  </label>
-                  <label>
-                    <span>Booked calls</span>
-                    <input name="bookedCalls" type="number" min="0" step="1" placeholder="8" />
-                  </label>
-                  <label>
-                    <span>Showed calls</span>
-                    <input name="showedCalls" type="number" min="0" step="1" placeholder="6" />
-                  </label>
-                  <label>
-                    <span>Closed deals</span>
-                    <input name="closedDeals" type="number" min="0" step="1" placeholder="1" />
-                  </label>
-                  <label>
-                    <span>Cash collected</span>
-                    <input name="cashCollected" type="text" inputmode="decimal" placeholder="INR 60,000" />
-                  </label>
-                </div>
-                <label>
-                  <span>Biggest bottleneck</span>
-                  <textarea name="bottleneck" rows="2" placeholder="Example: slow replies, no-shows, repeated objections."></textarea>
-                </label>
-              </fieldset>
-            </div>
-          </details>
+  <section class="finding" id="finding">
+    <div class="stat"><s>13</s> of 19</div>
+    <div class="body">
+      <h2>premium clinics across three cities give no price signal on their homepage.</h2>
+      <p>We read nineteen of them across London, New York and Miami. Thirteen served a homepage carrying no figure and no promise of one. The more useful finding is that it is not the same leak in every city: Miami mostly publishes prices and mostly has no answers section at all; New York does the reverse, and one clinic asks thirty form fields before it will accept an enquiry. We will hand you the whole study, city by city, before you decide anything.</p>
+      <p class="note">Method: automated read of the served homepage HTML, August 2026 — 7 London, 6 New York, 6 Miami clinics offering longevity, IV or hormone services, followed by a hand audit of one. Inner pages are deliberately not counted; the finding is about the homepage, which is where the comparison happens. A homepage with no price may still have an excellent fee page one click deeper — that is itself one of the leaks.</p>
+    </div>
+  </section>
 
-          <button type="submit">Generate Pipeline Loop</button>
-          <p class="form-status" data-agent-status role="status" aria-live="polite"></p>
-        </form>
-      </section>
+  <section class="spec">
+    <div class="browser">
+      <div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+      <div class="mock">
+        <div class="bar" style="height:14px;width:30%"></div>
+        <div class="bar" style="height:34px;width:74%;margin-top:22px"></div>
+        <div class="bar" style="height:34px;width:54%;margin-top:9px"></div>
+        <div class="bar" style="height:9px;width:60%;margin-top:22px;opacity:.62"></div>
+        <div class="bar" style="height:9px;width:48%;margin-top:8px;opacity:.62"></div>
+        <div class="bar" style="height:32px;width:28%;margin-top:26px;background:#D9CCB6"></div>
+        <div class="bar" style="height:9px;width:22%;margin-top:50px;opacity:.5"></div>
+        <div class="bar" style="height:26px;width:84%;margin-top:14px"></div>
+        <div class="bar" style="height:26px;width:84%;margin-top:8px"></div>
+        <div class="bar" style="height:26px;width:84%;margin-top:8px"></div>
+        <div class="lk" style="top:96px;left:30%;width:30%"></div>
+        <div class="flag" style="top:88px;left:62%"><span class="pin">1</span> No price, anywhere</div>
+        <div class="lk" style="top:188px;left:30%;width:30%"></div>
+        <div class="flag" style="top:180px;left:62%"><span class="pin">2</span> One idea, ten hooks</div>
+        <div class="flag" style="top:300px;left:62%"><span class="pin">3</span> Nothing answered</div>
+      </div>
+    </div>
+    <div class="specbody">
+      <h2>What a leak audit gives you</h2>
+      <p>A short, plain document. Named leaks, in the order they cost you money, with the fix beside each one. No deck, no dashboard, no jargon.</p>
+      <div class="rows">
+        <div class="row"><span class="t">Landing page — named leaks</span><span class="v">In priority order</span></div>
+        <div class="row"><span class="t">Enquiry flow — friction count</span><span class="v">Field by field</span></div>
+        <div class="row"><span class="t">Paid creative — distinct concepts</span><span class="v">Concepts, not hooks</span></div>
+        <div class="row"><span class="t">Pre-purchase questions</span><span class="v">Asked vs answered</span></div>
+      </div>
+    </div>
+  </section>
 
-      <section class="output-panel" aria-labelledby="output-title">
-        <div>
-          <p class="section-label">Agent output</p>
-          <h2 id="output-title" data-output-title>Pipeline Brief</h2>
-          <div class="output-tabs" role="tablist" aria-label="Agent output sections">
-            <button type="button" role="tab" id="output-tab-pipelineBrief" data-output-tab="pipelineBrief" aria-controls="agent-output-panel" aria-selected="true">Brief</button>
-            <button type="button" role="tab" id="output-tab-implementationChecklist" data-output-tab="implementationChecklist" aria-controls="agent-output-panel" aria-selected="false" tabindex="-1">Checklist</button>
-            <button type="button" role="tab" id="output-tab-weeklyFixReport" data-output-tab="weeklyFixReport" aria-controls="agent-output-panel" aria-selected="false" tabindex="-1">Weekly Report</button>
-          </div>
-        </div>
-        <div class="output-actions">
-          <button type="button" data-copy-output disabled>Copy section</button>
-        </div>
-        <div class="output-empty" data-output-empty>
-          Your generated system will appear here: Pipeline Brief, Implementation Checklist, and Weekly Fix Report.
-        </div>
-        <div class="agent-output" id="agent-output-panel" role="tabpanel" aria-labelledby="output-tab-pipelineBrief" data-agent-output hidden tabindex="0"></div>
-      </section>
+  <section class="checks" id="checks">
+    <div class="lead">
+      <h2>What we actually look at</h2>
+      <p>Four passes, done by hand, on the surfaces that decide whether a stranger becomes a customer or a closed tab.</p>
+    </div>
+    <div class="checkgrid">
+      <div class="check"><div class="num">i</div><h3>The money page</h3>
+        <p>The one page your revenue depends on, read the way a first-time visitor reads it, and the precise points at which they lose interest.</p></div>
+      <div class="check"><div class="num">ii</div><h3>The paid creative</h3>
+        <p>Your top spend, checked for genuinely distinct concepts rather than one idea wearing ten hooks.</p></div>
+      <div class="check"><div class="num">iii</div><h3>The unanswered</h3>
+        <p>The questions people need settled before they commit, and whether your site settles a single one of them.</p></div>
+      <div class="check"><div class="num">iv</div><h3>The reach</h3>
+        <p>Whether new work is reaching new people, or quietly re-serving the audience you already had.</p></div>
+    </div>
+  </section>
 
-      <section class="safety-panel" aria-label="Safety rails">
-        <article>
-          <strong>Automated now</strong>
-          <span>Diagnosis, recommendations, hooks, lead forms, follow-up scripts, CRM stages, tracking checklist, and decision plan.</span>
-        </article>
-        <article>
-          <strong>Approval-gated</strong>
-          <span>Claims, ad spend, campaign publishing, platform connections, CRM outcome syncing, and anything compliance-sensitive.</span>
-        </article>
-        <article>
-          <strong>Stored</strong>
-          <span>Email and lightweight usage metadata, including daily rate-limit counters. The business snapshot, optional details, weekly metrics, and generated artifacts are processed for the output and are not saved by this app.</span>
-        </article>
-      </section>
+  <section class="method" id="method">
+    <h2>How the work runs</h2>
+    <div class="track">
+      <div class="stop filled"><div class="d">Day 0</div><h4>Everything on the table</h4>
+        <p>Payment, access, the approval owner and the implementation owner, all recorded. The clock starts here and nowhere earlier.</p></div>
+      <div class="stop"><div class="d">Days 1–5</div><h4>The read</h4>
+        <p>The four passes, by hand. You get the named leaks in the order they cost you money.</p></div>
+      <div class="stop"><div class="d">Days 6–14</div><h4>The fix</h4>
+        <p>The highest-leverage page rewritten or rebuilt, plus a dev-ready handoff if your team ships it.</p></div>
+      <div class="stop"><div class="d">Months 2–3</div><h4>The loop</h4>
+        <p>Weekly checks, one revision, and tracking that tells you whether the fix held.</p></div>
+    </div>
+  </section>
 
-      <footer class="agent-footer">
-        <span>Need guided setup?</span>
-        <a href="mailto:hello@tinystudio.io">hello@tinystudio.io</a>
-      </footer>
-    </main>
+  <section class="who" id="who">
+    <p><b>We work mostly with premium wellness clinics.</b> The audit itself is not fussy — it works on any page carrying real money. If yours does, put your email in and we will take a look.</p>
+    <span class="sc">Everyone welcome to ask</span>
+  </section>
 
-    <script src="/script.js" defer></script>
-  </body>
+  <section class="offer" id="terms">
+    <div>
+      <h2>Or have it <em>closed</em>, not merely found.</h2>
+      <p>The audit is free and yours to keep, whether or not we ever speak again. Should you want the work done, we run a monthly desk. Month one is the <b>7-Day Sprint</b> — the leak found and closed inside seven working days. Months two and three build the loop that keeps it closed.</p>
+    </div>
+    <div class="price">
+      <div class="big">$2,500</div>
+      <div class="per sc">Per month · Three-month minimum</div>
+      <div class="guarantee"><b>Delivery guarantee.</b> If the month-one deliverables are not in your hands within fourteen working days of Day 0, month one is refunded in full. Day 0 begins only once payment, access and both named owners are recorded. If we are waiting on you, the clock pauses.</div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>Before you ask</h2>
+    <div class="q"><h4>What exactly do I get for free?</h4>
+      <p>A written leak audit on one page of your choosing — named leaks in priority order, with the fix beside each. Yours to keep and to hand to any developer, including one who is not us.</p></div>
+    <div class="q"><h4>Why only six a month?</h4>
+      <p>Because they are done by hand and we are also delivering paid work. Six is what we can do properly. When the month is full, you go on the list for the next one.</p></div>
+    <div class="q"><h4>Do you guarantee more customers?</h4>
+      <p>No, and be wary of anyone who does. We guarantee the work is delivered on time or month one is refunded. What the market does with a better page is not ours to promise.</p></div>
+    <div class="q"><h4>What if I only want the audit?</h4>
+      <p>Then take it and go, with our blessing. It is not bait. Most of what we find is fixable by a competent developer in an afternoon.</p></div>
+  </section>
+
+
+  <section id="confidential">
+    <h2>Why there are no logos on this site</h2>
+    <p class="lede">We do not publish client work. No logos, no case studies, no testimonials, no "as seen at." If you engage us, nobody learns it from us — not on a site, not in a pitch deck, not in a conversation with the clinic down the road.<br><br><b>Market research is the opposite, and we share it freely.</b> The nineteen-clinic study reads public homepages of businesses that are not our clients and have no relationship with us — you are welcome to all of it, city by city. What we never share is anything belonging to someone who paid us. <a href="specimen.html" style="color:var(--brass)">Read the specimen &rarr;</a></p>
+  </section>
+
+  <footer>
+    <span class="sc">TinyStudio</span>
+    <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
+  </footer>
+</div>
+<script defer>
+(function(){
+  var SEL='h1,.orn,.sub,form,.micro,.meta,.finding,.browser,.specbody,.lead,.check,.method h2,.stop,.who,.offer h2,.offer p,.price,.faq h2,.q';
+  function run(){
+    var els=[].slice.call(document.querySelectorAll(SEL));
+    els.forEach(function(el){el.setAttribute('data-r','')});
+    var io=new IntersectionObserver(function(en){
+      en.forEach(function(e){
+        if(!e.isIntersecting)return;
+        var sibs=[].slice.call(e.target.parentNode.children)
+          .filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});
+        e.target.style.transitionDelay=Math.min(Math.max(0,sibs.indexOf(e.target)),6)*100+'ms';
+        e.target.classList.add('in'); io.unobserve(e.target);
+      });
+    },{threshold:.08,rootMargin:'0px 0px -5% 0px'});
+    els.forEach(function(el){io.observe(el)});
+    setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(el){el.classList.add('in')})},1600);
+  }
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',run):run();
+})();
+</script>
+</body>
 </html>

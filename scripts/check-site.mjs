@@ -3,7 +3,9 @@ import { execFileSync } from "node:child_process";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-const index = read("public/index.html");
+// The Agent Desk moved to /agent-desk when the leak-audit site took the root.
+// These checks are about the Desk's markup, so they follow it.
+const index = read("public/agent-desk.html");
 const styles = read("public/styles.css");
 const script = read("public/script.js");
 const llms = read("public/llms.txt");

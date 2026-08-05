@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing &amp; terms — TinyStudio</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .plan{margin-top:60px;display:grid;grid-template-columns:1.25fr .95fr;gap:0;border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;background:linear-gradient(172deg,rgba(255,253,248,.92),rgba(235,225,207,.5));
+    box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 40px 84px -50px rgba(25,20,16,.3)}
+  .plan .l{padding:46px 50px;border-right:1px solid var(--line)}
+  .plan .r{padding:46px 50px;text-align:right}
+  .plan h2{font-family:'Fraunces',serif;font-weight:200;font-size:36px;letter-spacing:-.025em;line-height:1.12;max-width:15ch}
+  .plan .inc{margin-top:28px;list-style:none}
+  .plan .inc li{font-size:15.5px;line-height:1.5;color:var(--soft);padding:11px 0 11px 26px;position:relative;
+    border-bottom:1px solid var(--hair)}
+  .plan .inc li:last-child{border-bottom:0}
+  .plan .inc li::before{content:'';position:absolute;left:0;top:19px;width:10px;height:1px;background:var(--brass)}
+  .plan .big{font-family:'Fraunces',serif;font-weight:200;font-size:82px;letter-spacing:-.05em;line-height:.86}
+  .plan .per{margin-top:14px;color:var(--muted)}
+  .plan .warranty{margin-top:30px;padding-top:22px;border-top:1px solid var(--line);text-align:left;
+    font-size:13.5px;line-height:1.68;color:var(--soft)}
+  .plan .warranty b{color:var(--brass);font-weight:600}
+
+  .track{margin-top:50px;display:grid;grid-template-columns:repeat(4,1fr);position:relative}
+  .track::before{content:'';position:absolute;top:9px;left:0;right:0;height:1px;background:var(--line)}
+  .stop{padding-right:30px;position:relative}
+  .stop::before{content:'';position:absolute;top:5px;left:0;width:9px;height:9px;border-radius:50%;
+    background:var(--cream);border:1px solid var(--brass)}
+  .stop.filled::before{background:var(--brass)}
+  .stop .d{margin-top:30px;color:var(--brass);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:700}
+  .stop h4{margin-top:10px;font-size:17px;font-weight:600;letter-spacing:-.008em}
+  .stop p{margin-top:8px;font-size:14.5px;line-height:1.68;color:var(--muted);max-width:26ch}
+
+  .q{display:grid;grid-template-columns:.85fr 1.15fr;gap:52px;padding:26px 0;border-top:1px solid var(--hair)}
+  .q:last-of-type{border-bottom:1px solid var(--hair)}
+  .q h4{font-size:18px;font-weight:600;letter-spacing:-.01em;max-width:26ch}
+  .q p{font-size:15.5px;line-height:1.74;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="index.html">Tiny<span>Studio</span></a>
+    <div class="navlinks">
+      <a href="audit.html">The audit</a>
+      <a href="agents.html">The desk</a>
+      <a href="pricing.html" aria-current="page">Pricing</a>
+      <a class="navcta" href="index.html#start">Request an audit</a>
+    </div>
+  </nav>
+
+  <div class="phead">
+    <span class="orn sc">Pricing &amp; terms</span>
+    <h1>One price. <em>One way to get your money back.</em></h1>
+    <p class="sub">No tiers, no bundles, no discovery-call-to-discuss-pricing. The audit is free. If you want the work done, this is what it costs and this is what happens if we are late.</p>
+  </div>
+
+  <div class="plan">
+    <div class="l">
+      <h2>The 7-Day Sprint, then the Growth Desk</h2>
+      <ul class="inc">
+        <li><b>Month one — the 7-Day Sprint.</b> The leak audit, then the highest-leverage page rewritten or rebuilt, inside seven working days</li>
+        <li>A dev-ready handoff if your own team ships it</li>
+        <li>Search-trust basics: the questions people ask before they commit, answered on the page</li>
+        <li>Months two and three — weekly checks, one revision, and tracking that says whether the fix held</li>
+        <li>Seven specialist agents behind it, a person signing every client-facing output</li>
+      </ul>
+    </div>
+    <div class="r">
+      <div class="big">$2,500</div>
+      <div class="per sc">Per month · Three-month minimum</div>
+      <div class="warranty"><b>Delivery guarantee.</b> If the month-one deliverables are not in your hands within fourteen working days of Day&nbsp;0, month one is refunded in full. Day&nbsp;0 begins only once payment, access and both named owners are recorded. If we are waiting on you, the clock pauses.</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>How the seven days are counted</h2>
+    <p class="lede">The clock only starts when we genuinely have everything, and it stops whenever the ball is back in your court.</p>
+    <div class="track">
+      <div class="stop filled"><div class="d">Day 0</div><h4>Everything on the table</h4>
+        <p>Payment, access, the approval owner and the implementation owner, all recorded. Nothing starts earlier.</p></div>
+      <div class="stop"><div class="d">Days 1–3</div><h4>The read</h4>
+        <p>Four passes by hand. Named leaks, in the order they cost you money.</p></div>
+      <div class="stop"><div class="d">Days 4–7</div><h4>The fix</h4>
+        <p>The page rewritten or rebuilt, plus the handoff. Seven working days from Day 0, in your hands.</p></div>
+      <div class="stop"><div class="d">Months 2–3</div><h4>The loop</h4>
+        <p>Weekly checks, one revision, and tracking that tells you whether the fix held.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Before you ask</h2>
+    <div class="q"><h4>Why is the audit free?</h4>
+      <p>Because it is the only honest way to show you we can do the work. You keep it either way, and most of what we find is fixable by a competent developer in an afternoon — including one who is not us.</p></div>
+    <div class="q"><h4>Do you guarantee more customers?</h4>
+      <p>No, and be wary of anyone who does. We guarantee the work is delivered on time or month one is refunded. What the market does with a better page is not ours to promise.</p></div>
+    <div class="q"><h4>What if I am unhappy but you delivered?</h4>
+      <p>Then you tell us, we use the revision, and you leave at the end of the three months. We would rather write that plainly than pretend a satisfaction clause we could not honour.</p></div>
+    <div class="q"><h4>Why only six audits a month?</h4>
+      <p>They are done by hand and we are also delivering paid work. Six is what we can do properly. When the month is full you go on the list for the next one.</p></div>
+    <div class="q"><h4>Who actually does the work?</h4>
+      <p>Seven specialist agents do the research, drafting and checking. A person reviews fit, every claim, all client-facing work, delivery and renewal. Automation never sends, publishes, spends or approves. <a href="agents.html" style="color:var(--brass)">See the desk →</a></p></div>
+  </section>
+
+  <div class="band">
+    <h2>The audit costs you an email. The rest is a decision you can make later.</h2>
+    <p>Six a month, done by hand. When this month's sixth is taken the intake closes until the next one opens.</p>
+    <div class="note">No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees. The delivery guarantee above is the only promise we make about outcomes, and it is a promise about our work, not your market.</div>
+  </div>
+
+
+  <section id="confidential">
+    <h2>Why there are no logos on this site</h2>
+    <p class="lede">We do not publish client work. No logos, no case studies, no testimonials, no "as seen at." If you engage us, nobody learns it from us — not on a site, not in a pitch deck, not in a conversation with the clinic down the road.<br><br><b>Market research is the opposite, and we share it freely.</b> The nineteen-clinic study reads public homepages of businesses that are not our clients and have no relationship with us — you are welcome to all of it, city by city. What we never share is anything belonging to someone who paid us. <a href="specimen.html" style="color:var(--brass)">Read the specimen &rarr;</a></p>
+  </section>
+
+  <footer>
+    <span class="sc">TinyStudio</span>
+    <span class="sc"><a href="audit.html">The audit</a> · <a href="agents.html">The desk</a></span>
+    <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
+  </footer>
+</div>
+<script defer>
+(function(){var S='.phead h1,.phead .sub,.plan,section h2,section .lede,.stop,.q,.band';
+function r(){var e=[].slice.call(document.querySelectorAll(S));e.forEach(function(x){x.setAttribute('data-r','')});
+var io=new IntersectionObserver(function(en){en.forEach(function(v){if(!v.isIntersecting)return;
+var s=[].slice.call(v.target.parentNode.children).filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});
+v.target.style.transitionDelay=Math.min(Math.max(0,s.indexOf(v.target)),6)*90+'ms';
+v.target.classList.add('in');io.unobserve(v.target)})},{threshold:.08,rootMargin:'0px 0px -5% 0px'});
+e.forEach(function(x){io.observe(x)});
+setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(x){x.classList.add('in')})},1600)}
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()})();
+</script>
+</body>
+</html>

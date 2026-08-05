@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Desk — TinyStudio</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .roster{margin-top:56px;border-top:1px solid var(--line)}
+  .ag{display:grid;grid-template-columns:56px 1.15fr 1.45fr auto;gap:34px;align-items:start;
+    padding:30px 0;border-bottom:1px solid var(--hair);
+    transition:padding-left var(--mid) var(--ease),background var(--mid) var(--ease)}
+  .ag:hover{padding-left:14px;background:rgba(255,253,248,.5)}
+  .ag .n{font-family:'Fraunces',serif;font-style:italic;font-weight:200;font-size:30px;color:var(--brass-lt);line-height:1}
+  .ag h3{font-size:19px;font-weight:600;letter-spacing:-.012em}
+  .ag .job{margin-top:7px;font-size:14.5px;line-height:1.65;color:var(--muted)}
+  .ag .reads{font-size:14px;line-height:1.72;color:var(--soft)}
+  .ag .reads b{display:block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:7px}
+  .ag .gate{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+    color:var(--brass);white-space:nowrap;padding-top:5px}
+
+  .gatebox{margin-top:96px;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;background:linear-gradient(172deg,rgba(255,253,248,.9),rgba(235,225,207,.5))}
+  .gatebox>div{padding:38px 42px}
+  .gatebox>div:first-child{border-right:1px solid var(--line)}
+  .gatebox h4{font-family:'Fraunces',serif;font-weight:300;font-size:25px;letter-spacing:-.02em}
+  .gatebox ul{margin-top:18px;list-style:none}
+  .gatebox li{font-size:15px;line-height:1.55;color:var(--soft);padding:9px 0 9px 26px;position:relative}
+  .gatebox li::before{content:'';position:absolute;left:0;top:16px;width:9px;height:1px;background:var(--brass)}
+  .gatebox .never li::before{background:var(--sig);width:9px;height:9px;top:14px;border-radius:50%;
+    background:transparent;border:1px solid var(--sig)}
+
+  .stack{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--hair)}
+  .stack div{padding:26px 30px 26px 0;border-right:1px solid var(--hair)}
+  .stack div:last-child{border-right:0}
+  .stack div:not(:first-child){padding-left:30px}
+  .stack .k{font-family:'Fraunces',serif;font-size:21px;font-weight:300;letter-spacing:-.015em}
+  .stack .v{margin-top:8px;font-size:14px;line-height:1.65;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="index.html">Tiny<span>Studio</span></a>
+    <div class="navlinks">
+      <a href="audit.html">The audit</a>
+      <a href="agents.html" aria-current="page">The desk</a>
+      <a href="pricing.html">Pricing</a>
+      <a class="navcta" href="index.html#start">Request an audit</a>
+    </div>
+  </nav>
+
+  <div class="phead">
+    <span class="orn sc">The desk</span>
+    <h1>Seven specialists, <em>one human signature.</em></h1>
+    <p class="sub">Each one does a single job and nothing else. They read your actual pages, your actual reviews, your actual numbers — never a generic prompt about your industry. Nothing reaches you until a person has read it and put their name to it.</p>
+    <div class="urg"><i></i><span><b>Six audits a month.</b> When the sixth is taken, the intake closes until the next.</span></div>
+  </div>
+
+  <div class="roster">
+    <div class="ag"><div class="n">i</div>
+      <div><h3>Landing Page Fixer</h3><p class="job">Turns a vague page into one with a clear audience, offer, proof and next action.</p></div>
+      <div class="reads"><b>Reads</b>Your page, your buyer, your offer details, your reviews, an analytics snapshot, competitor pages.</div>
+      <div class="gate">Human-approved</div></div>
+
+    <div class="ag"><div class="n">ii</div>
+      <div><h3>Product Page Fixer</h3><p class="job">The same discipline applied to the pages that carry a price and a decision.</p></div>
+      <div class="reads"><b>Reads</b>Page copy, objections, proof assets, pricing context, comparable pages.</div>
+      <div class="gate">Human-approved</div></div>
+
+    <div class="ag"><div class="n">iii</div>
+      <div><h3>Site Architecture Fixer</h3><p class="job">Fixes the order and hierarchy a first-time visitor actually moves through.</p></div>
+      <div class="reads"><b>Reads</b>Site structure, internal links, search intent, service hierarchy.</div>
+      <div class="gate">Human-approved</div></div>
+
+    <div class="ag"><div class="n">iv</div>
+      <div><h3>Ad Angle Generator</h3><p class="job">Builds testable angles from real customer language — and marks any claim you cannot prove.</p></div>
+      <div class="reads"><b>Reads</b>Reviews, objections, winning and losing ads, competitor hooks, channel notes.</div>
+      <div class="gate">Human-approved</div></div>
+
+    <div class="ag"><div class="n">v</div>
+      <div><h3>Competitor Watcher</h3><p class="job">Turns competitor research into moves you can make — explicitly without copying anyone.</p></div>
+      <div class="reads"><b>Reads</b>Three to eight competitor URLs, your positioning, reviews and objections.</div>
+      <div class="gate">Human-approved</div></div>
+
+    <div class="ag"><div class="n">vi</div>
+      <div><h3>Email &amp; SMS Generator</h3><p class="job">Writes the follow-up sequence in your voice, from your own proof.</p></div>
+      <div class="reads"><b>Reads</b>Brand voice, offer, objections, prior sends, customer replies.</div>
+      <div class="gate">Human-approved</div></div>
+
+    <div class="ag"><div class="n">vii</div>
+      <div><h3>Weekly Performance Analyst</h3><p class="job">Turns the week's numbers and what shipped into a report and a next-action list.</p></div>
+      <div class="reads"><b>Reads</b>Weekly analytics, changes shipped, channel notes, client replies, last week's learnings.</div>
+      <div class="gate">Human-approved</div></div>
+  </div>
+
+  <div class="gatebox">
+    <div>
+      <h4>What the desk does</h4>
+      <ul>
+        <li>Research, drafting, quality checks, packaging and routing</li>
+        <li>Reads your real pages, reviews, ads and numbers</li>
+        <li>Flags every claim that needs proof before it can be said</li>
+        <li>Runs on the current frontier model tier, chosen per job</li>
+      </ul>
+    </div>
+    <div class="never">
+      <h4>What it is never allowed to do</h4>
+      <ul>
+        <li>Send anything to anyone</li>
+        <li>Publish anything to your site</li>
+        <li>Spend a penny of ad budget</li>
+        <li>Approve, accept or renew its own work</li>
+      </ul>
+    </div>
+  </div>
+
+  <section>
+    <h2>Why this isn't something you can just prompt</h2>
+    <p class="lede">The models are available to everyone — that is precisely the point. What isn't, is seven purpose-built specialists with fixed inputs and checklists, pointed at your actual business, with a human refusing to let an unproven claim leave the building.</p>
+    <div class="stack">
+      <div><div class="k">Specialised, not general</div><div class="v">Each agent has one job, a defined input list and a checklist it must satisfy. A general chat window has none of those.</div></div>
+      <div><div class="k">Your data, not your industry</div><div class="v">They read your reviews, your pages, your numbers. Not a plausible-sounding average of your sector.</div></div>
+      <div><div class="k">A person signs it</div><div class="v">Fit, claims, client-facing work, delivery and renewal are all human decisions. Automation never gets the last word.</div></div>
+    </div>
+  </section>
+
+  <div class="band">
+    <h2>Every week the leak stays open is a week of traffic you already paid for, walking out.</h2>
+    <p>That is the only urgency we will ever sell you. Not a countdown, not a discount that expires — just the plain arithmetic that the visitors arriving today are leaving through the same gap they left through last month.</p>
+    <div class="note">We make no claim about how much that costs you. We will show you where it happens; what it is worth is yours to judge.</div>
+  </div>
+
+  <footer>
+    <span class="sc">TinyStudio</span>
+    <span class="sc"><a href="audit.html">The audit</a> · <a href="pricing.html">Pricing</a></span>
+    <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
+  </footer>
+</div>
+<script defer>
+(function(){var S='.phead h1,.phead .sub,.urg,.ag,.gatebox,section h2,section .lede,.stack div,.band';
+function r(){var e=[].slice.call(document.querySelectorAll(S));e.forEach(function(x){x.setAttribute('data-r','')});
+var io=new IntersectionObserver(function(en){en.forEach(function(v){if(!v.isIntersecting)return;
+var s=[].slice.call(v.target.parentNode.children).filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});
+v.target.style.transitionDelay=Math.min(Math.max(0,s.indexOf(v.target)),6)*90+'ms';
+v.target.classList.add('in');io.unobserve(v.target)})},{threshold:.08,rootMargin:'0px 0px -5% 0px'});
+e.forEach(function(x){io.observe(x)});
+setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(x){x.classList.add('in')})},1600)}
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()})();
+</script>
+</body>
+</html>
