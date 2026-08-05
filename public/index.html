@@ -189,6 +189,20 @@
     form.two input:first-of-type{border-right:0;border-bottom:1px solid var(--line)}
     form.two button{width:100%}
   }
+  /* who signs it */
+  .signer{margin-top:112px;padding-top:66px;border-top:1px solid var(--line);
+    display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:start}
+  .sig-portrait{width:120px;height:120px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(168deg,#FFFDF8,#E8DDC9);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 22px 46px -30px rgba(25,20,16,.4)}
+  .sig-portrait span{font-family:'Fraunces',serif;font-size:15px;letter-spacing:.22em;color:var(--brass)}
+  .sig-portrait img{width:120px;height:120px;border-radius:50%;object-fit:cover;display:block}
+  .sig-body h2{font-family:'Fraunces',serif;font-weight:200;font-size:40px;letter-spacing:-.028em;
+    line-height:1.1;margin-top:14px}
+  .sig-body p{margin-top:20px;font-size:16.5px;line-height:1.75;color:var(--soft);max-width:58ch}
+  .sig-note:empty{display:none}
+  @media (max-width:760px){.signer{grid-template-columns:1fr;gap:26px}}
 </style>
 </head>
 <body>
@@ -205,9 +219,9 @@
     <form class="lead two" id="start" action="/api/signups" method="post">
       <input type="url" name="website" required placeholder="yourwebsite.com">
       <input type="email" name="email" required placeholder="Your work email">
-      <button>See if you qualify</button>
+      <button>Show me where I'm leaking</button>
     </form>
-    <p class="micro">Your website and your email. That is the whole form — no call needed to receive it.</p>
+    <p class="micro">Thirty seconds to ask. Findings inside five working days. No call at any point.</p>
     <div style="margin:26px auto 0;display:inline-flex;align-items:center;gap:13px;background:rgba(255,253,248,.8);border:1px solid var(--line);border-radius:999px;padding:11px 22px 11px 16px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 14px 34px -24px rgba(25,20,16,.35)">
       <i style="width:7px;height:7px;border-radius:50%;background:#B04A2E;display:block;box-shadow:0 0 0 4px rgba(176,74,46,.14)"></i>
       <span style="font-size:13.5px;color:var(--soft)"><b style="color:var(--ink);font-weight:600">Six a month.</b> When the sixth is taken, the intake closes until the next.</span>
@@ -295,6 +309,21 @@
   <section class="who" id="who">
     <p><b>We work mostly with premium wellness clinics.</b> The audit itself is not fussy — it works on any page carrying real money. If yours does, put your email in and we will take a look.</p>
     <span class="sc">Everyone welcome to ask</span>
+  </section>
+
+
+  <section class="signer" id="who-signs">
+    <div class="sig-portrait" aria-hidden="true">
+      <!-- REPLACE: 480x480 photo at public/nish.jpg, then swap this div for:
+           <img src="nish.jpg" alt="Nish, who runs the desk" width="120" height="120"> -->
+      <span>NISH</span>
+    </div>
+    <div class="sig-body">
+      <span class="sc" style="color:var(--brass)">Who signs it</span>
+      <h2 style="max-width:18ch">There is one person behind the desk, and it is not a department.</h2>
+      <p>My name is Nish. I read every audit before it leaves, I decide what we will and will not claim, and I am the one who owes you a refund if the work is late. The seven agents do the research and the drafting. The judgement, and the liability, are mine.</p>
+      <p class="sig-note"><!-- REPLACE: one true credential line — years in the work, or a background line you are happy to stand behind. Delete this comment when done. --></p>
+    </div>
   </section>
 
   <section class="offer" id="terms">
