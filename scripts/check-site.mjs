@@ -284,6 +284,21 @@ if (!styles.includes(".agent-shell") || !styles.includes(".agent-form") || !styl
   failures.push("Missing Agent Desk visual styles.");
 }
 
+// Responsive regression guard: each public route's stylesheet must keep its
+// mobile block, or a 390px phone view regains horizontal overflow.
+const responsiveCss = [
+  ["shared.css", ["@media (max-width:760px)", ".wrap{padding:0 20px}", ".navlinks{flex-wrap:wrap"]],
+  ["index.css", ["@media (max-width:760px)", ".wrap{padding:0 20px}", ".navlinks{flex-wrap:wrap"]],
+  ["pricing.css", ["@media (max-width:760px)", ".plan{grid-template-columns:1fr"]],
+  ["agents.css", ["@media (max-width:760px)", ".ag{grid-template-columns:1fr", ".gatebox{grid-template-columns:1fr"]]
+];
+for (const [file, needles] of responsiveCss) {
+  const css = read(`public/${file}`);
+  for (const needle of needles) {
+    if (!css.includes(needle)) failures.push(`Missing mobile responsive rule in ${file}: ${needle}`);
+  }
+}
+
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
