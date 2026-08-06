@@ -1,0 +1,229 @@
+{
+  "_note": "Sources are tiered before any claim is read. Tier 0 and 4 are never crawled. Ranking is by whether the author bears a cost for being wrong. Seeded 2026-08-06.",
+  "tier_1_operators": {
+    "_rule": "Authoritative for how their own system BEHAVES. Their performance claims are VENDOR-GOSPEL.",
+    "sources": [
+      "https://developers.google.com/search",
+      "https://support.google.com/webmasters",
+      "https://support.google.com/google-ads",
+      "https://web.dev",
+      "https://developers.google.com/analytics"
+    ],
+    "self_debunks": [
+      {
+        "claim": "Quality Score is an auction input you optimise",
+        "refuted_by": "https://support.google.com/google-ads/answer/6167118",
+        "quote": "Quality Score is not an input in the ad auction. It's a diagnostic tool."
+      },
+      {
+        "claim": "Ad spend influences organic rankings",
+        "refuted_by": "https://www.google.com/search/howsearchworks/our-approach/",
+        "quote": "Google Search does not provide special treatment such as ranking boosts ... including advertising."
+      }
+    ]
+  },
+  "tier_2_practitioners": {
+    "_rule": "Harvest fully, claim-gate hard. Requires shown working: code, spend, timeframe, vertical or sample size.",
+    "recurring_studies": [
+      {
+        "name": "SearchPilot case studies",
+        "url": "https://www.searchpilot.com/resources/blog",
+        "cadence": "fortnightly",
+        "why": "Discloses its method: Bayesian credible intervals, bucketing into statistically similar control/variant groups, model confidence reported separately from results.",
+        "caveat": "Individual case studies are rigorous. Roundup posts list large uplifts with no confidence or method. Harvest the former only."
+      },
+      {
+        "name": "Ahrefs GSC anonymised-query studies",
+        "url": "https://ahrefs.com/blog/gsc-anonymized-queries/",
+        "cadence": "irregular",
+        "why": "Primary data at scale, calculation disclosed, ships a reproducible template.",
+        "caveat": "INCENTIVE-CONFLICT: a tool vendor benefits when the data gap looks large."
+      },
+      {
+        "name": "SparkToro zero-click",
+        "url": "https://sparktoro.com/blog",
+        "cadence": "annual-ish",
+        "why": "Best limitations disclosure found; warns year-over-year comparison is shaky because the panel provider changed.",
+        "caveat": "Clickstream panel, not GSC. Never blend with GSC figures."
+      },
+      {
+        "name": "Optmyzr match-type / bidding study",
+        "url": "https://www.optmyzr.com/blog/optmyzr-study-broad-match-bidding/",
+        "why": "Within-account comparison across thousands of accounts, caveats stated, and the author published a result against her own previously advocated position.",
+        "caveat": "Sample is an advanced tool's customer base."
+      },
+      {
+        "name": "Advanced Web Ranking quarterly CTR",
+        "url": "https://www.advancedwebranking.com/blog/category/research-studies",
+        "cadence": "quarterly",
+        "why": "Long consistent series, useful for direction of travel.",
+        "caveat": "No sample size and no stated data source. Never quote a precise figure as if the method were known."
+      }
+    ],
+    "people": [
+      {
+        "name": "Georgi Georgiev",
+        "url": "https://blog.analytics-toolkit.com/",
+        "why": "Statistical validity; argues from the maths and openly disagrees with other credible voices."
+      },
+      {
+        "name": "Ron Kohavi",
+        "url": "https://exp-platform.com/",
+        "why": "Controlled-experiment work aimed explicitly at vendor and agency marketing claims."
+      },
+      {
+        "name": "Antoine Eripret",
+        "url": "https://www.aeripret.com/",
+        "why": "Working SQL and real cost figures for GSC BigQuery export."
+      },
+      {
+        "name": "Trevor Fox",
+        "url": "https://trevorfox.com/learn-sql-for-seo/",
+        "why": "Free SQL-for-SEO curriculum, previously paid."
+      },
+      {
+        "name": "Mark Williams-Cook",
+        "url": "https://markwilliamscook.substack.com/",
+        "why": "Runs genuinely controlled experiments against live systems."
+      },
+      {
+        "name": "Elias Dabbas",
+        "url": "https://github.com/eliasdabbas/advertools",
+        "why": "Open source; the code can be checked."
+      },
+      {
+        "name": "Marco Giordano",
+        "url": "https://seotistics.com/blog/",
+        "why": "Active on GSC/GA4 metric semantics.",
+        "caveat": "COURSE FLAG: sells courses. INCENTIVE-CONFLICT checked on every claim."
+      }
+    ],
+    "academic": [
+      {
+        "name": "Blake, Nosko & Tadelis paid-search field experiment",
+        "url": "https://www.nber.org/papers/w20171",
+        "why": "Experimental refutation of platform-reported paid-search ROI, run by eBay's own economists on eBay's own money."
+      }
+    ]
+  },
+  "tier_3_forums": {
+    "_rule": "Only threads with visible correction dynamics and identifiable practitioners. single-source-pending at best.",
+    "sources": [
+      "https://www.reddit.com/r/PPC/",
+      "https://www.reddit.com/r/TechSEO/",
+      "https://support.google.com/google-ads/community"
+    ]
+  },
+  "tier_4_content_marketing": {
+    "_rule": "Do not crawl. A single genuine teardown may be promoted by human decision.",
+    "shapes": [
+      "agency blogs",
+      "ultimate guides",
+      "listicles",
+      "aggregation newsletters",
+      "engagement-bait posts"
+    ]
+  },
+  "tier_0_never": {
+    "_rule": "SELLING or VENDOR-GOSPEL by construction. No exception path.",
+    "shapes": [
+      "course and template sellers",
+      "how-I-made-$X threads",
+      "AI content farms",
+      "platform sales pages"
+    ],
+    "observed_denylist": {
+      "_note": "Ranked on page one for exactly our topics while carrying no original data. Recorded because the harvester must never treat ranking as a quality signal: on these queries SERP position was anti-correlated with rigour, and the rigorous sources did not appear at all.",
+      "domains": [
+        "upgrowth.in",
+        "seotransformer.com",
+        "digitalsuccess.us",
+        "runoctopus.com",
+        "metricsrule.com",
+        "foundgrove.com",
+        "nerdymedia.net",
+        "primaryposition.com",
+        "jadigital.net",
+        "seoguru.ai",
+        "rankture.com",
+        "hostragons.com",
+        "gostellar.app",
+        "bilarna.com",
+        "websiteoptimizer.ai",
+        "stackmatix.com",
+        "almcorp.com",
+        "lcntech.com",
+        "optimixed.com",
+        "omnibound.ai",
+        "indexsy.com",
+        "firstpagesage.com",
+        "aeoengine.ai",
+        "riseopp.com",
+        "quickseo.ai",
+        "digitalapplied.com"
+      ]
+    }
+  },
+  "known_zombies": {
+    "_note": "Figures that circulate detached from their method. Any claim resting on one is ECHO until traced to the original. Every one is the kind of thing an agency would happily put in a client deck.",
+    "claims": [
+      {
+        "figure": "8-second attention span, worse than a goldfish",
+        "reality": "Traced through a 2015 corporate report to a stats aggregator whose own cited sources could find no record of the research when contacted."
+      },
+      {
+        "figure": "Visuals processed 60,000x faster than text",
+        "reality": "Traced to a 1982 magazine advertising section, asserted with no citation. A public cash offer for supporting evidence went unclaimed."
+      },
+      {
+        "figure": "People remember 10% of what they read",
+        "reality": "The percentages were never in the original work. Debunked repeatedly since 1971."
+      },
+      {
+        "figure": "Rule of 7 touchpoints",
+        "reality": "The documented pre-history says about twenty; the measured literature says three. Seven was fixed by a 1989 business book."
+      },
+      {
+        "figure": "5x more expensive to acquire than retain",
+        "reality": "Traced back through decades of citations and disappears."
+      },
+      {
+        "figure": "94% of first impressions are design-related",
+        "reality": "From a 2004 study of 15 participants about health-site mistrust, not first impressions generally."
+      },
+      {
+        "figure": "We see 5,000-10,000 ads a day",
+        "reality": "Traced to a 2015 agency blog recounting a personal count, itself an advert for that agency."
+      },
+      {
+        "figure": "7-38-55 rule",
+        "reality": "Two 1967 studies on single spoken words, combined. The author said it does not apply unless discussing feelings or attitudes."
+      },
+      {
+        "figure": "The $300 million button",
+        "reality": "Not fraudulent, but discloses no company, sample size, period, baseline, control, or how the figure was computed."
+      }
+    ]
+  },
+  "contested_not_settled": {
+    "_note": "Live disagreements. Stored as contested, never client-facing. Stops us treating one side's confident post as settled.",
+    "items": [
+      {
+        "topic": "Single-keyword ad groups",
+        "state": "Named practitioners argue both sides; neither has published a controlled test."
+      },
+      {
+        "topic": "Underpowered A/B tests",
+        "state": "Credible statisticians disagree on whether a significant result from an underpowered test can be dismissed. Do not cite them as one voice."
+      },
+      {
+        "topic": "Smart Bidding learning-phase resets",
+        "state": "No official documentation and no practitioner test found either way."
+      }
+    ]
+  },
+  "decay": {
+    "_note": "Several of the strongest names on this beat stopped publishing, went paid, or moved on between 2024 and 2026. Tiers are not permanent.",
+    "review_every_days": 180
+  }
+}
