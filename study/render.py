@@ -48,6 +48,7 @@ def newest():
 def values(s):
     return {
         "no_price": str(s["no_price"]),
+        "no_faq": str(s["no_faq"]),
         "readable": str(s["readable"]),
         "no_price_word": spell(s["no_price"]),
         "readable_word": spell(s["readable"]),
