@@ -8,15 +8,15 @@ Serve a self-serve AI Agent Desk from the TinyStudio.io domain family while keep
 
 - `public/index.html` contains the Agent Desk intake and output surface.
 - `public/styles.css` contains the visual system.
-- `public/script.js` posts intake to `/api/agent-audit` and renders the generated brief.
+- `public/script.js` posts intake to `/api/agent-audit` and renders the generated Pipeline Brief, Implementation Checklist, and Weekly Fix Report.
 - `public/llms.txt` and `public/offer.md` expose agent-readable Agent Desk truth.
 - `src/worker.js` serves allowed assets with security headers and returns the Agent Desk for stale public paths.
 - `src/worker.js` writes launch emails through `/api/signups`.
-- `src/worker.js` runs Cloudflare Workers AI through `env.AI`.
+- `src/worker.js` runs Cloudflare Workers AI through `env.AI` and returns structured agent sections.
 - `src/worker.js` rate-limits agent runs with daily D1 counters and lightweight usage metadata.
 - `src/worker.js` returns retired responses for `app.tinystudio.io` and `api.tinystudio.io`.
 - `wrangler.jsonc` defines apex, www, app, api route patterns, D1, assets, and Workers AI binding.
-- `scripts/check-site.mjs` validates Agent Desk content, AI binding, safety rails, and claim safety.
+- `scripts/check-site.mjs` validates Agent Desk content, structured output sections, AI binding, safety rails, and claim safety.
 
 ## Verification
 
