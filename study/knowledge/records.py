@@ -15,12 +15,17 @@ from datetime import date, timedelta
 CORROBORATION = ("first-party", "two-source", "single-source-pending")
 CONFIDENCE = ("verified", "reported", "contested")
 
-# Review windows are chosen defaults, not measured facts. Platform mechanics rot
-# on platform release cycles; how buyers behave moves far more slowly.
+# Review windows follow the observed decay tiers. The durability test: who would
+# have to be wrong for this to stop being true? If the answer is one vendor's
+# product manager, it expires fast. If it is decades of replication, it does not.
+# Measured magnitudes are the trap: they rebound, so a stale figure can be wrong
+# in either direction, not merely out of date.
 VOLATILITY_WINDOWS = {
-    "platform-mechanic": 182,
-    "tooling": 365,
-    "human-behavior": 730,
+    "feature-surface": 182,       # where a button is, which report exists
+    "policy-control": 365,        # match-type semantics, crawler controls; often reverses
+    "measured-magnitude": 365,    # CTR curves, referral share; non-monotonic, rebounds
+    "structural": 1460,           # auction mechanics, incrementality vs correlation
+    "empirical-generalisation": 3650,
 }
 
 REQUIRED = (

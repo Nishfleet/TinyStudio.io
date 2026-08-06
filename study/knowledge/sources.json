@@ -223,7 +223,81 @@
     ]
   },
   "decay": {
-    "_note": "Several of the strongest names on this beat stopped publishing, went paid, or moved on between 2024 and 2026. Tiers are not permanent.",
-    "review_every_days": 180
+    "_note": "Five tiers by half-life. The durability test: ask who would have to be wrong for this to stop being true. If the answer is one vendor's product manager, it is T1-T3 and must be re-verified against a primary source. If it is several independent replications across decades, it is T5. Advice written on the strength of an ANNOUNCEMENT decays far faster than advice written on the strength of a MEASUREMENT.",
+    "tiers": [
+      {
+        "tier": "T1 feature-surface",
+        "half_life_months": "3-9",
+        "contents": "where a button is, campaign-type names, which report exists"
+      },
+      {
+        "tier": "T2 policy-and-control",
+        "half_life_months": "9-24",
+        "contents": "match-type semantics, crawler controls, consent posture",
+        "warning": "often REVERSES. This tier produces confidently-wrong advice."
+      },
+      {
+        "tier": "T3 measured-magnitudes",
+        "half_life_months": "6-18",
+        "contents": "CTR curves, zero-click %, referral share",
+        "warning": "non-monotonic. Numbers rebound, so a stale figure can be wrong in EITHER direction."
+      },
+      {
+        "tier": "T4 structural",
+        "half_life_months": "36-84",
+        "contents": "auction mechanics, intent stratification, incrementality vs correlation"
+      },
+      {
+        "tier": "T5 empirical-generalisation",
+        "half_life_months": "120+",
+        "contents": "double jeopardy, 60/40 brand-activation, observational-vs-RCT bias"
+      }
+    ],
+    "registry_review_every_days": 180
+  },
+  "source_hierarchy": {
+    "_note": "Platform statements are NOT automatically top-tier. Spokespeople publicly denied mechanisms that a later confirmed document showed to exist. A claim resting on a single spokesperson post is weak evidence, not settled.",
+    "order": [
+      "the platform's own written documentation",
+      "the platform's API changelog and release notes",
+      "independent replication",
+      "practitioner measurement with shown working",
+      "spokesperson statements",
+      "everything else"
+    ]
+  },
+  "provenance_trap": {
+    "_note": "Track provenance at the DATA-SOURCE level, not the publisher level. Several apparently independent outlets share an owner or a measurement panel, so three 'independent' confirmations can be one clickstream. This is the ECHO check with teeth.",
+    "known_shared_ownership_or_panel": [
+      "a major SEO tool vendor owns both a well-known research blog and a clickstream data provider",
+      "a widely cited zero-click study runs on a third party's panel",
+      "several experimentation tools have been absorbed by larger platforms"
+    ]
+  },
+  "calibration_test": {
+    "_note": "Use this as the acceptance test for any automated screen. Several sites published detailed, internally coherent, mutually corroborating analysis of a Google core update that never happened, complete with invented ranking factors and volatility figures. The status dashboard shows no such update.",
+    "lesson": "Cross-site corroboration is NOT evidence when the sites generate from the same synthetic premise. Any screen that passes this fabricated update is not fit to run."
+  },
+  "filter_rules": {
+    "_note": "Each grounded in a traced case rather than intuition.",
+    "downgrade_or_reject": [
+      "annualised from a short window (a month multiplied by twelve)",
+      "named subject absent ('a major retailer', 'a client in your industry')",
+      "proxy metric substituted for the outcome claimed (traffic quoted where revenue is the claim)",
+      "third-party estimate presented as measurement",
+      "measurement instrument owned by the party with the conclusion",
+      "correlation study on SERP positions treated as ranking factors",
+      "citation depth under two hops to a primary source, or a terminal broken link",
+      "author identity unverifiable: no external footprint, stock or generated headshot, rotating bylines",
+      "no failure mode described (real practitioner writing names what did not work)",
+      "'the platform said X' resting on a single spokesperson post"
+    ]
+  },
+  "vertical_literature": {
+    "_note": "Searched specifically for luxury real estate, automotive dealer, dental and clinic marketing sources. That category is a funnel: nearly every result leads with paid coaching. This is a finding, not a search failure.",
+    "structure": "Take MECHANISM from horizontal sources, take demand-side data from trade associations, and let vertical specificity come from our own testing. Do not go looking for a dental-marketing publication."
+  },
+  "reputation_warning": {
+    "_note": "Reputation is the worst available filter. A large share of famous names are dormant, pivoted, or their domains now resolve to unrelated businesses and parked ad farms, while the reputation persists. A vault built from an old who-to-follow list points largely at corpses. Every source entry needs a last-verified date, not just a name."
   }
 }
