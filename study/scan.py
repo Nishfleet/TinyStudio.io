@@ -112,6 +112,15 @@ def delta(old, new):
 def main():
     with open(CORPUS) as fh:
         corpus = json.load(fh)
+
+    # At corpus scale a full daily sweep is neither kind to the sites nor useful —
+    # homepages do not change hourly. Read a deterministic slice each day so every
+    # site is re-read on a fixed cycle, and the whole corpus stays under measurement.
+    cycle = int(os.environ.get("SCAN_CYCLE_DAYS", "7"))
+    if cycle > 1 and len(corpus) > 500:
+        slot = date.today().toordinal() % cycle
+        corpus = [c for i, c in enumerate(sorted(corpus, key=lambda c: c["url"]))
+                  if i % cycle == slot]
     with cf.ThreadPoolExecutor(max_workers=12) as ex:
         rows = list(ex.map(scan, corpus))
     ok = [r for r in rows if r["ok"]]

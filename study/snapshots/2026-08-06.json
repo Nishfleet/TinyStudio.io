@@ -1,6 +1,6 @@
 {
  "date": "2026-08-06",
- "scanned_at": "2026-08-06T04:29:15+00:00",
+ "scanned_at": "2026-08-06T04:47:43+00:00",
  "attempted": 99,
  "readable": 89,
  "industries": 13,
@@ -548,7 +548,7 @@
    "geo": "Monaco",
    "host": "yacht-zoo.com",
    "ok": true,
-   "words": 2120,
+   "words": 2112,
    "price": 0,
    "faq": true,
    "fields": 1
