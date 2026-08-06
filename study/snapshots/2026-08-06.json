@@ -1,0 +1,972 @@
+{
+ "date": "2026-08-06",
+ "scanned_at": "2026-08-06T04:29:15+00:00",
+ "attempted": 99,
+ "readable": 89,
+ "industries": 13,
+ "geographies": 8,
+ "no_price": 57,
+ "no_faq": 53,
+ "rows": [
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "harpalclinic.co.uk",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "the-hvn.com",
+   "ok": true,
+   "words": 2359,
+   "price": 0,
+   "faq": true,
+   "fields": 3
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "optimisehealth.com",
+   "ok": true,
+   "words": 1424,
+   "price": 1,
+   "faq": true,
+   "fields": 6
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "londoncryo.com",
+   "ok": true,
+   "words": 872,
+   "price": 1,
+   "faq": true,
+   "fields": 1
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "nuutro.co.uk",
+   "ok": true,
+   "words": 1764,
+   "price": 0,
+   "faq": true,
+   "fields": 6
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "thewellnesslondon.com",
+   "ok": true,
+   "words": 1368,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "London",
+   "host": "hum2n.com",
+   "ok": true,
+   "words": 1252,
+   "price": 0,
+   "faq": false,
+   "fields": 1
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "New York",
+   "host": "collagenbar.nyc",
+   "ok": true,
+   "words": 2120,
+   "price": 2,
+   "faq": true,
+   "fields": 2
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "New York",
+   "host": "manhattanmedicalarts.com",
+   "ok": true,
+   "words": 1693,
+   "price": 0,
+   "faq": true,
+   "fields": 1
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "New York",
+   "host": "prefusionhealth.com",
+   "ok": true,
+   "words": 1704,
+   "price": 0,
+   "faq": true,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "New York",
+   "host": "apollohousenyc.com",
+   "ok": true,
+   "words": 2329,
+   "price": 0,
+   "faq": true,
+   "fields": 11
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "New York",
+   "host": "merakiintegrative.com",
+   "ok": true,
+   "words": 1150,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "New York",
+   "host": "patientsmedical.com",
+   "ok": true,
+   "words": 7989,
+   "price": 0,
+   "faq": true,
+   "fields": 30
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "Miami",
+   "host": "vitaflowfl.com",
+   "ok": true,
+   "words": 1156,
+   "price": 11,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "Miami",
+   "host": "hallongevity.com",
+   "ok": true,
+   "words": 1492,
+   "price": 4,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "Miami",
+   "host": "alivemiami.com",
+   "ok": true,
+   "words": 4808,
+   "price": 9,
+   "faq": false,
+   "fields": 5
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "Miami",
+   "host": "neomedicineinstitute.com",
+   "ok": true,
+   "words": 1163,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "Miami",
+   "host": "alphahormones.com",
+   "ok": true,
+   "words": 5463,
+   "price": 0,
+   "faq": true,
+   "fields": 10
+  },
+  {
+   "industry": "Wellness clinics",
+   "geo": "Miami",
+   "host": "purehealthmiami.com",
+   "ok": true,
+   "words": 436,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Dubai",
+   "host": "f1rstmotors.com",
+   "ok": true,
+   "words": 205,
+   "price": 0,
+   "faq": false,
+   "fields": 1
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Miami",
+   "host": "premierautomiami.com",
+   "ok": true,
+   "words": 1940,
+   "price": 12,
+   "faq": true,
+   "fields": 9
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Miami",
+   "host": "limitedspec.com",
+   "ok": true,
+   "words": 901,
+   "price": 12,
+   "faq": false,
+   "fields": 6
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Miami",
+   "host": "exoticshunter.com",
+   "ok": true,
+   "words": 564,
+   "price": 22,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Miami",
+   "host": "thecollection.com",
+   "ok": true,
+   "words": 1307,
+   "price": 0,
+   "faq": true,
+   "fields": 16
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Miami",
+   "host": "pugachev.miami",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Dubai",
+   "host": "luxurysupercarsdubai.com",
+   "ok": true,
+   "words": 2603,
+   "price": 0,
+   "faq": true,
+   "fields": 8
+  },
+  {
+   "industry": "Supercar dealers",
+   "geo": "Miami",
+   "host": "prestigeluxuryrentals.com",
+   "ok": true,
+   "words": 2051,
+   "price": 7,
+   "faq": true,
+   "fields": 2
+  },
+  {
+   "industry": "Luxury real estate",
+   "geo": "London",
+   "host": "knightsbridgeprimeproperty.com",
+   "ok": true,
+   "words": 953,
+   "price": 17,
+   "faq": false,
+   "fields": 20
+  },
+  {
+   "industry": "Luxury real estate",
+   "geo": "London",
+   "host": "jefferies.london",
+   "ok": true,
+   "words": 1195,
+   "price": 15,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Luxury real estate",
+   "geo": "London",
+   "host": "beauchamp.com",
+   "ok": true,
+   "words": 2807,
+   "price": 5,
+   "faq": false,
+   "fields": 216
+  },
+  {
+   "industry": "Luxury real estate",
+   "geo": "London",
+   "host": "mayfairinternationalrealty.com",
+   "ok": true,
+   "words": 305,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Luxury real estate",
+   "geo": "London",
+   "host": "eatonpremier.com",
+   "ok": true,
+   "words": 1374,
+   "price": 7,
+   "faq": false,
+   "fields": 20
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "77harleystreet.co.uk",
+   "ok": true,
+   "words": 886,
+   "price": 0,
+   "faq": true,
+   "fields": 0
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "marylebonesmileclinic.co.uk",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "harleystreetsmileclinic.co.uk",
+   "ok": true,
+   "words": 3339,
+   "price": 0,
+   "faq": true,
+   "fields": 29
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "prodentalclinic.london",
+   "ok": true,
+   "words": 870,
+   "price": 2,
+   "faq": false,
+   "fields": 1
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "harleystreetdentalandimplantclinic.co.uk",
+   "ok": true,
+   "words": 795,
+   "price": 0,
+   "faq": false,
+   "fields": 13
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "smilelondon.co.uk",
+   "ok": true,
+   "words": 1410,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "harleystreetdentalartclinic.com",
+   "ok": true,
+   "words": 1184,
+   "price": 0,
+   "faq": false,
+   "fields": 5
+  },
+  {
+   "industry": "Cosmetic dentistry",
+   "geo": "London",
+   "host": "harleystreetimplantcentre.co.uk",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Wellness centres & spas",
+   "geo": "London",
+   "host": "thirdspace.london",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Wellness centres & spas",
+   "geo": "London",
+   "host": "rebaserecovery.com",
+   "ok": true,
+   "words": 9,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Wellness centres & spas",
+   "geo": "London",
+   "host": "comohotels.com",
+   "ok": true,
+   "words": 1948,
+   "price": 0,
+   "faq": true,
+   "fields": 8
+  },
+  {
+   "industry": "Wellness centres & spas",
+   "geo": "London",
+   "host": "corinthia.com",
+   "ok": true,
+   "words": 1185,
+   "price": 5,
+   "faq": false,
+   "fields": 2
+  },
+  {
+   "industry": "Wellness centres & spas",
+   "geo": "London",
+   "host": "bulgarihotels.com",
+   "ok": true,
+   "words": 1642,
+   "price": 0,
+   "faq": false,
+   "fields": 21
+  },
+  {
+   "industry": "Wellness centres & spas",
+   "geo": "Global",
+   "host": "luxewellnessclub.com",
+   "ok": true,
+   "words": 1422,
+   "price": 0,
+   "faq": false,
+   "fields": 25
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "kleinairconditioning.com",
+   "ok": true,
+   "words": 1811,
+   "price": 0,
+   "faq": false,
+   "fields": 6
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "ameritempac.com",
+   "ok": true,
+   "words": 1065,
+   "price": 0,
+   "faq": false,
+   "fields": 7
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "luxury-cooling.com",
+   "ok": true,
+   "words": 598,
+   "price": 0,
+   "faq": false,
+   "fields": 7
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "acpowercomfort.com",
+   "ok": true,
+   "words": 2970,
+   "price": 0,
+   "faq": true,
+   "fields": 0
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "miamihvac.net",
+   "ok": true,
+   "words": 763,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "polluxair.com",
+   "ok": true,
+   "words": 3513,
+   "price": 0,
+   "faq": false,
+   "fields": 4
+  },
+  {
+   "industry": "Premium HVAC",
+   "geo": "Miami",
+   "host": "centralcomfortairconditioning.com",
+   "ok": true,
+   "words": 1825,
+   "price": 1,
+   "faq": true,
+   "fields": 8
+  },
+  {
+   "industry": "Yacht brokers",
+   "geo": "Monaco",
+   "host": "superyachtsmonaco.com",
+   "ok": true,
+   "words": 1343,
+   "price": 0,
+   "faq": true,
+   "fields": 17
+  },
+  {
+   "industry": "Yacht brokers",
+   "geo": "Monaco",
+   "host": "twwyachts.com",
+   "ok": true,
+   "words": 2029,
+   "price": 12,
+   "faq": true,
+   "fields": 11
+  },
+  {
+   "industry": "Yacht brokers",
+   "geo": "Monaco",
+   "host": "yacht-zoo.com",
+   "ok": true,
+   "words": 2120,
+   "price": 0,
+   "faq": true,
+   "fields": 1
+  },
+  {
+   "industry": "Yacht brokers",
+   "geo": "Fort Lauderdale",
+   "host": "moranyachts.com",
+   "ok": true,
+   "words": 1697,
+   "price": 8,
+   "faq": false,
+   "fields": 7
+  },
+  {
+   "industry": "Yacht brokers",
+   "geo": "Fort Lauderdale",
+   "host": "worthavenueyachts.com",
+   "ok": true,
+   "words": 6496,
+   "price": 35,
+   "faq": false,
+   "fields": 53
+  },
+  {
+   "industry": "Yacht brokers",
+   "geo": "Monaco",
+   "host": "iyc.com",
+   "ok": true,
+   "words": 922,
+   "price": 0,
+   "faq": true,
+   "fields": 2
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Global",
+   "host": "vistajet.com",
+   "ok": true,
+   "words": 1225,
+   "price": 1,
+   "faq": false,
+   "fields": 14
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Dubai",
+   "host": "jetluxe.com",
+   "ok": true,
+   "words": 916,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Global",
+   "host": "privatejet.com",
+   "ok": true,
+   "words": 1550,
+   "price": 0,
+   "faq": true,
+   "fields": 7
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Global",
+   "host": "jetfinder.com",
+   "ok": true,
+   "words": 2475,
+   "price": 0,
+   "faq": true,
+   "fields": 38
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Global",
+   "host": "skyaccess.com",
+   "ok": true,
+   "words": 1052,
+   "price": 11,
+   "faq": true,
+   "fields": 1
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Global",
+   "host": "charterjetone.com",
+   "ok": true,
+   "words": 2576,
+   "price": 1,
+   "faq": false,
+   "fields": 20
+  },
+  {
+   "industry": "Private aviation",
+   "geo": "Global",
+   "host": "paramountbusinessjets.com",
+   "ok": true,
+   "words": 2241,
+   "price": 12,
+   "faq": true,
+   "fields": 2
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Beverly Hills",
+   "host": "harrisfacialplastics.com",
+   "ok": true,
+   "words": 4030,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Beverly Hills",
+   "host": "drcalvert.com",
+   "ok": true,
+   "words": 782,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Dubai",
+   "host": "aesthetics.ae",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Dubai",
+   "host": "bhwaa.com",
+   "ok": true,
+   "words": 2080,
+   "price": 0,
+   "faq": true,
+   "fields": 1
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Dubai",
+   "host": "elitecosmeticsurgery.ae",
+   "ok": true,
+   "words": 4598,
+   "price": 0,
+   "faq": false,
+   "fields": 6
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Dubai",
+   "host": "skin111.com",
+   "ok": false,
+   "err": "HTTP Error 503: Service Unavailable"
+  },
+  {
+   "industry": "Plastic surgery",
+   "geo": "Dubai",
+   "host": "dubailondonhospital.com",
+   "ok": true,
+   "words": 1287,
+   "price": 0,
+   "faq": false,
+   "fields": 2
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "London",
+   "host": "bqwatches.com",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "London",
+   "host": "chrono-group.com",
+   "ok": true,
+   "words": 1806,
+   "price": 2,
+   "faq": true,
+   "fields": 3
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "Dubai",
+   "host": "luxurysouq.com",
+   "ok": true,
+   "words": 6421,
+   "price": 2,
+   "faq": true,
+   "fields": 14
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "Dubai",
+   "host": "dubailuxurywatch.com",
+   "ok": true,
+   "words": 3535,
+   "price": 0,
+   "faq": false,
+   "fields": 6
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "Dubai",
+   "host": "watchtradeco.com",
+   "ok": true,
+   "words": 512,
+   "price": 0,
+   "faq": false,
+   "fields": 3
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "Dubai",
+   "host": "bigmoewatches.com",
+   "ok": true,
+   "words": 1651,
+   "price": 24,
+   "faq": true,
+   "fields": 0
+  },
+  {
+   "industry": "Luxury watches",
+   "geo": "Dubai",
+   "host": "thewatchmeister.com",
+   "ok": true,
+   "words": 3403,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Private members clubs",
+   "geo": "London",
+   "host": "theartsclub.co.uk",
+   "ok": true,
+   "words": 1412,
+   "price": 0,
+   "faq": false,
+   "fields": 16
+  },
+  {
+   "industry": "Private members clubs",
+   "geo": "Global",
+   "host": "sohohouse.com",
+   "ok": true,
+   "words": 341,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Private members clubs",
+   "geo": "London",
+   "host": "5hertfordstreet.com",
+   "ok": true,
+   "words": 0,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Private members clubs",
+   "geo": "London",
+   "host": "annabels.co.uk",
+   "ok": true,
+   "words": 75,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Private members clubs",
+   "geo": "New York",
+   "host": "casacipriani.com",
+   "ok": true,
+   "words": 496,
+   "price": 0,
+   "faq": false,
+   "fields": 4
+  },
+  {
+   "industry": "Private members clubs",
+   "geo": "London",
+   "host": "homehouse.co.uk",
+   "ok": true,
+   "words": 249,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "huntsmansavilerow.com",
+   "ok": true,
+   "words": 902,
+   "price": 10,
+   "faq": true,
+   "fields": 4
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "englishcut.com",
+   "ok": true,
+   "words": 302,
+   "price": 0,
+   "faq": false,
+   "fields": 1
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "gievesandhawkes.com",
+   "ok": true,
+   "words": 2052,
+   "price": 25,
+   "faq": true,
+   "fields": 19
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "nortonandsons.co.uk",
+   "ok": true,
+   "words": 1146,
+   "price": 9,
+   "faq": true,
+   "fields": 4
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "redmayne1860.com",
+   "ok": true,
+   "words": 552,
+   "price": 1,
+   "faq": true,
+   "fields": 3
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "onsavilerow.com",
+   "ok": true,
+   "words": 167,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Bespoke tailoring",
+   "geo": "London",
+   "host": "savilerowcustom.com",
+   "ok": true,
+   "words": 2501,
+   "price": 6,
+   "faq": true,
+   "fields": 4
+  },
+  {
+   "industry": "Interior design",
+   "geo": "London",
+   "host": "rosenarmani.com",
+   "ok": false,
+   "err": "HTTP Error 403: Forbidden"
+  },
+  {
+   "industry": "Interior design",
+   "geo": "London",
+   "host": "elliotjames.com",
+   "ok": true,
+   "words": 141,
+   "price": 0,
+   "faq": false,
+   "fields": 4
+  },
+  {
+   "industry": "Interior design",
+   "geo": "London",
+   "host": "interieurlondon.com",
+   "ok": true,
+   "words": 370,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Interior design",
+   "geo": "Dubai",
+   "host": "algedra.ae",
+   "ok": false,
+   "err": "<urlopen error [Errno -3] Temporary failure in name resoluti"
+  },
+  {
+   "industry": "Interior design",
+   "geo": "London",
+   "host": "accouterdesign.com",
+   "ok": true,
+   "words": 375,
+   "price": 0,
+   "faq": false,
+   "fields": 0
+  },
+  {
+   "industry": "Interior design",
+   "geo": "London",
+   "host": "hillhouseinteriors.com",
+   "ok": true,
+   "words": 892,
+   "price": 0,
+   "faq": false,
+   "fields": 6
+  }
+ ]
+}
