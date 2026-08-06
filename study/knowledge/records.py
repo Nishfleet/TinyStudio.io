@@ -28,10 +28,25 @@ VOLATILITY_WINDOWS = {
     "empirical-generalisation": 3650,
 }
 
+# `quote` is the verbatim text as published. `claim` is our restatement of it and
+# is always derived. The gate runs on the quote, never on the restatement.
+#
+# The failure this prevents: a model normalises a claim slightly stronger than the
+# source wrote it, and from then on the gate, the corroboration check and the
+# confidence all attach to the paraphrase. The record reads as internally
+# consistent, so a reviewer approves it, and a client document ends up citing a
+# real source that does not quite say that. Catching it requires rereading the
+# original, which is the first step any review workflow erodes.
 REQUIRED = (
-    "id", "claim", "mechanism", "disproof", "applies_when", "does_not_apply",
-    "changes", "source", "corroboration", "confidence", "volatility",
+    "id", "quote", "claim", "mechanism", "disproof", "applies_when",
+    "does_not_apply", "changes", "source", "corroboration", "confidence",
+    "volatility",
 )
+
+# Fields that invalidate a human approval if they change. Editing any of them on
+# an approved claim demotes it, which is what keeps "nothing unreviewed reaches a
+# client" true over time rather than only on the day it was approved.
+APPROVAL_BINDING = ("quote", "claim", "mechanism", "source", "corroboration")
 
 
 def review_by(volatility, captured):
@@ -71,6 +86,26 @@ def validate(record):
     # An unarchived source is untraceable the moment the URL rots, which is
     # exactly when a client asks "says who?".
     return problems
+
+
+def renderable(record):
+    """The only text a client document may render.
+
+    Documents quote the source verbatim. A restatement can drift; the published
+    words cannot.
+    """
+    if record.get("state") != "approved":
+        raise ValueError(f"not approved for client use: {record.get('id')}")
+    return record["quote"]
+
+
+def demote_if_edited(approved, incoming):
+    """Any change to the evidence a human signed off on sends it back to review."""
+    changed = [f for f in APPROVAL_BINDING if approved.get(f) != incoming.get(f)]
+    if changed:
+        incoming = dict(incoming, state="pending", client_facing=False,
+                        demoted_because=changed)
+    return incoming
 
 
 def contest(record_a, record_b):
