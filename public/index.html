@@ -21,7 +21,7 @@
     <h1>Most of them leave <em>before they ever get in touch.</em></h1>
     <p class="sub">We read the one page your revenue depends on the way a customer with intent reads it, and show you the exact points at which they go.</p>
     <form class="lead two" id="start" action="/api/signups" method="post">
-      <input type="url" name="website" required placeholder="yourwebsite.com">
+      <input type="text" name="website" inputmode="url" pattern="^([a-zA-Z][a-zA-Z0-9+.-]*://)?[^\s.]+\.[^\s]+$" required placeholder="yourwebsite.com">
       <input type="email" name="email" required placeholder="Your work email">
       <button>Show me where we're leaking</button>
     </form>

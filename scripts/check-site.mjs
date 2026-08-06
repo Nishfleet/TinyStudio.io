@@ -192,6 +192,37 @@ if (JSON.stringify(requiredFields) !== JSON.stringify(expectedRequiredFields)) {
   failures.push(`Agent Desk must require only email and business fields. Found required fields: ${requiredFields.join(", ") || "none"}`);
 }
 
+for (const intakePage of ["public/index.html", "public/audit.html"]) {
+  const page = read(intakePage);
+  const websiteField = formFieldTags(page).find((tag) => fieldName(tag) === "website");
+  if (!websiteField) {
+    failures.push(`${intakePage} must include the website intake field.`);
+    continue;
+  }
+  if (/\stype="url"/i.test(websiteField)) {
+    failures.push(`${intakePage} website field must not use type=url, which rejects the scheme-less domains the placeholder teaches.`);
+  }
+  if (!/\srequired(?:\s|>|=)/i.test(websiteField)) {
+    failures.push(`${intakePage} website field must stay required.`);
+  }
+  const pattern = websiteField.match(/\bpattern="([^"]*)"/i)?.[1];
+  if (!pattern) {
+    failures.push(`${intakePage} website field must carry a pattern that allows scheme-less domains.`);
+    continue;
+  }
+  try {
+    const re = new RegExp(pattern);
+    if (!re.test("yourwebsite.com")) {
+      failures.push(`${intakePage} website pattern must accept scheme-less domains like yourwebsite.com.`);
+    }
+    if (re.test("not a url") || re.test("example")) {
+      failures.push(`${intakePage} website pattern must reject malformed values.`);
+    }
+  } catch {
+    failures.push(`${intakePage} website pattern must be a valid regular expression.`);
+  }
+}
+
 for (const optionalName of [
   "market",
   "funnel",
