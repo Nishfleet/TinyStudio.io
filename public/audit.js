@@ -7,3 +7,16 @@ v.target.classList.add('in');io.unobserve(v.target)})},{threshold:.08,rootMargin
 e.forEach(function(x){io.observe(x)});
 setTimeout(function(){document.querySelectorAll('[data-r]').forEach(function(x){x.classList.add('in')})},1600)}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()})();
+(function(){
+  function run(){
+    var field=document.querySelector("input[name='website']");
+    if(!field)return;
+    field.addEventListener('change',function(){
+      var value=field.value.trim();
+      if(!value||/^[a-z][a-z0-9+.-]*:\/\//i.test(value))return;
+      if(!/^[\w.-]+\.[a-z]{2,}(?:\/[\w\-./~%!$&'()*+,;=:@?]*)?$/i.test(value))return;
+      field.value='https://'+value;
+    });
+  }
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',run):run();
+})();

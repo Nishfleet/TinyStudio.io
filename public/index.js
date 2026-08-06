@@ -17,3 +17,16 @@
   }
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',run):run();
 })();
+(function(){
+  function run(){
+    var field=document.querySelector("input[name='website']");
+    if(!field)return;
+    field.addEventListener('change',function(){
+      var value=field.value.trim();
+      if(!value||/^[a-z][a-z0-9+.-]*:\/\//i.test(value))return;
+      if(!/^[\w.-]+\.[a-z]{2,}(?:\/[\w\-./~%!$&'()*+,;=:@?]*)?$/i.test(value))return;
+      field.value='https://'+value;
+    });
+  }
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',run):run();
+})();
