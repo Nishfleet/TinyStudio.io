@@ -217,6 +217,46 @@ for (const optionalName of [
   }
 }
 
+const siteHome = read("public/index.html");
+const siteAudit = read("public/audit.html");
+
+// Conversion-friction regression: the signup website field must accept a bare
+// business domain (example.com) at the browser level instead of requiring a
+// scheme via type="url", while still rejecting malformed entries and staying
+// required. The server's normalizeWebsite keeps the URL-safety gate.
+const VALID_WEBSITES = ["example.com", "www.example.com", "https://example.com", "example.com/page", "https://example.com/"];
+const INVALID_WEBSITES = ["example", "not a domain", "example..com", "example.com/with space", "https://"];
+
+function websiteField(html) {
+  return html.match(/<input\b[^>]*name="website"[^>]*>/i)?.[0] || "";
+}
+
+for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteAudit]]) {
+  const field = websiteField(pageHtml);
+  if (!field) {
+    failures.push(`Signup form on ${pageName} must keep a website input.`);
+    continue;
+  }
+  if (/\btype="url"/i.test(field)) {
+    failures.push(`Signup website field on ${pageName} must not use type="url" (rejects bare domains like example.com).`);
+  }
+  if (!/\srequired(?:\s|>|=)/i.test(field)) {
+    failures.push(`Signup website field on ${pageName} must stay required.`);
+  }
+  const pattern = field.match(/\bpattern="([^"]+)"/i)?.[1];
+  if (!pattern) {
+    failures.push(`Signup website field on ${pageName} must carry a domain pattern.`);
+    continue;
+  }
+  const compiled = new RegExp(`^(?:${pattern})$`, "i");
+  for (const value of VALID_WEBSITES) {
+    if (!compiled.test(value)) failures.push(`Signup website pattern on ${pageName} must accept ${value}.`);
+  }
+  for (const value of INVALID_WEBSITES) {
+    if (compiled.test(value)) failures.push(`Signup website pattern on ${pageName} must reject ${JSON.stringify(value)}.`);
+  }
+}
+
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }

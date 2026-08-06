@@ -992,3 +992,28 @@ test("agent audit rejects model output that misses required sections", async () 
   assert.equal(json.ok, false);
   assert.equal(json.error, "empty_agent_output");
 });
+
+test("signup handler accepts a bare-domain website with a test email and stores the normalized URL", async () => {
+  const db = new FakeDB();
+  const env = { DB: db, AI: new FakeAI("") };
+  const res = await worker.fetch(
+    new Request("https://tinystudio.io/api/signups", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Origin": "https://tinystudio.io",
+        "Accept": "text/html",
+        "User-Agent": "tinystudio-worker-test"
+      },
+      body: new URLSearchParams({ website: "example.com", email: "audit-check+test@example.com" }).toString()
+    }),
+    env
+  );
+
+  assert.equal(res.status, 303);
+  assert.equal(new URL(res.headers.get("Location")).pathname, "/brief-requested");
+  const insert = db.calls.find((call) => call.sql.includes("INSERT INTO email_signups"));
+  assert.ok(insert, "signup handler must persist through the existing email_signups path");
+  assert.equal(insert.values[0], "audit-check+test@example.com");
+  assert.equal(insert.values[7], "https://example.com");
+});
