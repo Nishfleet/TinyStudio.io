@@ -217,6 +217,46 @@ for (const optionalName of [
   }
 }
 
+const siteHome = read("public/index.html");
+const siteAudit = read("public/audit.html");
+
+// Conversion-friction regression: the signup website field must accept a bare
+// business domain (example.com) at the browser level instead of requiring a
+// scheme via type="url", while still rejecting malformed entries and staying
+// required. The server's normalizeWebsite keeps the URL-safety gate.
+const VALID_WEBSITES = ["example.com", "www.example.com", "https://example.com", "example.com/page", "https://example.com/"];
+const INVALID_WEBSITES = ["example", "not a domain", "example..com", "example.com/with space", "https://"];
+
+function websiteField(html) {
+  return html.match(/<input\b[^>]*name="website"[^>]*>/i)?.[0] || "";
+}
+
+for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteAudit]]) {
+  const field = websiteField(pageHtml);
+  if (!field) {
+    failures.push(`Signup form on ${pageName} must keep a website input.`);
+    continue;
+  }
+  if (/\btype="url"/i.test(field)) {
+    failures.push(`Signup website field on ${pageName} must not use type="url" (rejects bare domains like example.com).`);
+  }
+  if (!/\srequired(?:\s|>|=)/i.test(field)) {
+    failures.push(`Signup website field on ${pageName} must stay required.`);
+  }
+  const pattern = field.match(/\bpattern="([^"]+)"/i)?.[1];
+  if (!pattern) {
+    failures.push(`Signup website field on ${pageName} must carry a domain pattern.`);
+    continue;
+  }
+  const compiled = new RegExp(`^(?:${pattern})$`, "i");
+  for (const value of VALID_WEBSITES) {
+    if (!compiled.test(value)) failures.push(`Signup website pattern on ${pageName} must accept ${value}.`);
+  }
+  for (const value of INVALID_WEBSITES) {
+    if (compiled.test(value)) failures.push(`Signup website pattern on ${pageName} must reject ${JSON.stringify(value)}.`);
+  }
+}
+
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
@@ -282,6 +322,21 @@ if (!sitemap.includes("https://tinystudio.io/")) {
 
 if (!styles.includes(".agent-shell") || !styles.includes(".agent-form") || !styles.includes(".agent-output")) {
   failures.push("Missing Agent Desk visual styles.");
+}
+
+// Responsive regression guard: each public route's stylesheet must keep its
+// mobile block, or a 390px phone view regains horizontal overflow.
+const responsiveCss = [
+  ["shared.css", ["@media (max-width:760px)", ".wrap{padding:0 20px}", ".navlinks{flex-wrap:wrap"]],
+  ["index.css", ["@media (max-width:760px)", ".wrap{padding:0 20px}", ".navlinks{flex-wrap:wrap"]],
+  ["pricing.css", ["@media (max-width:760px)", ".plan{grid-template-columns:1fr"]],
+  ["agents.css", ["@media (max-width:760px)", ".ag{grid-template-columns:1fr", ".gatebox{grid-template-columns:1fr"]]
+];
+for (const [file, needles] of responsiveCss) {
+  const css = read(`public/${file}`);
+  for (const needle of needles) {
+    if (!css.includes(needle)) failures.push(`Missing mobile responsive rule in ${file}: ${needle}`);
+  }
 }
 
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {

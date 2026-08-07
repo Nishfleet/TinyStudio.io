@@ -32,3 +32,17 @@
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xp1{color:var(--brass)}
+
+/* mobile — pricing page */
+@media (max-width:760px){
+  .plan{grid-template-columns:1fr}
+  .plan .l{border-right:0;border-bottom:1px solid var(--line)}
+  .plan .l,.plan .r{padding:32px 26px}
+  .plan .r{text-align:left}
+  .plan .big{font-size:56px}
+  .track{grid-template-columns:1fr;gap:26px}
+  .track::before{display:none}
+  .stop{padding-right:0}
+  .stop .d{margin-top:0}
+  .q{grid-template-columns:1fr;gap:14px}
+}
