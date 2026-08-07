@@ -386,8 +386,163 @@ if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
 
-for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {
-  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
+// ---- AI-search evidence artifact ---------------------------------------
+// The audit page carries a controlled-test evidence artifact for AI-search
+// discoverability. Fixtures in evidence-fixtures/ai-search/ are the single
+// source of truth; the audit page embeds a copy of both files and this block
+// refuses to let the embedded bundle drift from them.
+const AI_STATES = ["found", "wrong", "absent", "not-tested"];
+let aiQuestions = null;
+let aiEvidence = null;
+try {
+  aiQuestions = JSON.parse(read("evidence-fixtures/ai-search/controlled-questions.json"));
+  aiEvidence = JSON.parse(read("evidence-fixtures/ai-search/evidence.json"));
+} catch (error) {
+  failures.push(`AI-search fixture must exist and be valid JSON: ${error.message}`);
+}
+
+if (aiQuestions && aiEvidence) {
+  for (const fixture of ["evidence-fixtures/ai-search/controlled-questions.json", "evidence-fixtures/ai-search/evidence.json", "evidence-fixtures/ai-search/README.md"]) {
+    try {
+      execFileSync("git", ["ls-files", "--error-unmatch", fixture], {
+        cwd: new URL("..", import.meta.url),
+        stdio: "ignore"
+      });
+    } catch {
+      failures.push(`AI-search fixture must be tracked by git: ${fixture}`);
+    }
+  }
+
+  const auditScript = read("public/audit.js");
+
+  if (!siteAudit.includes('id="ai-search-evidence"') || !siteAudit.includes('data-ai-search-evidence')) {
+    failures.push("Audit page must mount the AI-search evidence artifact.");
+  }
+
+  for (const state of AI_STATES) {
+    if (!auditScript.includes(state)) failures.push(`Audit script must represent the state: ${state}`);
+  }
+  for (const label of ["Found", "Wrong", "Absent", "Not tested"]) {
+    if (!auditScript.includes(label)) failures.push(`Audit script must label the state: ${label}`);
+  }
+
+  const bundleMatch = siteAudit.match(/<script type="application\/json" id="ai-search-evidence">([\s\S]*?)<\/script>/);
+  if (!bundleMatch) {
+    failures.push("Audit page must embed the AI-search evidence bundle.");
+  } else {
+    let embedded = null;
+    try {
+      embedded = JSON.parse(bundleMatch[1]);
+    } catch (error) {
+      failures.push("Audit page AI-search bundle must be valid JSON.");
+    }
+    if (embedded) {
+      const expected = { questions: aiQuestions, evidence: aiEvidence };
+      if (JSON.stringify(embedded) !== JSON.stringify(expected)) {
+        failures.push("Audit page AI-search bundle must match evidence-fixtures/ai-search/ (regenerate the embed).");
+      }
+    }
+  }
+
+  const questions = aiQuestions.questions || [];
+  const questionIds = new Set();
+  for (const question of questions) {
+    for (const field of ["id", "name", "prompt", "truth"]) {
+      if (typeof question[field] !== "string" || !question[field]) {
+        failures.push(`AI-search question must carry ${field}: ${JSON.stringify(question.id || question)}`);
+      }
+    }
+    if (questionIds.has(question.id)) failures.push(`AI-search question id must be unique: ${question.id}`);
+    questionIds.add(question.id);
+  }
+  if (!questions.length) failures.push("AI-search fixture must name at least one controlled question.");
+
+  const engines = new Map((aiEvidence.engines || []).map((engine) => [engine.id, engine]));
+  for (const engine of aiEvidence.engines || []) {
+    if (!engine.id || !engine.name) failures.push("AI-search engine entries must carry id and name.");
+  }
+
+  const runs = aiEvidence.runs || [];
+  if (!runs.length) failures.push("AI-search fixture must carry at least one captured run.");
+  for (const run of runs) {
+    if (!AI_STATES.includes(run.state)) failures.push(`AI-search run has an unknown state: ${run.state}`);
+    if (!questionIds.has(run.questionId)) failures.push(`AI-search run references an unknown question: ${run.questionId}`);
+    if (!engines.has(run.engine)) failures.push(`AI-search run references an unknown engine: ${run.engine}`);
+    if (run.state === "not-tested") {
+      if (!run.reason) failures.push(`not-tested run must state a reason: ${run.questionId}/${run.engine}`);
+      if (run.captured || (run.sources || []).length) {
+        failures.push(`not-tested run must not carry an answer or sources: ${run.questionId}/${run.engine}`);
+      }
+    } else {
+      if (!run.captured) failures.push(`run must capture what was observed: ${run.questionId}/${run.engine}`);
+      if (run.state !== "absent" && !(run.sources || []).length) {
+        failures.push(`run must cite its sources: ${run.questionId}/${run.engine}`);
+      }
+    }
+    if (run.remediation && run.remediation.page) {
+      let siteHost = "";
+      try {
+        siteHost = new URL(aiEvidence.business.site).hostname;
+      } catch {
+        failures.push("AI-search business site must be a valid URL.");
+      }
+      const sameDomain = (run.sources || []).some((source) => {
+        try {
+          return new URL(source.url).hostname === siteHost;
+        } catch {
+          return false;
+        }
+      });
+      if (siteHost && !sameDomain) {
+        failures.push(`page-specific remediation needs same-domain evidence: ${run.questionId}/${run.engine}`);
+      }
+    }
+  }
+
+  const fixtureText = JSON.stringify(aiQuestions) + "\n" + JSON.stringify(aiEvidence);
+  if (/[\w.+-]+@[\w-]+\.[\w.]{2,}/.test(fixtureText)) {
+    failures.push("AI-search fixture must not capture email addresses.");
+  }
+  if (/\+\d[\d\s()-]{6,}\d/.test(fixtureText)) {
+    failures.push("AI-search fixture must not capture phone numbers.");
+  }
+  if (/\b(password|credential|api[_-]?key|secret token|client brief|customer brief)\b/i.test(fixtureText)) {
+    failures.push("AI-search fixture must not capture credentials or customer briefs.");
+  }
+
+  const aiSection = siteAudit.match(/<section id="ai-search">[\s\S]*?<\/section>/i)?.[0] || "";
+  const artifactCopy = aiSection.replace(/<script[\s\S]*?<\/script>/, "");
+  const promisePatterns = [
+    /\bguarantee\w*\b/i,
+    /\bautonomous\b/i,
+    /\bpublish\w*\b/i,
+    /\bwill\s+(rank|publish|deliver|generate)\b/i,
+    /\brank\s*(#\s*\d|number\s+one|first)\b/i
+  ];
+  for (const pattern of promisePatterns) {
+    if (pattern.test(artifactCopy)) failures.push(`Forbidden claim in AI-search artifact copy: ${pattern}`);
+  }
+
+  const narrativeFields = [];
+  questions.forEach((question) => narrativeFields.push(question.truth));
+  runs.forEach((run) => {
+    if (run.remediation) narrativeFields.push(run.remediation.text);
+    if (run.reason) narrativeFields.push(run.reason);
+  });
+  (aiEvidence.engines || []).forEach((engine) => narrativeFields.push(engine.note));
+  narrativeFields.push(aiEvidence.business?.note || "");
+  const narrativeText = narrativeFields.filter(Boolean).join("\n");
+  for (const pattern of [
+    /\bguarantee\w*\b/i,
+    /\bautonomous\b/i,
+    /\bwill\s+(rank|publish|deliver|generate)\b/i,
+    /\brank\s*(#\s*\d|number\s+one|first)\b/i
+  ]) {
+    if (pattern.test(narrativeText)) failures.push(`Forbidden claim in AI-search fixture narrative: ${pattern}`);
+  }
+}
+
+for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
   }
