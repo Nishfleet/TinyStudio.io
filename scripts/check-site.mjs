@@ -123,10 +123,12 @@ const requiredWorkerCopy = [
 ];
 
 const requiredPublicArtifacts = [
-  "self-serve AI Agent Desk",
-  "Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side",
+  "human-reviewed managed service",
+  "The Website Correction",
+  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
+  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "not autonomous software",
   "Client-side code does not call model providers",
-  "does not promise revenue, ROAS, profit, booked calls",
   "No campaign publishing",
   "No ad spend changes"
 ];

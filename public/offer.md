@@ -1,31 +1,51 @@
-# TinyStudio Agent Desk
+# The Website Correction
 
-TinyStudio Agent Desk is a self-serve AI workspace for high-ticket pipeline setup.
+TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
 
-It helps build the operating system around an offer before a business spends more on ads: offer diagnosis, funnel path, ad angles, qualification, follow-up, CRM stages, tracking checklist, implementation tasks, and weekly decision rules.
+## Buyer
 
-The customer can start with only an email and a rough business snapshot. The agents infer missing context, state assumptions, and ask only true blocker questions when more information is genuinely needed.
+Founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
 
-## What It Generates
+## Promise
 
-- Pipeline Brief
-- Implementation Checklist
-- Weekly Fix Report
+In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
 
-Those artifacts can include readiness diagnosis, recommended funnel path, audience and pain map, first four creative tests, lead qualification form, follow-up and setter flow, CRM and tracking checklist, 7-day or 15-day decision plan, metric tracker, and approval gates.
+## Included
 
-## What It Does Not Do
+- fault map for the selected page
+- rewrite or redesign of that page
+- one implementation pass or a dev-ready handoff
+- search-trust basics
+- before/after proof
+- Loom walkthrough
+- measurement plan
+- one revision
+- 14-day implementation tracking
 
-- No revenue guarantee
-- No ROAS guarantee
-- No booked-call guarantee
-- No sales-lift guarantee
+## Day 0
+
+The clock starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
+
+## Price
+
+The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
+
+## Review Boundary
+
+Human review gates fit, claims, client-facing work, delivery/acceptance, and renewal. Automation may prepare research, drafts, QA, packages, and routing, but never autonomously sends, publishes, spends, approves, accepts, or renews.
+
+## Not Promised
+
+There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
+
+## Legacy Agent Desk
+
+The earlier self-serve Agent Desk (one-shot Pipeline Brief) is demoted and is not the current offer. Its safety rails stand:
+
 - No campaign publishing
 - No ad spend changes
 - No ad account connection
 - No prospect message sending
-- No storage of submitted business snapshots, optional details, weekly metrics, or generated artifacts
-- No replacement for a sales team
 
 ## Contact
 
