@@ -20,7 +20,7 @@ const wranglerConfig = JSON.parse(wrangler);
 const failures = [];
 
 const requiredIndexCopy = [
-  "TinyStudio Agent Desk",
+  "The Tiny Studio Agent Desk",
   "Build the pipeline system before you buy more ads.",
   "Cloudflare AI",
   "Self-serve",
