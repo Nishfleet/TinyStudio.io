@@ -1,58 +1,51 @@
-# TinyStudio
+# TinyStudio.io
 
-TinyStudio sells one human-reviewed managed service: The Website Correction.
+TinyStudio.io sells one human-reviewed service around the page a business's revenue depends on: a free leak audit, and the Growth Desk that closes the leaks the audit finds. The self-serve Agent Desk is legacy and not the current offer.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Current Offer: The Website Correction
+## Current Offer: The Leak Audit
 
-The Website Correction is a managed service with human review, not autonomous software.
+The leak audit is complimentary and yours to keep, whether or not TinyStudio is ever engaged. Six audits are taken per month; when the sixth is taken, the intake closes until the next.
 
-Buyer: founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
+The audit reads the one page a business's revenue depends on, the way a customer with intent reads it, in four passes: the money page, the paid creative, the unanswered pre-purchase questions, and the reach. Each pass is run by a specialist that does only that job, then read and signed by a person before it reaches the client. The result is a short, plain document: named leaks in the order they cost the business money, with the fix beside each one. Findings arrive inside five working days, and no call is required at any point.
 
-In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
+## The Growth Desk
 
-## Included
+If the leaks are to be closed rather than merely found, the desk runs at $2,500 a month on a three-month minimum. Month one closes the leak: the highest-leverage page rewritten or rebuilt, a dev-ready handoff if the client's own team ships it, and search-trust basics. Months two and three build the loop that keeps it closed: weekly checks, one revision, and tracking that says whether the fix held.
 
-- fault map for the selected page
-- rewrite or redesign of that page
-- one implementation pass or a dev-ready handoff
-- search-trust basics
-- before/after proof
-- Loom walkthrough
-- measurement plan
-- one revision
-- 14-day implementation tracking
+There is one promise about outcomes, and only one: the delivery guarantee. If the month-one deliverables are not in the client's hands within fourteen working days of Day 0, month one is refunded in full. Day 0 begins only once payment, access, the approval owner and the implementation owner are recorded, and the clock pauses if TinyStudio is waiting on the client.
 
-## Price And Start
+## How The Work Runs
 
-The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
+Seven specialist agents do the research, drafting, quality checks, packaging and routing — Landing Page Fixer, Product Page Fixer, Site Architecture Fixer, Ad Angle Generator, Competitor Watcher, Email & SMS Generator, and Weekly Performance Analyst. Each has one job, a fixed set of inputs and a checklist it must satisfy, reading the client's actual pages, reviews, ads and numbers — never a generic sector template.
 
-Day 0 starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
+A person reviews fit, every claim, all client-facing work, delivery and renewal. Automation never sends anything to anyone, publishes anything to a client's site, spends ad budget, or approves, accepts or renews its own work. Nothing leaves the desk without a human signature.
 
-## Human Review Boundary
+## Evidence
 
-Human review gates fit, claims, client-facing work, delivery/acceptance, and renewal. Automation may prepare research, drafts, QA, packages, and routing, but never autonomously sends, publishes, spends, approves, accepts, or renews.
+The site's finding is backed by market research that TinyStudio shares freely: an automated read of served homepage HTML, refreshed daily. The current set covers 99 sites across thirteen industries and eight geographies; 89 are readable and ten are blocked by bot protection and excluded from every count. Of the 89 readable, 53 answer none of the questions a buyer asks before committing, and 57 show no price. Inner pages are deliberately not counted. This number is today's and changes as the set is re-read.
 
 ## Not Promised
 
-There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
+TinyStudio makes no revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees, and makes no claim about how much an open leak costs a business. The delivery guarantee is a promise about the work, not the market.
+
+Client work is never published: no logos, no case studies, no testimonials. Market research is shared freely; nothing belonging to a paying client is ever shared.
+
+## Data Handling
+
+The public forms collect a business website and an email address, stored in Cloudflare D1 with source, page path, referer and user-agent metadata. There is no public endpoint for reading collected signups.
+
+Submitted business context is processed to generate output and is not stored by this app.
 
 ## Legacy Self-Serve Agent Desk
 
-The earlier self-serve Agent Desk, which generated a one-shot Pipeline Brief, is demoted and is not the product TinyStudio sells. Agent Desk surfaces still reachable on this site are legacy, not the current offer.
-
-The legacy surface keeps its safety rails:
+The earlier self-serve Agent Desk (one-shot Pipeline Brief) is demoted and is not the current offer. Agent Desk surfaces still reachable on this site are legacy, not the current offer. The legacy surface keeps its safety rails:
 
 - No campaign publishing
 - No ad spend changes
 - No ad account connection
 - No prospect message sending
-- Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
-
-## Data Handling
-
-The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. Submitted business context is processed to generate output and is not stored by this app.
-
-There is no public endpoint for reading collected emails or usage metadata.
+- Cloudflare Workers AI generates its artifacts server-side; client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly
+- It stores lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key

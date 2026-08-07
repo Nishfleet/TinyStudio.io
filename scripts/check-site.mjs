@@ -122,15 +122,34 @@ const requiredWorkerCopy = [
   "noAutopublishing: true"
 ];
 
+// The machine-readable contract (llms.txt + offer.md) must describe the
+// offer the rendered routes actually present: the free leak audit and the
+// Growth Desk, with the self-serve Agent Desk scoped as legacy.
 const requiredPublicArtifacts = [
-  "human-reviewed managed service",
-  "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
-  "not autonomous software",
-  "Client-side code does not call model providers",
-  "No campaign publishing",
-  "No ad spend changes"
+  "free leak audit",
+  "The Growth Desk",
+  "$2,500",
+  "three-month minimum",
+  "delivery guarantee",
+  "Six audits a month",
+  "five working days",
+  "Seven specialist",
+  "human signature",
+  "no revenue, ranking, ROAS",
+  "Cloudflare D1",
+  "no public endpoint",
+  "not the current offer",
+  "never published"
+];
+
+// The retired self-serve pitch must not return as the current product. The
+// legacy scoping section may say "self-serve Agent Desk" and "Pipeline Brief",
+// so the forbidden phrases are the exact retired framing, not those words.
+const forbiddenStaleArtifacts = [
+  "self-serve AI Agent Desk",
+  "high-ticket pipeline setup",
+  "lead-to-call pipeline loop",
+  "Pipeline Brief, Implementation Checklist, and Weekly Fix Report"
 ];
 
 const forbiddenClaims = [
@@ -172,6 +191,11 @@ for (const text of requiredWorkerCopy) {
 for (const text of requiredPublicArtifacts) {
   const haystack = `${llms}\n${offer}`;
   if (!haystack.includes(text)) failures.push(`Missing public artifact copy: ${text}`);
+}
+
+for (const text of forbiddenStaleArtifacts) {
+  const haystack = `${llms}\n${offer}`.toLowerCase();
+  if (haystack.includes(text.toLowerCase())) failures.push(`Retired self-serve pitch found in public artifacts: ${text}`);
 }
 
 function formFieldTags(html) {
