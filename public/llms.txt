@@ -1,38 +1,58 @@
-# TinyStudio.io
+# TinyStudio
 
-TinyStudio.io runs a self-serve AI Agent Desk for high-ticket pipeline setup.
+TinyStudio sells one human-reviewed managed service: The Website Correction.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Current Product
+## Current Offer: The Website Correction
 
-TinyStudio Agent Desk helps high-ticket coaches, consultants, service businesses, agencies, course sellers, and experts build a lead-to-call pipeline loop.
+The Website Correction is a managed service with human review, not autonomous software.
 
-The public workflow requires only email and a compact business snapshot. Offer, target buyer, proof/assets, market preference, current funnel, follow-up/CRM context, optional weekly lead-to-call metrics, bottleneck context, and constraints are optional detail inputs.
+Buyer: founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
 
-The agents are expected to infer missing context, label assumptions, and ask only true blocker questions when missing information would prevent a useful next step.
+In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
 
-Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side. Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
+## Included
 
-## Agent Outputs
+- fault map for the selected page
+- rewrite or redesign of that page
+- one implementation pass or a dev-ready handoff
+- search-trust basics
+- before/after proof
+- Loom walkthrough
+- measurement plan
+- one revision
+- 14-day implementation tracking
 
-The Agent Desk can generate:
+## Price And Start
 
-- Pipeline Brief with readiness diagnosis, funnel path, audience and pain map, first four creative tests, lead qualification, follow-up, CRM, tracking, decision plan, and approval gates
-- Implementation Checklist for setup work across offer, funnel, creative, qualification, follow-up, booking/reminders, CRM stages, tracking events, and review cadence
-- Weekly Fix Report that uses supplied weekly metrics when available, otherwise provides contextual first-week guidance plus the metrics to collect
+The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
 
-## Safety And Limits
+Day 0 starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
 
-TinyStudio Agent Desk does not promise revenue, ROAS, profit, booked calls, rankings, AI visibility, conversion lift, or sales lift.
+## Human Review Boundary
 
-The Agent Desk does not publish campaigns, change ad spend, connect to ad accounts, send prospect messages, sync CRM outcomes to ad platforms, or replace a sales team.
+Human review gates fit, claims, client-facing work, delivery/acceptance, and renewal. Automation may prepare research, drafts, QA, packages, and routing, but never autonomously sends, publishes, spends, approves, accepts, or renews.
 
-Claims, ad spend, campaign publishing, platform connections, tracking implementation, and compliance-sensitive decisions remain approval-gated.
+## Not Promised
+
+There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
+
+## Legacy Self-Serve Agent Desk
+
+The earlier self-serve Agent Desk, which generated a one-shot Pipeline Brief, is demoted and is not the product TinyStudio sells. Agent Desk surfaces still reachable on this site are legacy, not the current offer.
+
+The legacy surface keeps its safety rails:
+
+- No campaign publishing
+- No ad spend changes
+- No ad account connection
+- No prospect message sending
+- Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
 ## Data Handling
 
-The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. The business snapshot, optional details, weekly metrics, and generated artifacts are processed to generate the output and are not stored by this app.
+The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. Submitted business context is processed to generate output and is not stored by this app.
 
 There is no public endpoint for reading collected emails or usage metadata.
