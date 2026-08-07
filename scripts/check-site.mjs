@@ -261,6 +261,49 @@ if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"o
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
+// Mobile layout regression: at 390x844 the /audit page previously overflowed
+// horizontally (navlinks measured to x=569, the 53-of-89 stat to x=451).
+// The mobile treatment must live in audit.css behind the shared 760px
+// breakpoint and stack every overflowing block. These checks below are
+// STATIC SOURCE GUARDS (regex over audit.css), not behavioral tests: CI has
+// no browser. The behavioral, measured layout proof for this fix lives in
+// docs/evidence/audit-mobile-overflow-390x844-2026-08-06.md (unfixed 567px
+// scrollWidth at 390x844, fixed 390px, desktop 1280px unchanged).
+const auditCss = read("public/audit.css");
+const auditMobile = auditCss.match(/@media \(max-width:760px\)\{([\s\S]*)\}\s*$/)?.[1] ?? "";
+
+if (!auditMobile) {
+  failures.push("Audit page must carry a mobile (max-width:760px) media query in audit.css.");
+} else {
+  const requireMobileRule = (label, pattern) => {
+    if (!pattern.test(auditMobile)) failures.push(`Audit mobile layout must ${label}.`);
+  };
+  requireMobileRule("scale the 128px stat instead of leaving it nowrap at full size", /\.stat\{[^}]*clamp\(/);
+  requireMobileRule("turn the nav into a wrapping two-tier layout", /\.navlinks\{[^}]*flex-wrap:wrap/);
+  requireMobileRule("give the nav CTA its own full-width row", /\.navcta\{[^}]*1 1 100%/);
+  requireMobileRule("stack the band stat and copy into one column", /\.bandgrid\{[^}]*grid-template-columns:1fr/);
+  requireMobileRule("stack the four checks into one column", /\.checks\{[^}]*grid-template-columns:1fr/);
+  requireMobileRule("let proof rows wrap instead of overflowing", /\.row\{[^}]*flex-wrap:wrap/);
+}
+
+// The behavioral layout proof (real Chromium measurement, local static copy)
+// is checked in so the static guards above stay distinguishable from it.
+// Existence and section anchors only — this does not re-verify measurements.
+const overflowReceipt = read("docs/evidence/audit-mobile-overflow-390x844-2026-08-06.md");
+for (const anchor of [
+  "unfixed",
+  "390x844",
+  "**fixed**",
+  "**390**",
+  "1280x800",
+  "not CI proof",
+  "Exact verification method"
+]) {
+  if (!overflowReceipt.includes(anchor)) {
+    failures.push(`Overflow evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+  }
+}
+
 for (const claim of forbiddenClaims) {
   const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
