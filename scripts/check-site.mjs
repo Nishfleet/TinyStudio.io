@@ -544,6 +544,69 @@ if (aiQuestions && aiEvidence) {
   }
 }
 
+// ---- TinyStudio identity clarification -------------------------------------
+// One precise identity must run through every owned public surface: TinyStudio
+// is the business behind tinystudio.io — the free leak audit of high-ticket
+// service homepages plus the desk that closes what it finds. The clarification
+// must be present on the homepage, the audit page, and in offer.md, and the
+// ambiguous or retired framings ("The Tiny Studio", the spaced name form, and
+// the self-serve Agent Desk product names) must not reappear in visible copy.
+// The embedded AI-search evidence bundle is a verbatim record of captured
+// engine answers that legitimately quotes other businesses' names, so script
+// blocks are stripped before the stale-string scan.
+const ownedPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+const identityFacts = [
+  "tinystudio.io",
+  "Mac subtitle app",
+  "fibre-arts magazine",
+  "states no base city or office address"
+];
+
+for (const phrase of identityFacts) {
+  if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
+  if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
+  if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
+}
+
+if (!siteHome.includes('id="identity"')) {
+  failures.push("Homepage must carry the identity clarification (id=\"identity\").");
+}
+if (!siteAudit.includes('id="identity"')) {
+  failures.push("Audit page must carry the identity clarification (id=\"identity\").");
+}
+if (!offer.includes("## Identity")) {
+  failures.push("offer.md must carry the machine-readable Identity section.");
+}
+if (!offer.includes("is not the current offer")) {
+  failures.push("offer.md must keep the legacy Agent Desk demotion statement.");
+}
+
+const staleIdentityStrings = [
+  "The Tiny Studio",  // collides with "The Tiny Studio LA", an unrelated venue
+  "Tiny Studio",      // the spaced name form is never used by this business
+  "self-serve",       // the retired Agent Desk framing
+  "Pipeline Brief",   // the retired Agent Desk deliverable
+  "Agent Desk"        // the retired product name
+];
+
+for (const [pageName, pageHtml] of ownedPages) {
+  const visibleCopy = pageHtml.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
+  for (const stale of staleIdentityStrings) {
+    if (visibleCopy.toLowerCase().includes(stale.toLowerCase())) {
+      failures.push(`Stale identity string on ${pageName}: ${stale}`);
+    }
+  }
+  if (!pageHtml.includes("tinystudio.io")) {
+    failures.push(`Every owned page must anchor the identity to the domain: ${pageName}`);
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
@@ -564,4 +627,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("TinyStudio.io Agent Desk checks passed.");
+console.log("TinyStudio.io checks passed.");
