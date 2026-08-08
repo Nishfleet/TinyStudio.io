@@ -16,5 +16,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Browser step for the render-blocking guarantee (dogfood finding
+      # b8f6046e942a): the static guards prove the blocking shape cannot
+      # return, this step proves the served pages actually render without it.
+      - name: Render-blocking regression check (real Chromium)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run check:render-blocking
       - name: Wrangler config and bundle check
         run: npx wrangler@latest deploy --dry-run

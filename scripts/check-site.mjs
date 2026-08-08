@@ -493,6 +493,31 @@ for (const anchor of [
   }
 }
 
+// The static guards cannot see behavior, so CI must run the browser check
+// (scripts/check-render-blocking.mjs) alongside them; these guards keep that
+// wiring from drifting: the script, the package.json entry, the CI step, and
+// the production CSP the browser check asserts under (mirrored from the
+// worker, which the check cannot import).
+let renderBlockingScript = "";
+try {
+  renderBlockingScript = read("scripts/check-render-blocking.mjs");
+} catch {
+  failures.push("scripts/check-render-blocking.mjs must exist (browser render-blocking guard).");
+}
+const ciWorkflow = read(".github/workflows/ci.yml");
+if (!packageJson.includes('"check:render-blocking": "node scripts/check-render-blocking.mjs"')) {
+  failures.push("package.json must expose the browser render-blocking check as check:render-blocking.");
+}
+if (!ciWorkflow.includes("npm run check:render-blocking")) {
+  failures.push("CI must run the browser render-blocking check (npm run check:render-blocking).");
+}
+if (renderBlockingScript) {
+  const workerCsp = worker.match(/Content-Security-Policy":\s*"([^"]+)"/)?.[1] ?? "";
+  if (!workerCsp || !renderBlockingScript.includes(workerCsp)) {
+    failures.push("scripts/check-render-blocking.mjs must mirror the worker's production CSP string.");
+  }
+}
+
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
