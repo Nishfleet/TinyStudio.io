@@ -1,35 +1,46 @@
 # TinyStudio
 
-TinyStudio sells one human-reviewed managed service: The Website Correction.
+TinyStudio's current offer: The Website Appraisal — the free leak audit of
+high-ticket service homepages — and the human-reviewed desk that closes what
+the audit finds. The audit is free and yours to keep; the desk's price and
+terms are on pricing.html.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Current Offer: The Website Correction
+## Identity
 
-The Website Correction is a managed service with human review, not autonomous software.
+TinyStudio is the business behind tinystudio.io: the free leak audit of
+high-ticket service homepages and the human-reviewed desk that closes what
+the audit finds, run by Nish, who signs every audit. Other businesses share
+the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a
+video production studio, a Los Angeles venue, an unrelated studio LLC. None
+of them are this TinyStudio, and this TinyStudio is none of them. The site
+states no base city or office address.
 
-Buyer: founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
+Machine-readable mirror of this file: https://tinystudio.io/offer.md
+The audit page (https://tinystudio.io/audit.html) carries the controlled
+AI-search evidence artifact: exact prompts, captured answers, and cited pages
+for the questions a buyer asks before committing.
 
-In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
+## Current Offer: The Website Appraisal
 
-## Included
+The Website Appraisal is the free leak audit of high-ticket service
+homepages, reviewed by a person, not autonomous software. The human-reviewed
+desk closes what the audit finds: month one corrects the costliest fault;
+months two and three build the loop that keeps the standard up.
 
-- fault map for the selected page
-- rewrite or redesign of that page
-- one implementation pass or a dev-ready handoff
-- search-trust basics
-- before/after proof
-- Loom walkthrough
-- measurement plan
-- one revision
-- 14-day implementation tracking
+The appraisal is a written report on one page of your choosing — each fault
+named, in order of what it costs you, with the fix beside each. It is yours
+to keep and to hand to any developer, including one who is not us.
 
-## Price And Start
+Buyer: high-ticket service businesses — clinics, surgeons, dentists, spas,
+dealers, brokers — and clients are never named.
 
-The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
+Six appraisals a month, done by hand. When the sixth is taken, the intake
+closes until the next.
 
-Day 0 starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
+Price and terms: https://tinystudio.io/pricing.html
 
 ## Human Review Boundary
 
