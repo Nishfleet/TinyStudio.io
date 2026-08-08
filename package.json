@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "wrangler dev --remote --ip 127.0.0.1 --port 8788 --persist-to /tmp/tinystudio-agent-worker",
     "check": "node scripts/check-site.mjs",
+    "check:render-blocking": "node scripts/check-render-blocking.mjs",
     "test": "npm run check && npm run test:worker && npm run test:ui",
     "test:worker": "node --test scripts/test-agent-worker.mjs",
     "test:ui": "node --test scripts/test-agent-ui.mjs",
@@ -20,6 +21,7 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "playwright": "^1.62.1",
     "wrangler": "^4.93.0"
   }
 }

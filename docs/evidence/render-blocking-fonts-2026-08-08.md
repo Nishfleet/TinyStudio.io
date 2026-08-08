@@ -96,4 +96,21 @@ await browser.close();
 
 ## Limitation
 
-This is local static-server proof, not CI proof and not a hosted/live claim. The repo's CI (`npm test`) has no browser dependency, so it runs only the source-string guards in `scripts/check-site.mjs` plus the worker/UI contract tests; a render-blocking regression can therefore still ship if the served HTML drifts and CI stays green. The live tinystudio.io deployment was not measured here; a deployed page could differ (CDN cache, different asset versions). To be CI-proof this measurement would need a browser step added to CI (not done — out of scope).
+This is local static-server proof, not CI proof and not a hosted/live claim. The repo's CI (`npm test`) has no browser dependency, so it runs only the source-string guards in `scripts/check-site.mjs` plus the worker/UI contract tests; a render-blocking regression can therefore still ship if the served HTML drifts and CI stays green. The live tinystudio.io deployment was not measured here; a deployed page could differ (CDN cache, different asset versions).
+
+### CI enforcement (added 2026-08-09)
+
+The browser gap above is now closed: `.github/workflows/ci.yml` runs
+`npm run check:render-blocking` as a browser step (`scripts/check-render-blocking.mjs`),
+so the render-blocking guarantee no longer depends on CI staying source-green.
+The check serves the six public pages statically under the exact production CSP
+header, intercepts the css2 request and delays it, then asserts in real
+Chromium that (1) the css2 resource is non-blocking, (2) first-contentful-paint
+does not wait for it, (3) the only render-blocking resources are the site's own
+same-origin stylesheets, and (4) the preload link is still promoted to a real
+stylesheet under the production CSP. The css2 response is stubbed so the check
+has no external network dependency; the static guards above keep the real font
+URL and the no-JS fallback honest. A blocking shape (a `<link rel="stylesheet">`
+or `@import` returning on any of the six pages) fails CI: measured locally, a
+reintroduced blocking link holds first paint to the delayed css2 response
+(fcp 2780ms vs css2 end 2566ms) and the check fails with exit code 1.
