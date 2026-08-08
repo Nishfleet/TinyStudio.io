@@ -766,6 +766,49 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
 }
 
+// ---- Meta descriptions (dogfood) -------------------------------------------
+// The leak audit this site sells flags a homepage whose served HTML carries no
+// description, so the site's own five public pages must not carry the same
+// fault. Each page keeps exactly one valid, non-empty description meta tag in
+// its head, within a practical search-snippet length, distinct per page, and
+// free of the offer promises the repo refuses to make.
+const metaDescriptionPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+const seenDescriptions = new Map();
+for (const [pageName, pageHtml] of metaDescriptionPages) {
+  const tags = [...pageHtml.matchAll(/<meta\b[^>]*\bname="description"[^>]*>/gi)].map((match) => match[0]);
+  if (tags.length !== 1) {
+    failures.push(`Meta description must appear exactly once in the head of ${pageName} (found ${tags.length}).`);
+    continue;
+  }
+  const content = tags[0].match(/\bcontent="([^"]*)"/i)?.[1] ?? "";
+  const trimmed = content.trim();
+  if (!trimmed) {
+    failures.push(`Meta description on ${pageName} must not be empty.`);
+    continue;
+  }
+  if (trimmed.length > 160) {
+    failures.push(`Meta description on ${pageName} must fit a search snippet (${trimmed.length} > 160 chars).`);
+  }
+  const prior = seenDescriptions.get(trimmed);
+  if (prior) {
+    failures.push(`Meta description on ${pageName} must be unique; it duplicates ${prior}.`);
+  } else {
+    seenDescriptions.set(trimmed, pageName);
+  }
+  for (const claim of forbiddenClaims) {
+    if (trimmed.toLowerCase().includes(claim.toLowerCase())) {
+      failures.push(`Meta description on ${pageName} must not promise: ${claim}`);
+    }
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
