@@ -113,4 +113,30 @@ has no external network dependency; the static guards above keep the real font
 URL and the no-JS fallback honest. A blocking shape (a `<link rel="stylesheet">`
 or `@import` returning on any of the six pages) fails CI: measured locally, a
 reintroduced blocking link holds first paint to the delayed css2 response
-(fcp 2780ms vs css2 end 2566ms) and the check fails with exit code 1.
+  (fcp 2780ms vs css2 end 2566ms) and the check fails with exit code 1.
+
+### Live deployment verification (added 2026-08-09)
+
+The limitation above — "The live tinystudio.io deployment was not measured here;
+a deployed page could differ (CDN cache, different asset versions)" — is now
+closed. On 2026-08-09 the deployed pages were measured in real Chromium
+(Playwright 1.62.1, headless, unthrottled, no artificial CDN delay):
+
+| Page | css2 renderBlockingStatus | FCP (ms) | css2 responseEnd (ms) | Render-blocking resources | Fonts load (Karla / Fraunces) | Promoted sheet applied |
+|---|---|---|---|---|---|---|
+| index.html (home) | non-blocking | 652 | 460 | same-origin index.css only | yes / yes | yes |
+| audit.html | non-blocking | 624 | 536 | same-origin audit.css, shared.css | yes / yes | yes |
+| agents.html | non-blocking | 880 | 558 | same-origin agents.css, shared.css | yes / yes | yes |
+| pricing.html | non-blocking | 720 | 531 | same-origin shared.css, pricing.css | yes / yes | yes |
+| specimen.html | non-blocking | 796 | 623 | same-origin specimen.css, shared.css | yes / yes | yes |
+| brief-requested.html | non-blocking | 668 | 527 | same-origin shared.css, brief-requested.css | yes / yes | yes |
+
+The only render-blocking resources on any live page are the site's own
+same-origin stylesheets — the exact allowance the CI check
+(`scripts/check-render-blocking.mjs`) asserts. No render-blocking scripts and no
+render-blocking external resources were observed, including on the homepage the
+original dogfood run flagged. The Google Fonts css2 stylesheet is fetched
+non-blocking on all six live pages, first paint does not wait for it, and fonts
+still load and apply under the production CSP. This closes dogfood finding
+b8f6046e942a ("Render-blocking resources on home") against the deployed site;
+the code-side fix and the CI enforcement were already merged as PRs #20 and #23.
