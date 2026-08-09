@@ -1243,6 +1243,45 @@ for (const [pageName, pageHtml, pageUrl] of structuredDataPages) {
   }
 }
 
+// ---- Internal page links (dogfood 996dffe45ef7) ---------------------------
+// The leak audit this site sells flags a homepage whose internal links do not
+// point at the final destination URL: the dogfood run reported every .html
+// navigation target on home ("index.html" -> "/", "audit.html" -> "/audit",
+// "agents.html" -> "/agents", "pricing.html" -> "/pricing", "specimen.html" ->
+// "/specimen") as a redirecting internal link. The five public pages must
+// therefore point every page link at the clean URL the worker serves, never
+// at a .html file that resolves to it. These are STATIC SOURCE GUARDS (regex
+// over the served files): CI has no browser, so they assert the .html target
+// shape cannot return, not that the redirects are absent on the network.
+const internalLinkPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+const htmlPageTargets = {
+  "index.html": "/",
+  "audit.html": "/audit",
+  "agents.html": "/agents",
+  "pricing.html": "/pricing",
+  "specimen.html": "/specimen"
+};
+
+for (const [pageName, pageHtml] of internalLinkPages) {
+  const anchors = [...pageHtml.matchAll(/<a\b[^>]*>/gi)].map((match) => match[0]);
+  for (const anchor of anchors) {
+    const href = anchor.match(/\bhref="([^"]*)"/i)?.[1] ?? "";
+    const target = href.split("#")[0];
+    if (Object.prototype.hasOwnProperty.call(htmlPageTargets, target)) {
+      failures.push(
+        `Internal page link on ${pageName} must point at the clean destination ${JSON.stringify(htmlPageTargets[target])} (found ${JSON.stringify(href)}).`
+      );
+    }
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
