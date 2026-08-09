@@ -939,9 +939,11 @@ for (const [pageName, pageHtml] of metaDescriptionPages) {
 // carries no canonical URL, leaving search engines to guess which address is
 // the page (finding 6631c0ab0454, "Missing canonical URL on home"), so the
 // site's own five public pages must not carry that fault either. Each page
-// keeps exactly one <link rel="canonical"> inside its head, pointing at the
-// absolute https://tinystudio.io address the page is served under (the .html
-// form; the worker also serves extensionless twins).
+// keeps exactly one <link rel="canonical"> — parsed across the whole document,
+// ignoring commented-out markup and accepting single or double quotes — that
+// link sits inside the head and points at the absolute https://tinystudio.io
+// address the page is served under (the .html form; the worker also serves
+// extensionless twins).
 const canonicalPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
@@ -950,15 +952,25 @@ const canonicalPages = [
   ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
 ];
 
+const canonicalLinkPattern = /<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi;
+const canonicalHrefPattern = /\bhref\s*=\s*["']([^"']*)["']/i;
+
 const seenCanonicals = new Map();
 for (const [pageName, pageHtml, expected] of canonicalPages) {
-  const head = pageHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
-  const links = [...head.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map((match) => match[0]);
+  // A commented-out canonical is inert markup; it must neither satisfy the
+  // guarantee nor trip the duplicate check.
+  const liveHtml = pageHtml.replace(/<!--[\s\S]*?-->/g, "");
+  const links = [...liveHtml.matchAll(canonicalLinkPattern)].map((match) => match[0]);
   if (links.length !== 1) {
-    failures.push(`Canonical link must appear exactly once in the head of ${pageName} (found ${links.length}).`);
+    failures.push(`Canonical link must appear exactly once across ${pageName} (found ${links.length}).`);
     continue;
   }
-  const href = links[0].match(/\bhref="([^"]*)"/i)?.[1] ?? "";
+  const head = liveHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const headLinks = [...head.matchAll(canonicalLinkPattern)].length;
+  if (headLinks !== 1) {
+    failures.push(`Canonical link on ${pageName} must sit inside the head (found ${headLinks} in head, ${links.length} total).`);
+  }
+  const href = links[0].match(canonicalHrefPattern)?.[1] ?? "";
   const trimmed = href.trim();
   if (!trimmed) {
     failures.push(`Canonical link on ${pageName} must not have an empty href.`);
