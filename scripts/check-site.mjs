@@ -1282,6 +1282,59 @@ for (const [pageName, pageHtml] of internalLinkPages) {
   }
 }
 
+// ---- Canonical URLs (dogfood) ----------------------------------------------
+// The leak audit this site sells also flags a homepage whose served HTML
+// carries no canonical URL, leaving search engines to guess which address is
+// the page (finding 6631c0ab0454, "Missing canonical URL on home"), so the
+// site's own five public pages must not carry that fault either. Each page
+// keeps exactly one <link rel="canonical"> — parsed across the whole document,
+// ignoring commented-out markup and accepting single or double quotes — that
+// link sits inside the head and points at the absolute https://tinystudio.io
+// address the page is served under (the .html form; the worker also serves
+// extensionless twins).
+const canonicalPages = [
+  ["homepage", siteHome, "https://tinystudio.io/"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+];
+
+const canonicalLinkPattern = /<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi;
+const canonicalHrefPattern = /\bhref\s*=\s*["']([^"']*)["']/i;
+
+const seenCanonicals = new Map();
+for (const [pageName, pageHtml, expected] of canonicalPages) {
+  // A commented-out canonical is inert markup; it must neither satisfy the
+  // guarantee nor trip the duplicate check.
+  const liveHtml = pageHtml.replace(/<!--[\s\S]*?-->/g, "");
+  const links = [...liveHtml.matchAll(canonicalLinkPattern)].map((match) => match[0]);
+  if (links.length !== 1) {
+    failures.push(`Canonical link must appear exactly once across ${pageName} (found ${links.length}).`);
+    continue;
+  }
+  const head = liveHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const headLinks = [...head.matchAll(canonicalLinkPattern)].length;
+  if (headLinks !== 1) {
+    failures.push(`Canonical link on ${pageName} must sit inside the head (found ${headLinks} in head, ${links.length} total).`);
+  }
+  const href = links[0].match(canonicalHrefPattern)?.[1] ?? "";
+  const trimmed = href.trim();
+  if (!trimmed) {
+    failures.push(`Canonical link on ${pageName} must not have an empty href.`);
+    continue;
+  }
+  if (trimmed !== expected) {
+    failures.push(`Canonical link on ${pageName} must point at ${expected} (found ${trimmed}).`);
+  }
+  const prior = seenCanonicals.get(trimmed);
+  if (prior) {
+    failures.push(`Canonical URL on ${pageName} must be unique; it duplicates ${prior}.`);
+  } else {
+    seenCanonicals.set(trimmed, pageName);
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
