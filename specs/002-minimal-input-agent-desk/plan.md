@@ -1,5 +1,10 @@
 # Implementation Plan: Minimal-Input Agent Desk
 
+Status: historical — this correction shipped for the Agent Desk, which was
+later retired. It is a record of that work, not current instructions; the
+current product is The Website Appraisal
+(`specs/004-website-appraisal/plan.md`).
+
 ## Scope
 
 Correct the Agent Desk so it behaves like an agentic product: the customer provides a small seed, and the agents infer the rest unless a true blocker remains.

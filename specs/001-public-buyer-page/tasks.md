@@ -1,5 +1,9 @@
 # Tasks: Self-Serve Agent Desk
 
+Status: historical — this task list belongs to the retired Agent Desk. The
+routes shipped and the surface is retired in place, so the remaining
+unchecked deploy item is closed by supersession. Not current instructions.
+
 - [x] Create new deployable public-site repo.
 - [x] Add Spec Kit project layer.
 - [x] Add Agent Desk public surface.

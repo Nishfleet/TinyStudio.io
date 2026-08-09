@@ -1,5 +1,10 @@
 # Feature Specification: Minimal-Input Agent Desk
 
+Status: historical — this correction shipped for the Agent Desk, which was
+later retired. It is a record, not current instructions; current product
+truth is in `specs/004-website-appraisal/plan.md` and the machine-readable
+public files (`public/offer.md`, `public/llms.txt`).
+
 ## What Went Wrong
 
 The Agent Desk drifted into an agency intake form. The UI required customers to pre-diagnose their offer, buyer, funnel, proof, follow-up, CRM, and weekly numbers before the agent could help.

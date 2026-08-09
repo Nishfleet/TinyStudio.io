@@ -1,5 +1,8 @@
 # Tasks: Minimal-Input Agent Desk
 
+Status: historical — this task list belongs to the retired Agent Desk and is
+complete as recorded. Not current instructions.
+
 - [x] Write root-cause spec for the heavy-intake failure.
 - [x] Add implementation plan for the correction.
 - [x] Make offer, audience, funnel, proof, follow-up, CRM, and weekly numbers optional in the UI.

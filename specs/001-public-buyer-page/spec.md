@@ -1,5 +1,10 @@
 # Feature Specification: Self-Serve Agent Desk
 
+Status: historical — the Agent Desk this spec describes shipped and was later
+retired. It is a record, not current instructions; current product truth is
+in `specs/004-website-appraisal/plan.md` and the machine-readable public
+files (`public/offer.md`, `public/llms.txt`).
+
 ## User Outcome
 
 Visitors can visit `tinystudio.io`, submit high-ticket pipeline context, and receive an AI-generated Pipeline Brief, Implementation Checklist, and Weekly Fix Report without a sales call.

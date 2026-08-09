@@ -1,7 +1,10 @@
 # 003 - Premium Wellness Clinic Launch
 
-Status: approved by Nish 2026-08-05. Builds on the recovered minimal-input
-Agent Desk (`specs/002-minimal-input-agent-desk/`).
+Status: historical campaign plan — approved by Nish 2026-08-05; recorded here
+as a past campaign against the retired Agent Desk, not current instructions.
+Builds on the recovered minimal-input Agent Desk
+(`specs/002-minimal-input-agent-desk/`). The current product is The Website
+Appraisal (`specs/004-website-appraisal/plan.md`).
 
 ## Goal
 
