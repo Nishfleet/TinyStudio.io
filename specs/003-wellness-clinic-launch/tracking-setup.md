@@ -66,8 +66,17 @@ I cannot create this without account access. Exact steps:
    - Click-through window: **30 days**
    - Attribution: **Data-driven**, or last-click if data-driven is unavailable
 4. Tag setup → copy the **conversion ID** (`AW-…`) and the **conversion label**
-5. Paste both into `brief-requested.html`, replacing `AW-XXXXXXXXX` and the
-   `send_to` label. **Four placeholder occurrences — replace all of them.**
+5. Set both on the Worker so the tag is emitted at request time — no code
+   change, and no placeholder can ever ship as a dead conversion:
+   - `wrangler secret put GOOGLE_ADS_CONVERSION_ID` → the `AW-…` ID
+   - `wrangler secret put GOOGLE_ADS_CONVERSION_LABEL` → the conversion label
+   - (For `wrangler dev --remote`, put both in `.dev.vars` instead.)
+   The Worker validates both (`AW-` + digits; a 10+ character alphanumeric
+   label) and injects the gtag loader + conversion event into
+   `/brief-requested` **only** when both are set and well-formed. With either
+   missing or malformed, the page ships with no tag at all — a dead tag is
+   never served. The CSP allowances for gtag are scoped to that one noindex
+   page's response; every other page keeps the strict CSP.
 
 ## 4. GA4 + Ads link
 
@@ -94,7 +103,7 @@ works is a day of data you cannot use.
 - [ ] `htmlRedirect()` in `src/worker.js` points at `/brief-requested`
 - [ ] JS success path redirects to `/brief-requested`
 - [ ] Conversion action created — Submit lead form, no value, count One, 30 days
-- [ ] `AW-…` ID and label pasted into `brief-requested.html` (all four spots)
+- [ ] `GOOGLE_ADS_CONVERSION_ID` and `GOOGLE_ADS_CONVERSION_LABEL` set on the Worker (`wrangler secret put`; `.dev.vars` for dev)
 - [ ] GA4 linked to Ads
 - [ ] Live test submission verified as a recorded conversion
 - [ ] Negatives loaded, ads approved
