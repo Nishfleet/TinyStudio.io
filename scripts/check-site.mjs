@@ -958,10 +958,14 @@ const socialSharePages = [
 ];
 const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
 
+// og: tags must use property=, twitter: tags must use name= (either is a
+// malformed tag that platforms ignore), and the attribute boundary must not
+// let data-property or data-name pass.
+const socialShareAttr = (key) => (key.startsWith("og:") ? "property" : "name");
 const shareTagIn = (html, key) =>
   [...html.matchAll(/<meta\b[^>]*>/gi)]
     .map((match) => match[0])
-    .filter((tag) => new RegExp(`\\b(?:name|property)="${key}"`, "i").test(tag));
+    .filter((tag) => new RegExp(`(?:^|\\s)${socialShareAttr(key)}="${key}"`, "i").test(tag));
 
 const ogImage = readFileSync(new URL("../public/og-image.png", import.meta.url));
 if (!ogImage.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
