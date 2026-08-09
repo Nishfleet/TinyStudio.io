@@ -934,6 +934,52 @@ for (const [pageName, pageHtml] of metaDescriptionPages) {
   }
 }
 
+// ---- Apple touch icon (dogfood) ---------------------------------------------
+// The leak audit this site sells flags a homepage whose served HTML carries no
+// apple touch icon, leaving iOS Safari to derive a home-screen icon from a
+// screenshot of the page (finding 98a7bf8e08fc, "Apple touch icon missing on
+// home"), so the site's own five public pages must not carry that fault either.
+// Each page keeps exactly one <link rel="apple-touch-icon"> inside its head,
+// pointing at the served /apple-touch-icon.png asset, and the asset itself must
+// stay a tracked, valid PNG so a dropped or rewritten file cannot silently
+// leave the pages pointing at nothing.
+const iconPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+for (const [pageName, pageHtml] of iconPages) {
+  const head = pageHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const links = [...head.matchAll(/<link\b[^>]*\brel="apple-touch-icon"[^>]*>/gi)].map((match) => match[0]);
+  if (links.length !== 1) {
+    failures.push(`Apple touch icon link must appear exactly once in the head of ${pageName} (found ${links.length}).`);
+    continue;
+  }
+  const href = links[0].match(/\bhref="([^"]*)"/i)?.[1] ?? "";
+  if (href.trim() !== "/apple-touch-icon.png") {
+    failures.push(`Apple touch icon on ${pageName} must point at /apple-touch-icon.png (found ${JSON.stringify(href)}).`);
+  }
+}
+
+const iconBytes = readFileSync(new URL("../public/apple-touch-icon.png", import.meta.url), "latin1");
+if (!iconBytes.startsWith("\x89PNG\r\n\x1a\n")) {
+  failures.push("public/apple-touch-icon.png must be a valid PNG file.");
+}
+try {
+  execFileSync("git", ["ls-files", "--error-unmatch", "public/apple-touch-icon.png"], {
+    cwd: new URL("..", import.meta.url),
+    stdio: "ignore"
+  });
+} catch {
+  failures.push("public/apple-touch-icon.png must be tracked by git.");
+}
+if (!worker.includes('"/apple-touch-icon.png"')) {
+  failures.push("Worker must serve /apple-touch-icon.png from the public asset allow-list.");
+}
+
 // ---- Social share tags (dogfood d87d715be3d0) -----------------------------
 // The leak audit this site sells flags a homepage whose served HTML cannot
 // tell a social platform what to show when the page is shared — the share
