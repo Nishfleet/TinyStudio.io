@@ -1,9 +1,9 @@
-// Heading-hierarchy regression test for the four owned public pages.
+// Heading-hierarchy regression test for the six served public pages.
 //
 // The TinyStudio.io dogfood audit found skipped heading levels on the home,
-// agents, pricing and specimen pages (h1 -> h3, h2 -> h4). This test parses
-// the real heading outline of the served HTML and enforces the corrected
-// contract:
+// agents, pricing, specimen and brief-requested pages (h1 -> h3, h2 -> h4).
+// This test parses the real heading outline of the served HTML and enforces
+// the corrected contract:
 //
 //   1. exactly one h1 per page, and it is the first heading;
 //   2. no skipped levels when the outline descends (each heading is at most
@@ -21,18 +21,22 @@ import { readFileSync } from "node:fs";
 
 const PAGES = [
   "public/index.html",
+  "public/audit.html",
   "public/agents.html",
   "public/pricing.html",
-  "public/specimen.html"
+  "public/specimen.html",
+  "public/brief-requested.html"
 ];
 
 // The corrected outlines, locked as level sequences. Anything that reopens a
 // skip (or drops the single h1) changes these and fails the test.
 const EXPECTED_OUTLINES = {
   "public/index.html": [1, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 2, 2, 2, 3, 3, 3, 3, 2],
+  "public/audit.html": [1, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2],
   "public/agents.html": [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
   "public/pricing.html": [1, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2],
-  "public/specimen.html": [1, 2, 2, 2, 2, 3, 2]
+  "public/specimen.html": [1, 2, 2, 2, 2, 3, 2],
+  "public/brief-requested.html": [1, 2, 2, 2]
 };
 
 // Parse the headings that would actually be rendered: comments, <script> and
@@ -115,7 +119,7 @@ test("checker rejects the known bad shape: h2 -> h4 skips (homepage stops, ident
   assert.ok(issues.some((issue) => issue.includes("skips from h2 to h4")), `expected h2->h4 skips, got: ${issues.join("; ")}`);
 });
 
-test("checker rejects the known bad shape: h1 -> h3 roster and specimen findings", () => {
+test("checker rejects the known bad shape: h1 -> h3 roster, specimen and brief-requested", () => {
   const bad = [
     "<h1>Seven specialists</h1>",
     "<h3>Landing Page Fixer</h3>",
@@ -126,7 +130,11 @@ test("checker rejects the known bad shape: h1 -> h3 roster and specimen findings
     "<h3>The fee list is excellent</h3>",
     "<h3>The proof is real</h3>",
     "<h4>Two passes not run</h4>",
-    "<h2>Confidentiality</h2>"
+    "<h2>Confidentiality</h2>",
+    "<h1>That's it. Nothing else needed from you.</h1>",
+    "<h3>We read the page</h3>",
+    "<h3>Findings land in your inbox</h3>",
+    "<h3>Then nothing, unless you want something</h3>"
   ].join("");
   const issues = outlineIssues(headingOutline(bad));
   assert.ok(issues.some((issue) => issue.includes("skips from h1 to h3")), `expected h1->h3 skips, got: ${issues.join("; ")}`);
