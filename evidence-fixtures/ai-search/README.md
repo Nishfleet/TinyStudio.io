@@ -82,6 +82,10 @@ change to match them.
 2. Run the question against the engine; copy the answer verbatim and the
    cited pages.
 3. Add the run to `evidence.json` with the state it actually earned.
+   A re-run of the same question-and-engine pair replaces that pair's run
+   with the fresh capture (one run per pair, `testedOn` moved to the capture
+   day); the prior capture stays in git history, so the before/after remains
+   auditable.
 4. Regenerate the embedded bundle in `public/audit.html` (the bundle is the
    two files under one `{"questions": ..., "evidence": ...}` object) so the
    drift guard passes, then run `npm run check` and `npm test`.

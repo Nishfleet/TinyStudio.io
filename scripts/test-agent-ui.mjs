@@ -225,7 +225,7 @@ async function loadAuditScript() {
 
 test("AI-search fixture runs carry the right structure for their states", () => {
   const states = [...new Set(AI_EVIDENCE.runs.map((run) => run.state))].sort();
-  assert.deepEqual(states, ["absent", "not-tested", "wrong"]);
+  assert.deepEqual(states, ["not-tested", "wrong"]);
 
   const questionIds = new Set(AI_QUESTIONS.questions.map((question) => question.id));
   const engineIds = new Set(AI_EVIDENCE.engines.map((engine) => engine.id));
@@ -233,6 +233,7 @@ test("AI-search fixture runs carry the right structure for their states", () => 
   for (const run of AI_EVIDENCE.runs) {
     assert.ok(questionIds.has(run.questionId), `known question for ${run.questionId}/${run.engine}`);
     assert.ok(engineIds.has(run.engine), `known engine for ${run.questionId}/${run.engine}`);
+    assert.ok(run.testedAt, `testedAt recorded for ${run.questionId}/${run.engine}`);
     if (run.state === "not-tested") {
       assert.ok(run.reason, `not-tested reason for ${run.questionId}/${run.engine}`);
       assert.equal(run.captured, undefined, `not-tested must not capture an answer for ${run.questionId}/${run.engine}`);
@@ -241,6 +242,8 @@ test("AI-search fixture runs carry the right structure for their states", () => 
       assert.ok(run.captured, `captured observation for ${run.questionId}/${run.engine}`);
       if (run.state !== "absent") {
         assert.ok(run.sources.length, `cited sources for ${run.questionId}/${run.engine}`);
+      } else {
+        assert.deepEqual(run.sources || [], [], `absent must not cite sources for ${run.questionId}/${run.engine}`);
       }
     }
   }
