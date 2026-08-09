@@ -781,6 +781,81 @@ if (aiQuestions && aiEvidence) {
   }
 }
 
+// ---- AI Answer Readiness (dogfood 4473a99a9bc9) ----------------------------
+// The audit run 20260808T074205Z-msk2fl3n found the engines' preferred
+// source pages unclear: q5/google cited tinystudio.io yet described the
+// retired Agent Desk, and q7/google came back with the note "Missing:
+// pricing". Nothing on the site told an engine which page owns which fact.
+// The machine-readable pair must therefore declare, per controlled question,
+// the preferred source page: the section must exist in BOTH llms.txt and
+// offer.md (the mirror rule), every controlled question must be mapped to
+// exactly one page the worker serves (sitemap membership), price questions
+// must map to pricing.html (pricing.html owns the price), and the two files
+// must carry the same question-to-page mapping.
+const ANSWER_READINESS_HEADING = "## Answer Readiness: Preferred Source Pages";
+
+// The sitemap lists the indexable public surface at its clean extensionless
+// addresses; the worker also serves each page at its canonical .html twin,
+// which is the form the canonical links and the preferred-source mapping
+// use. Membership accepts either spelling (home stays "/").
+const servedPageUrls = new Set(
+  [...sitemap.matchAll(/<loc>(https:\/\/tinystudio\.io\/[^<]*)<\/loc>/g)]
+    .map((match) => match[1])
+    .filter((url) => url !== "https://tinystudio.io/llms.txt" && url !== "https://tinystudio.io/offer.md")
+);
+for (const [clean, html] of [
+  ["/audit", "/audit.html"],
+  ["/agents", "/agents.html"],
+  ["/pricing", "/pricing.html"],
+  ["/specimen", "/specimen.html"]
+]) {
+  if (servedPageUrls.has(`https://tinystudio.io${clean}`)) servedPageUrls.add(`https://tinystudio.io${html}`);
+}
+
+const readinessSection = (content) => {
+  const start = content.indexOf(ANSWER_READINESS_HEADING);
+  if (start === -1) return "";
+  const after = content.slice(start + ANSWER_READINESS_HEADING.length);
+  const end = after.search(/\n## /);
+  return end === -1 ? after : after.slice(0, end);
+};
+
+for (const [fileName, content] of [["llms.txt", llms], ["offer.md", offer]]) {
+  if (!content.includes(ANSWER_READINESS_HEADING)) {
+    failures.push(`${fileName} must carry the Answer Readiness section with preferred source pages.`);
+  }
+}
+
+if (aiQuestions && Array.isArray(aiQuestions.questions)) {
+  const llmsSection = readinessSection(llms);
+  const offerSection = readinessSection(offer);
+  for (const question of aiQuestions.questions) {
+    const llmsLine = llmsSection.split("\n").find((line) => line.includes(question.id));
+    if (!llmsLine) {
+      failures.push(`llms.txt must map the controlled question to a preferred source page: ${question.id}`);
+      continue;
+    }
+    const urls = [...llmsLine.matchAll(/https:\/\/tinystudio\.io\/[^\s]*/g)].map((match) => match[0]);
+    if (urls.length !== 1) {
+      failures.push(`Preferred source mapping must name exactly one page: ${question.id}`);
+      continue;
+    }
+    const preferred = urls[0];
+    if (!servedPageUrls.has(preferred)) {
+      failures.push(`Preferred source page must be a served page: ${question.id} ${preferred}`);
+    }
+    const isPriceQuestion =
+      question.id === "q2-what-tinystudio-charges" || question.id === "q7-what-tinystudio-io-charges";
+    if (isPriceQuestion && preferred !== "https://tinystudio.io/pricing.html") {
+      failures.push(`Price question ${question.id} must map to pricing.html (pricing.html owns the price).`);
+    }
+    const offerLine = offerSection.split("\n").find((line) => line.includes(question.id));
+    if (!offerLine || !offerLine.includes(preferred)) {
+      failures.push(`offer.md must mirror the preferred source page for ${question.id}: ${preferred}`);
+    }
+  }
+}
+
 // ---- TinyStudio identity clarification -------------------------------------
 // One precise identity must run through every owned public surface: TinyStudio
 // is the business behind tinystudio.io — the free leak audit of high-ticket
