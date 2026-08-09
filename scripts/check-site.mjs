@@ -661,6 +661,34 @@ if (aiQuestions && aiEvidence) {
     }
   }
 
+  // External citation links (dogfood 78fcaed682fa, audit run
+  // 20260808T074205Z-msk2fl3n): the engine found apps.apple.com/app/tinystudio
+  // returning 404 on /audit.html (issue-19, "Broken external links on
+  // /audit.html"). The App Store family of hosts resolves only the
+  // id-carrying forms — https://apps.apple.com/app/<numeric-id> or
+  // https://apps.apple.com/<region>/app/<slug>/id<digits> — so a bare slug
+  // such as /app/tinystudio is structurally dead. This rule is checked
+  // offline, so CI never depends on the network.
+  for (const run of runs) {
+    for (const source of run.sources || []) {
+      let parsedUrl = null;
+      try {
+        parsedUrl = new URL(source.url);
+      } catch {
+        parsedUrl = null;
+      }
+      if (!parsedUrl) continue;
+      const host = parsedUrl.hostname.replace(/^www\./, "");
+      if (host === "apps.apple.com" || host === "itunes.apple.com") {
+        const path = parsedUrl.pathname;
+        const carriesAppId = /^\/app\/\d+/.test(path) || /\/id\d+/.test(path);
+        if (!carriesAppId) {
+          failures.push(`AI-search source URL is a dead App Store form (must carry an app id): ${run.questionId}/${run.engine} ${JSON.stringify(source.url)}`);
+        }
+      }
+    }
+  }
+
   // Strict state transition: "found" means the answer named the tested business
   // and its facts checked out against the site — so the run must cite the
   // business's own site. This prevents relabeling a wrong/absent result as
@@ -930,6 +958,326 @@ for (const [pageName, pageHtml] of metaDescriptionPages) {
   for (const claim of forbiddenClaims) {
     if (trimmed.toLowerCase().includes(claim.toLowerCase())) {
       failures.push(`Meta description on ${pageName} must not promise: ${claim}`);
+    }
+  }
+}
+
+// ---- Apple touch icon (dogfood) ---------------------------------------------
+// The leak audit this site sells flags a homepage whose served HTML carries no
+// apple touch icon, leaving iOS Safari to derive a home-screen icon from a
+// screenshot of the page (finding 98a7bf8e08fc, "Apple touch icon missing on
+// home"), so the site's own five public pages must not carry that fault either.
+// Each page keeps exactly one <link rel="apple-touch-icon"> inside its head,
+// pointing at the served /apple-touch-icon.png asset, and the asset itself must
+// stay a tracked, valid PNG so a dropped or rewritten file cannot silently
+// leave the pages pointing at nothing.
+const iconPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+for (const [pageName, pageHtml] of iconPages) {
+  const head = pageHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const links = [...head.matchAll(/<link\b[^>]*\brel="apple-touch-icon"[^>]*>/gi)].map((match) => match[0]);
+  if (links.length !== 1) {
+    failures.push(`Apple touch icon link must appear exactly once in the head of ${pageName} (found ${links.length}).`);
+    continue;
+  }
+  const href = links[0].match(/\bhref="([^"]*)"/i)?.[1] ?? "";
+  if (href.trim() !== "/apple-touch-icon.png") {
+    failures.push(`Apple touch icon on ${pageName} must point at /apple-touch-icon.png (found ${JSON.stringify(href)}).`);
+  }
+}
+
+const iconBytes = readFileSync(new URL("../public/apple-touch-icon.png", import.meta.url), "latin1");
+if (!iconBytes.startsWith("\x89PNG\r\n\x1a\n")) {
+  failures.push("public/apple-touch-icon.png must be a valid PNG file.");
+}
+try {
+  execFileSync("git", ["ls-files", "--error-unmatch", "public/apple-touch-icon.png"], {
+    cwd: new URL("..", import.meta.url),
+    stdio: "ignore"
+  });
+} catch {
+  failures.push("public/apple-touch-icon.png must be tracked by git.");
+}
+if (!worker.includes('"/apple-touch-icon.png"')) {
+  failures.push("Worker must serve /apple-touch-icon.png from the public asset allow-list.");
+}
+
+// ---- Social share tags (dogfood d87d715be3d0) -----------------------------
+// The leak audit this site sells flags a homepage whose served HTML cannot
+// tell a social platform what to show when the page is shared — the share
+// card comes back with no image, or a scraped guess. The audit run
+// 20260808T074205Z-msk2fl3n found exactly that fault on this site's own home
+// page (finding d87d715be3d0, "Social share image incomplete on home"):
+// public/index.html served zero og:/twitter: tags even though
+// public/og-image.png exists and is allow-listed in the worker. Each public
+// page must now carry a complete, per-page share set in its head: og:title,
+// og:description, og:type, og:url, og:image with width/height/alt, and the
+// Twitter Card mirror. og:description must equal the page's meta description
+// so the two cannot drift; og:image must be the absolute og-image.png URL and
+// its declared dimensions must match the actual PNG header; og:url must be
+// the page's own absolute URL; and every tag must sit inside <head>, exactly
+// once.
+const socialSharePages = [
+  ["homepage", siteHome, "https://tinystudio.io/"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+];
+const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
+
+// og: tags must use property=, twitter: tags must use name= (either is a
+// malformed tag that platforms ignore), and the attribute boundary must not
+// let data-property or data-name pass.
+const socialShareAttr = (key) => (key.startsWith("og:") ? "property" : "name");
+const shareTagIn = (html, key) =>
+  [...html.matchAll(/<meta\b[^>]*>/gi)]
+    .map((match) => match[0])
+    .filter((tag) => new RegExp(`(?:^|\\s)${socialShareAttr(key)}="${key}"`, "i").test(tag));
+
+const ogImage = readFileSync(new URL("../public/og-image.png", import.meta.url));
+if (!ogImage.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+  failures.push("public/og-image.png must be a PNG file (the social share image).");
+} else if (ogImage.readUInt32BE(16) !== 1200 || ogImage.readUInt32BE(20) !== 630) {
+  failures.push(`og-image.png must be 1200x630 to match og:image:width/height (found ${ogImage.readUInt32BE(16)}x${ogImage.readUInt32BE(20)}).`);
+}
+
+for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
+  const head = pageHtml.match(/<head\b[\s\S]*?<\/head>/i)?.[0] ?? "";
+  const description = pageHtml.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0]?.match(/\bcontent="([^"]*)"/i)?.[1] ?? "";
+  const expected = new Map([
+    ["og:title", ""], // non-empty, per page
+    ["og:description", description],
+    ["og:type", "website"],
+    ["og:url", pageUrl],
+    ["og:image", SOCIAL_IMAGE_URL],
+    ["og:image:width", "1200"],
+    ["og:image:height", "630"],
+    ["og:image:alt", ""], // non-empty, per page
+    ["twitter:card", "summary_large_image"],
+    ["twitter:title", ""], // non-empty, per page
+    ["twitter:description", description],
+    ["twitter:image", SOCIAL_IMAGE_URL]
+  ]);
+  for (const [key, expectedContent] of expected) {
+    const inDoc = shareTagIn(pageHtml, key);
+    if (inDoc.length !== 1) {
+      failures.push(`Social share tag ${key} must appear exactly once on ${pageName} (found ${inDoc.length}).`);
+      continue;
+    }
+    const inHead = shareTagIn(head, key);
+    if (inHead.length !== 1) {
+      failures.push(`Social share tag ${key} on ${pageName} must sit inside <head>.`);
+      continue;
+    }
+    const content = inHead[0].match(/\bcontent="([^"]*)"/i)?.[1] ?? "";
+    if (expectedContent === "" && !content.trim()) {
+      failures.push(`Social share tag ${key} on ${pageName} must not be empty.`);
+    } else if (expectedContent !== "" && content !== expectedContent) {
+      failures.push(`Social share tag ${key} on ${pageName} must be ${JSON.stringify(expectedContent)} (found ${JSON.stringify(content)}).`);
+    }
+  }
+}
+
+// ---- Structured data (dogfood 975fdb784275) --------------------------------
+// The leak audit this site sells flags a homepage whose served HTML gives a
+// machine reader nothing to hold onto — no schema.org markup at all — so the
+// site's own five public pages must not carry that fault either. Each page
+// keeps exactly one application/ld+json block in its head: a @graph with a
+// stable Organization node (the same entity on every page), a WebSite node,
+// and the page's own WebPage node. Every value is bound to the page's own
+// head metadata — name to the og:title, description to the meta description,
+// url to the og:url — so the structured data cannot drift from what the page
+// actually says. The Organization node is identical on all five pages, and
+// the price stays where it belongs: pricing.html owns it, so no other page's
+// block may restate a dollar amount.
+const structuredDataPages = [
+  ["homepage", siteHome, "https://tinystudio.io/"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+];
+
+const ORGANIZATION_ID = "https://tinystudio.io/#organization";
+const WEBSITE_ID = "https://tinystudio.io/#website";
+const ORGANIZATION_NAME = "TinyStudio";
+const ORGANIZATION_LOGO = "https://tinystudio.io/apple-touch-icon.png";
+const ORGANIZATION_DESCRIPTION =
+  siteHome.match(/<meta\b[^>]*\bname="description"[^>]*\bcontent="([^"]*)"/i)?.[1] ?? "";
+
+// The page node name is bound to the og:title, whose HTML entities (e.g. the
+// pricing page's "&amp;") must be decoded before comparison.
+const decodeEntities = (text) =>
+  text.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+
+const jsonLdBlocksIn = (html) =>
+  [...html.matchAll(/<script\b[^>]*\btype="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
+    .map((match) => match[1]);
+
+const ogTitleOf = (html) =>
+  html.match(/<meta\b[^>]*\bproperty="og:title"[^>]*\bcontent="([^"]*)"/i)?.[1] ?? "";
+
+for (const [pageName, pageHtml, pageUrl] of structuredDataPages) {
+  const blocks = jsonLdBlocksIn(pageHtml);
+  if (blocks.length !== 1) {
+    failures.push(`Structured data must appear exactly once on ${pageName} (found ${blocks.length}).`);
+    continue;
+  }
+  const head = pageHtml.match(/<head\b[\s\S]*?<\/head>/i)?.[0] ?? "";
+  if (jsonLdBlocksIn(head).length !== 1) {
+    failures.push(`Structured data on ${pageName} must sit inside <head>.`);
+  }
+
+  let graph = null;
+  try {
+    graph = JSON.parse(blocks[0]);
+  } catch (error) {
+    failures.push(`Structured data on ${pageName} must be valid JSON (${error.message}).`);
+    continue;
+  }
+  if (graph["@context"] !== "https://schema.org") {
+    failures.push(`Structured data on ${pageName} must use the schema.org context.`);
+  }
+  if (!Array.isArray(graph["@graph"])) {
+    failures.push(`Structured data on ${pageName} must use an @graph array.`);
+    continue;
+  }
+
+  const nodes = graph["@graph"];
+  const nodeIds = nodes.map((node) => node["@id"]).filter(Boolean);
+  if (new Set(nodeIds).size !== nodeIds.length) {
+    failures.push(`Structured data on ${pageName} must use unique @id values within the graph.`);
+  }
+
+  const orgNodes = nodes.filter((node) => node["@type"] === "Organization");
+  const siteNodes = nodes.filter((node) => node["@type"] === "WebSite");
+  const pageNodes = nodes.filter((node) => node["@type"] === "WebPage");
+  if (orgNodes.length !== 1) {
+    failures.push(`Structured data on ${pageName} must carry exactly one Organization node (found ${orgNodes.length}).`);
+  } else {
+    const org = orgNodes[0];
+    if (org["@id"] !== ORGANIZATION_ID) {
+      failures.push(`Organization on ${pageName} must use the stable @id ${ORGANIZATION_ID}.`);
+    }
+    if (org.name !== ORGANIZATION_NAME) {
+      failures.push(`Organization on ${pageName} must be named ${ORGANIZATION_NAME} (found ${JSON.stringify(org.name)}).`);
+    }
+    if (org.url !== "https://tinystudio.io/") {
+      failures.push(`Organization on ${pageName} must point at https://tinystudio.io/ (found ${JSON.stringify(org.url)}).`);
+    }
+    if (org.logo !== ORGANIZATION_LOGO) {
+      failures.push(`Organization on ${pageName} must use the served logo ${ORGANIZATION_LOGO} (found ${JSON.stringify(org.logo)}).`);
+    }
+    if (org.description !== ORGANIZATION_DESCRIPTION) {
+      failures.push(`Organization description on ${pageName} must match the homepage meta description (stable entity).`);
+    }
+  }
+
+  if (siteNodes.length !== 1) {
+    failures.push(`Structured data on ${pageName} must carry exactly one WebSite node (found ${siteNodes.length}).`);
+  } else {
+    const site = siteNodes[0];
+    if (site["@id"] !== WEBSITE_ID) {
+      failures.push(`WebSite on ${pageName} must use the stable @id ${WEBSITE_ID}.`);
+    }
+    if (site.url !== "https://tinystudio.io/" || site.name !== ORGANIZATION_NAME) {
+      failures.push(`WebSite on ${pageName} must carry the site url and the TinyStudio name.`);
+    }
+    if (site.inLanguage !== "en") {
+      failures.push(`WebSite on ${pageName} must declare inLanguage "en".`);
+    }
+    if (site.publisher?.["@id"] !== ORGANIZATION_ID) {
+      failures.push(`WebSite on ${pageName} must name the Organization as its publisher.`);
+    }
+  }
+
+  const metaDescription = pageHtml.match(/<meta\b[^>]*\bname="description"[^>]*\bcontent="([^"]*)"/i)?.[1] ?? "";
+  const ogTitle = ogTitleOf(pageHtml);
+  if (pageNodes.length !== 1) {
+    failures.push(`Structured data on ${pageName} must carry exactly one WebPage node (found ${pageNodes.length}).`);
+  } else {
+    const page = pageNodes[0];
+    if (page["@id"] !== `${pageUrl}#webpage`) {
+      failures.push(`WebPage on ${pageName} must use the @id ${pageUrl}#webpage.`);
+    }
+    if (page.url !== pageUrl) {
+      failures.push(`WebPage on ${pageName} must carry its own url ${pageUrl} (found ${JSON.stringify(page.url)}).`);
+    }
+    if (page.name !== decodeEntities(ogTitle)) {
+      failures.push(`WebPage name on ${pageName} must equal the og:title (${JSON.stringify(decodeEntities(ogTitle))}).`);
+    }
+    if (page.description !== metaDescription) {
+      failures.push(`WebPage description on ${pageName} must equal the meta description.`);
+    }
+    if (page.inLanguage !== "en") {
+      failures.push(`WebPage on ${pageName} must declare inLanguage "en".`);
+    }
+    if (page.isPartOf?.["@id"] !== WEBSITE_ID) {
+      failures.push(`WebPage on ${pageName} must belong to the WebSite node.`);
+    }
+    if (page.about?.["@id"] !== ORGANIZATION_ID) {
+      failures.push(`WebPage on ${pageName} must be about the Organization node.`);
+    }
+  }
+
+  // The price is pricing.html's to state; no other page's structured data may
+  // restate a dollar amount (the pricing page mirrors its own meta
+  // description, which legitimately carries the price).
+  if (pageName !== "pricing page" && /\$\s?\d/.test(blocks[0])) {
+    failures.push(`Structured data on ${pageName} must not restate a dollar amount; pricing.html owns the price.`);
+  }
+  for (const claim of forbiddenClaims) {
+    if (blocks[0].toLowerCase().includes(claim.toLowerCase())) {
+      failures.push(`Structured data on ${pageName} must not promise: ${claim}`);
+    }
+  }
+  if (/\+\d[\d\s()-]{6,}\d/.test(blocks[0])) {
+    failures.push(`Structured data on ${pageName} must not capture phone numbers.`);
+  }
+}
+
+// ---- Internal page links (dogfood 996dffe45ef7) ---------------------------
+// The leak audit this site sells flags a homepage whose internal links do not
+// point at the final destination URL: the dogfood run reported every .html
+// navigation target on home ("index.html" -> "/", "audit.html" -> "/audit",
+// "agents.html" -> "/agents", "pricing.html" -> "/pricing", "specimen.html" ->
+// "/specimen") as a redirecting internal link. The five public pages must
+// therefore point every page link at the clean URL the worker serves, never
+// at a .html file that resolves to it. These are STATIC SOURCE GUARDS (regex
+// over the served files): CI has no browser, so they assert the .html target
+// shape cannot return, not that the redirects are absent on the network.
+const internalLinkPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+const htmlPageTargets = {
+  "index.html": "/",
+  "audit.html": "/audit",
+  "agents.html": "/agents",
+  "pricing.html": "/pricing",
+  "specimen.html": "/specimen"
+};
+
+for (const [pageName, pageHtml] of internalLinkPages) {
+  const anchors = [...pageHtml.matchAll(/<a\b[^>]*>/gi)].map((match) => match[0]);
+  for (const anchor of anchors) {
+    const href = anchor.match(/\bhref="([^"]*)"/i)?.[1] ?? "";
+    const target = href.split("#")[0];
+    if (Object.prototype.hasOwnProperty.call(htmlPageTargets, target)) {
+      failures.push(
+        `Internal page link on ${pageName} must point at the clean destination ${JSON.stringify(htmlPageTargets[target])} (found ${JSON.stringify(href)}).`
+      );
     }
   }
 }

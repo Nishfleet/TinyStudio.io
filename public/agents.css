@@ -4,7 +4,7 @@
     transition:padding-left var(--mid) var(--ease),background var(--mid) var(--ease)}
   .ag:hover{padding-left:14px;background:rgba(255,253,248,.5)}
   .ag .n{font-family:'Fraunces',serif;font-style:italic;font-weight:200;font-size:30px;color:var(--brass-lt);line-height:1}
-  .ag h3{font-size:19px;font-weight:600;letter-spacing:-.012em}
+  .ag h2{font-size:19px;font-weight:600;letter-spacing:-.012em}
   .ag .job{margin-top:7px;font-size:14.5px;line-height:1.65;color:var(--muted)}
   .ag .reads{font-size:14px;line-height:1.72;color:var(--soft)}
   .ag .reads b{display:block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;
@@ -16,7 +16,7 @@
     border-radius:14px;overflow:hidden;background:linear-gradient(172deg,rgba(255,253,248,.9),rgba(235,225,207,.5))}
   .gatebox>div{padding:38px 42px}
   .gatebox>div:first-child{border-right:1px solid var(--line)}
-  .gatebox h4{font-family:'Fraunces',serif;font-weight:300;font-size:25px;letter-spacing:-.02em}
+  .gatebox h2{font-family:'Fraunces',serif;font-weight:300;font-size:25px;letter-spacing:-.02em}
   .gatebox ul{margin-top:18px;list-style:none}
   .gatebox li{font-size:15px;line-height:1.55;color:var(--soft);padding:9px 0 9px 26px;position:relative}
   .gatebox li::before{content:'';position:absolute;left:0;top:16px;width:9px;height:1px;background:var(--brass)}
