@@ -124,7 +124,7 @@
     background:var(--cream);border:1px solid var(--brass)}
   .stop.filled::before{background:var(--brass)}
   .stop .d{margin-top:32px;color:var(--brass);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:700}
-  .stop h4{margin-top:11px;font-size:17px;font-weight:600;letter-spacing:-.008em}
+  .stop h3{margin-top:11px;font-size:17px;font-weight:600;letter-spacing:-.008em}
   .stop p{margin-top:8px;font-size:14.5px;line-height:1.68;color:var(--muted);max-width:26ch}
 
   /* ── who ───────────────────────────────────────── */
@@ -153,7 +153,7 @@
   .faq h2{font-family:'Fraunces',serif;font-weight:200;font-size:44px;letter-spacing:-.028em;margin-bottom:40px}
   .q{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;padding:26px 0;border-top:1px solid var(--hair)}
   .q:last-child{border-bottom:1px solid var(--hair)}
-  .q h4{font-size:18px;font-weight:600;letter-spacing:-.01em;max-width:24ch}
+  .q h3{font-size:18px;font-weight:600;letter-spacing:-.01em;max-width:24ch}
   .q p{font-size:15.5px;line-height:1.74;color:var(--muted)}
 
   footer{margin-top:110px;padding:30px 0 66px;border-top:1px solid var(--hair);
