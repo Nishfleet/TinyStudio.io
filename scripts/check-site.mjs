@@ -934,6 +934,79 @@ for (const [pageName, pageHtml] of metaDescriptionPages) {
   }
 }
 
+// ---- Social share tags (dogfood d87d715be3d0) -----------------------------
+// The leak audit this site sells flags a homepage whose served HTML cannot
+// tell a social platform what to show when the page is shared — the share
+// card comes back with no image, or a scraped guess. The audit run
+// 20260808T074205Z-msk2fl3n found exactly that fault on this site's own home
+// page (finding d87d715be3d0, "Social share image incomplete on home"):
+// public/index.html served zero og:/twitter: tags even though
+// public/og-image.png exists and is allow-listed in the worker. Each public
+// page must now carry a complete, per-page share set in its head: og:title,
+// og:description, og:type, og:url, og:image with width/height/alt, and the
+// Twitter Card mirror. og:description must equal the page's meta description
+// so the two cannot drift; og:image must be the absolute og-image.png URL and
+// its declared dimensions must match the actual PNG header; og:url must be
+// the page's own absolute URL; and every tag must sit inside <head>, exactly
+// once.
+const socialSharePages = [
+  ["homepage", siteHome, "https://tinystudio.io/"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+];
+const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
+
+const shareTagIn = (html, key) =>
+  [...html.matchAll(/<meta\b[^>]*>/gi)]
+    .map((match) => match[0])
+    .filter((tag) => new RegExp(`\\b(?:name|property)="${key}"`, "i").test(tag));
+
+const ogImage = readFileSync(new URL("../public/og-image.png", import.meta.url));
+if (!ogImage.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+  failures.push("public/og-image.png must be a PNG file (the social share image).");
+} else if (ogImage.readUInt32BE(16) !== 1200 || ogImage.readUInt32BE(20) !== 630) {
+  failures.push(`og-image.png must be 1200x630 to match og:image:width/height (found ${ogImage.readUInt32BE(16)}x${ogImage.readUInt32BE(20)}).`);
+}
+
+for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
+  const head = pageHtml.match(/<head\b[\s\S]*?<\/head>/i)?.[0] ?? "";
+  const description = pageHtml.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0]?.match(/\bcontent="([^"]*)"/i)?.[1] ?? "";
+  const expected = new Map([
+    ["og:title", ""], // non-empty, per page
+    ["og:description", description],
+    ["og:type", "website"],
+    ["og:url", pageUrl],
+    ["og:image", SOCIAL_IMAGE_URL],
+    ["og:image:width", "1200"],
+    ["og:image:height", "630"],
+    ["og:image:alt", ""], // non-empty, per page
+    ["twitter:card", "summary_large_image"],
+    ["twitter:title", ""], // non-empty, per page
+    ["twitter:description", description],
+    ["twitter:image", SOCIAL_IMAGE_URL]
+  ]);
+  for (const [key, expectedContent] of expected) {
+    const inDoc = shareTagIn(pageHtml, key);
+    if (inDoc.length !== 1) {
+      failures.push(`Social share tag ${key} must appear exactly once on ${pageName} (found ${inDoc.length}).`);
+      continue;
+    }
+    const inHead = shareTagIn(head, key);
+    if (inHead.length !== 1) {
+      failures.push(`Social share tag ${key} on ${pageName} must sit inside <head>.`);
+      continue;
+    }
+    const content = inHead[0].match(/\bcontent="([^"]*)"/i)?.[1] ?? "";
+    if (expectedContent === "" && !content.trim()) {
+      failures.push(`Social share tag ${key} on ${pageName} must not be empty.`);
+    } else if (expectedContent !== "" && content !== expectedContent) {
+      failures.push(`Social share tag ${key} on ${pageName} must be ${JSON.stringify(expectedContent)} (found ${JSON.stringify(content)}).`);
+    }
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
