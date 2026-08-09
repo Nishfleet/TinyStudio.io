@@ -581,6 +581,53 @@ test("identity disambiguation facts are mirrored by llms.txt and offer.md", () =
   assert.ok(LLMS_TXT.includes("https://tinystudio.io/audit.html"), "llms.txt must point at the audit page's evidence artifact");
 });
 
+test("every controlled question maps to a preferred source page, mirrored by llms.txt and offer.md", () => {
+  // Dogfood finding 4473a99a9bc9 ("AI Answer Readiness: preferred source
+  // pages are unclear"): an engine that cited tinystudio.io described the
+  // retired Agent Desk, and the pricing answer came back "Missing: pricing".
+  // The machine-readable pair must declare, per controlled question, the
+  // preferred source page an engine should read first — exactly one served
+  // page per question, pricing.html for price questions, and the same
+  // mapping in both files.
+  const ANSWER_READINESS_HEADING = "## Answer Readiness: Preferred Source Pages";
+  for (const [name, text] of [
+    ["llms.txt", LLMS_TXT],
+    ["offer.md", OFFER_MD]
+  ]) {
+    assert.ok(text.includes(ANSWER_READINESS_HEADING), `${name} must carry the Answer Readiness section`);
+  }
+  const sectionOf = (content) => {
+    const start = content.indexOf(ANSWER_READINESS_HEADING);
+    const after = content.slice(start + ANSWER_READINESS_HEADING.length);
+    const end = after.search(/\n## /);
+    return end === -1 ? after : after.slice(0, end);
+  };
+  const servedPages = [
+    "https://tinystudio.io/",
+    "https://tinystudio.io/audit.html",
+    "https://tinystudio.io/agents.html",
+    "https://tinystudio.io/pricing.html",
+    "https://tinystudio.io/specimen.html"
+  ];
+  const llmsSection = sectionOf(LLMS_TXT);
+  const offerSection = sectionOf(OFFER_MD);
+  for (const question of AI_QUESTIONS.questions) {
+    const llmsLine = llmsSection.split("\n").find((line) => line.includes(question.id));
+    assert.ok(llmsLine, `llms.txt must map the controlled question to a preferred source page: ${question.id}`);
+    const urls = [...(llmsLine ?? "").matchAll(/https:\/\/tinystudio\.io\/[^\s]*/g)].map((match) => match[0]);
+    assert.equal(urls.length, 1, `preferred source mapping must name exactly one page: ${question.id}`);
+    const preferred = urls[0];
+    assert.ok(servedPages.includes(preferred), `preferred source page must be a served page: ${question.id}`);
+    const isPriceQuestion =
+      question.id === "q2-what-tinystudio-charges" || question.id === "q7-what-tinystudio-io-charges";
+    if (isPriceQuestion) {
+      assert.equal(preferred, "https://tinystudio.io/pricing.html", `price question ${question.id} must map to pricing.html`);
+    }
+    const offerLine = offerSection.split("\n").find((line) => line.includes(question.id));
+    assert.ok(offerLine?.includes(preferred), `offer.md must mirror the preferred source page for ${question.id}`);
+  }
+});
+
 test("offer facts are mirrored by llms.txt and offer.md", () => {
   // Whitespace- and case-insensitive, matching the check-site guard: one file
   // may head a fact while the other embeds it mid-sentence, and llms.txt

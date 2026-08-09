@@ -75,6 +75,21 @@ revives the retired Website Correction or founder-pilot framing. Same rule as
 above: the site files are what get edited; the fixture's captured runs never
 change to match them.
 
+The pair also carries an answer-readiness mapping: an `## Answer Readiness:
+Preferred Source Pages` section in both files declares, per controlled
+question, the preferred source page an engine should read first — the page
+that owns the fact. The checks fail if a question is unmapped, mapped to more
+than one page, mapped to a page the worker does not serve (sitemap
+membership), or mapped differently between the two files; price questions
+must map to `pricing.html`, which owns the price. This is the direct answer
+to dogfood finding 4473a99a9bc9 ("AI Answer Readiness: preferred source pages
+are unclear", audit run 20260808T074205Z-msk2fl3n): the engines' q5/google
+run cited tinystudio.io but described the retired Agent Desk, and the
+q7/google run came back "Missing: pricing". The mapping names the page that
+owns each fact so an engine does not have to guess. Same rule as above: the
+site files are what get edited; the fixture's captured runs never change to
+match them.
+
 ## Adding a run
 
 1. Add or reuse a question in `controlled-questions.json` (stable id, name,
