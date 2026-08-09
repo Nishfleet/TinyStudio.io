@@ -998,6 +998,36 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
 }
 
+// ---- Retired Agent Desk index guard (dogfood: Google still presents the
+// retired self-serve "TinyStudio Agent Desk" title/snippet for tinystudio.io)
+// ----------------------------------------------------------------------------
+// The self-serve Agent Desk moved off the root when the leak-audit site took
+// over; public/agent-desk.html is still served at /agent-desk and
+// /agent-desk.html as a legacy surface. It is absent from the sitemap, no page
+// links to it, and llms.txt/offer.md demote it ("is not the current offer") —
+// but its head still carried the retired product's title and no robots
+// exclusion, so Google kept presenting that title/snippet for tinystudio.io.
+// The captured evidence is evidence-fixtures/ai-search/evidence.json, q5 /
+// google (2026-08-06): title "tinystudio.io - TinyStudio Agent Desk" against
+// the homepage URL, the legacy page's title consolidated through its canonical.
+// The legacy page must therefore stay out of the index: its head keeps a
+// robots noindex, nofollow meta, and its title and description frame the
+// surface as retired, so neither the search index nor a scraper can re-present
+// the retired self-serve product as the current offer.
+const retiredDeskHead = index.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
+if (!robotsMeta.test(retiredDeskHead)) {
+  failures.push("Retired Agent Desk page must keep a robots noindex, nofollow meta in its head.");
+}
+if (!/\bretired\b/i.test(retiredDeskHead)) {
+  failures.push("Retired Agent Desk page head must frame the surface as retired (title and/or description).");
+}
+const retiredDeskDescription =
+  retiredDeskHead.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0] ?? "";
+if (!/\bretired\b/i.test(retiredDeskDescription)) {
+  failures.push("Retired Agent Desk description must frame the surface as retired.");
+}
+
 // ---- Meta descriptions (dogfood) -------------------------------------------
 // The leak audit this site sells flags a homepage whose served HTML carries no
 // description, so the site's own five public pages must not carry the same
