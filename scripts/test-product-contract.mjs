@@ -20,6 +20,12 @@
 //      checker proves it rejects the regressions it guards, not just that the
 //      current files pass.
 //
+// Status is only accepted in the leading status banner immediately after each
+// document's H1; conflicting status claims are rejected, an active Agent Desk
+// framing fails even when the required current-product terms also appear, and
+// the current plan's no-guarantees boundary requires an explicit negation tied
+// to guarantee/promise language rather than a frozen sentence.
+//
 // The guard is deliberately scoped to repository contract truth. Runtime
 // behavior of public/ and src/ is owned by the application test suite, exact
 // pricing/legal prose is owned by the public copy files, and the dependency
@@ -59,6 +65,107 @@ const HISTORICAL_SPEC_FILES = [
   "specs/002-minimal-input-agent-desk/tasks.md"
 ];
 
+// --- Leading status banner -------------------------------------------------
+
+// The status banner is the blockquote that begins immediately after the
+// document's first H1 heading (only blank lines may intervene). A status
+// marker anywhere else in the document does not satisfy the contract.
+function leadingStatusBanner(text) {
+  const lines = text.split(/\r?\n/);
+  const h1 = lines.findIndex((line) => /^#\s/.test(line));
+  if (h1 === -1) return null;
+  let i = h1 + 1;
+  while (i < lines.length && /^\s*$/.test(lines[i])) i += 1;
+  if (i >= lines.length || !lines[i].startsWith(">")) return null;
+  const banner = [];
+  while (i < lines.length && lines[i].startsWith(">")) {
+    banner.push(lines[i]);
+    i += 1;
+  }
+  return banner.join("\n");
+}
+
+// True when `marker` sits in the leading banner, not merely somewhere in the
+// document body.
+function hasLeadingStatus(text, marker) {
+  const banner = leadingStatusBanner(text);
+  return banner !== null && banner.includes(marker);
+}
+
+// Status markers that contradict each expected marker wherever they appear:
+// a document may claim exactly one spec status.
+const CONFLICTING_STATUS = {
+  [MARKER_HISTORICAL]: [MARKER_CURRENT, MARKER_SUPERSEDED],
+  [MARKER_SUPERSEDED]: [MARKER_CURRENT, MARKER_HISTORICAL],
+  [MARKER_CURRENT]: [MARKER_HISTORICAL, MARKER_SUPERSEDED]
+};
+
+// Other status markers the document also claims anywhere in its body, if any.
+function conflictingStatusMarkers(text, marker) {
+  return CONFLICTING_STATUS[marker].filter((other) => text.includes(other));
+}
+
+// --- Current-product framing ----------------------------------------------
+
+// Lines that mention the Agent Desk are truthful only when the desk is
+// negated ("not the current product") or demoted ("retired", "legacy").
+// Any positive claim that it is current, active, reopening, back, or the
+// product/offer is the regression this guard exists to reject — even in a
+// document that also names The Website Appraisal and human-reviewed delivery.
+const AGENT_DESK_ACTIVE_PATTERNS = [
+  /reopen/i,
+  /Agent Desk[^\n.]{0,120}(current|active|alive|returning|back)/i,
+  /(current|active|alive|returning)[^\n.]{0,120}Agent Desk/i,
+  /Agent Desk[^\n.]{0,160}(is|remains|becomes?)\s+(the|our|a)?\s*(current\s+)?(product|offer)/i
+];
+const AGENT_DESK_NEGATED = /\b(not|never|no longer|without)\b/i;
+const AGENT_DESK_DEMOTED = /\b(retired|legacy|demoted|historical|superseded)\b/i;
+
+// Returns violations for lines that present the retired Agent Desk as alive.
+function agentDeskFramingIssues(text) {
+  const issues = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!/\bAgent Desk\b/i.test(line)) continue;
+    if (AGENT_DESK_NEGATED.test(line)) continue;
+    if (AGENT_DESK_DEMOTED.test(line)) continue;
+    if (AGENT_DESK_ACTIVE_PATTERNS.some((pattern) => pattern.test(line))) {
+      issues.push(`must not present the retired Agent Desk as current, reopening, or the product/offer: ${line.trim()}`);
+    }
+  }
+  return issues;
+}
+
+// --- No-guarantees boundary ------------------------------------------------
+
+// Returns the text of a `## Heading` section up to the next `## ` heading.
+function sectionText(text, heading) {
+  const lines = text.split(/\r?\n/);
+  const start = lines.findIndex((line) => line.trim() === heading);
+  if (start === -1) return null;
+  const end = lines.findIndex((line, index) => index > start && /^##\s/.test(line));
+  return lines.slice(start + 1, end === -1 ? undefined : end).join("\n");
+}
+
+// The current plan keeps its no-guarantees boundary only when a line in the
+// Boundaries section ties an explicit negation (no, never, must not) to
+// guarantee/promise language. Exact sentences are not frozen.
+const GUARANTEE_TERMS = /\b(guarantee|guarantees|promise|promises)\b/i;
+const GUARANTEE_NEGATIONS = /\b(no|never|must not|without)\b/i;
+
+function boundaryGuaranteeIssues(text) {
+  const section = sectionText(text, "## Boundaries");
+  if (section === null) {
+    return ["spec 004 must keep a Boundaries section"];
+  }
+  const negated = section.split(/\r?\n/).some(
+    (line) => GUARANTEE_TERMS.test(line) && GUARANTEE_NEGATIONS.test(line)
+  );
+  if (!negated) {
+    return ["spec 004 Boundaries must tie an explicit negation (no, never, must not) to guarantee/promise language"];
+  }
+  return [];
+}
+
 // Returns a list of human-readable violations for the top-level framing of a
 // current-product document; an empty list means the framing is correct.
 export function currentFramingIssues(text) {
@@ -75,6 +182,7 @@ export function currentFramingIssues(text) {
   if (text.includes(OLD_MEMORY_LINE)) {
     issues.push("MEMORY must not present the Agent Desk reopening framing");
   }
+  issues.push(...agentDeskFramingIssues(text));
   return issues;
 }
 
@@ -111,7 +219,8 @@ test("package.json describes the current product and wires the contract test", (
 test("specs 001 and 002 are unmistakably historical implementation records", () => {
   for (const path of HISTORICAL_SPEC_FILES) {
     const file = read(path);
-    assert.ok(file.includes(MARKER_HISTORICAL), `${path} must carry the ${MARKER_HISTORICAL} marker`);
+    assert.ok(hasLeadingStatus(file, MARKER_HISTORICAL), `${path} must carry ${MARKER_HISTORICAL} in the banner immediately after its H1`);
+    assert.deepEqual(conflictingStatusMarkers(file, MARKER_HISTORICAL), [], `${path} must not also claim CURRENT or SUPERSEDED status`);
     assert.ok(file.includes("retired"), `${path} must state the Agent Desk is retired`);
     assert.ok(file.includes(CURRENT_PLAN), `${path} must point at the current plan`);
   }
@@ -119,7 +228,8 @@ test("specs 001 and 002 are unmistakably historical implementation records", () 
 
 test("spec 003 is superseded and points at the current plan", () => {
   const plan = read("specs/003-wellness-clinic-launch/plan.md");
-  assert.ok(plan.includes(MARKER_SUPERSEDED), "spec 003 must carry the SUPERSEDED marker");
+  assert.ok(hasLeadingStatus(plan, MARKER_SUPERSEDED), "spec 003 must carry the SUPERSEDED marker in the banner immediately after its H1");
+  assert.deepEqual(conflictingStatusMarkers(plan, MARKER_SUPERSEDED), [], "spec 003 must not also claim CURRENT or HISTORICAL status");
   assert.ok(plan.includes(CURRENT_PLAN), "spec 003 must point at the current plan");
   // Spec 003's money/legal body is preserved by the repo, not asserted here:
   // the guard does not couple to exact pricing or legal sentence fragments.
@@ -127,10 +237,11 @@ test("spec 003 is superseded and points at the current plan", () => {
 
 test("the current plan exists at specs/004-website-appraisal/plan.md", () => {
   const plan = read(CURRENT_PLAN);
-  assert.ok(plan.includes(MARKER_CURRENT), "spec 004 must carry the CURRENT marker");
+  assert.ok(hasLeadingStatus(plan, MARKER_CURRENT), "spec 004 must carry the CURRENT marker in the banner immediately after its H1");
+  assert.deepEqual(conflictingStatusMarkers(plan, MARKER_CURRENT), [], "spec 004 must not also claim HISTORICAL or SUPERSEDED status");
   assert.ok(plan.includes(CURRENT_PRODUCT), "spec 004 must name The Website Appraisal");
   assert.ok(plan.includes(CURRENT_DELIVERY), "spec 004 must name human-reviewed delivery");
-  assert.ok(plan.includes("guarantees"), "spec 004 must keep its no-guarantees boundary");
+  assert.deepEqual(boundaryGuaranteeIssues(plan), [], boundaryGuaranteeIssues(plan).join("; "));
   assert.ok(plan.includes("/audit"), "spec 004 must keep the /audit appraisal surface");
   assert.ok(plan.includes("/agents"), "spec 004 must keep the /agents desk surface");
   assert.ok(plan.includes("/pricing"), "spec 004 must keep the /pricing surface");
@@ -154,4 +265,83 @@ test("checker rejects the old Agent Desk framings (fixtures)", () => {
 
   const descriptionIssues = currentFramingIssues(oldDescription);
   assert.ok(descriptionIssues.some((issue) => issue.includes("must name The Website Appraisal")), `got: ${descriptionIssues.join("; ")}`);
+});
+
+test("checker rejects misplaced, conflicting, and contradictory truth (fixtures)", () => {
+  // Misplaced status: markers buried in the body do not satisfy the
+  // leading-banner rule, no matter how many of them appear.
+  const misplacedStatus =
+    "# Fake Feature Specification\n" +
+    "\n" +
+    "## Body\n" +
+    "\n" +
+    `This record is old: ${MARKER_HISTORICAL}. The plan claims ${MARKER_CURRENT} ` +
+    `and also ${MARKER_SUPERSEDED}, but none of these sit in a banner after the H1.\n`;
+  assert.equal(hasLeadingStatus(misplacedStatus, MARKER_HISTORICAL), false, "a marker later in the document must not count as the leading banner");
+  assert.equal(hasLeadingStatus(misplacedStatus, MARKER_CURRENT), false, "a marker later in the document must not count as the leading banner");
+
+  // Conflicting status: a HISTORICAL banner cannot coexist with a CURRENT
+  // claim elsewhere in the document.
+  const conflictingHistorical =
+    "# Fake Feature Specification\n" +
+    "\n" +
+    `> **${MARKER_HISTORICAL} — retired.** Record kept for history.\n` +
+    "\n" +
+    "## Body\n" +
+    "\n" +
+    `Live again: this record is ${MARKER_CURRENT} from now on.\n`;
+  assert.deepEqual(
+    conflictingStatusMarkers(conflictingHistorical, MARKER_HISTORICAL),
+    [MARKER_CURRENT],
+    "a HISTORICAL spec that also claims CURRENT status must be rejected"
+  );
+
+  // Conflicting status: a SUPERSEDED plan cannot be reactivated as CURRENT.
+  const conflictingSuperseded =
+    "# Fake Campaign Plan\n" +
+    "\n" +
+    `> **${MARKER_SUPERSEDED} — historical campaign plan.**\n` +
+    "\n" +
+    "## Body\n" +
+    "\n" +
+    `Reactivated: this plan is ${MARKER_CURRENT} again.\n`;
+  assert.deepEqual(
+    conflictingStatusMarkers(conflictingSuperseded, MARKER_SUPERSEDED),
+    [MARKER_CURRENT],
+    "a SUPERSEDED plan that also claims CURRENT status must be rejected"
+  );
+
+  // Conflicting status: a CURRENT plan cannot claim HISTORICAL status.
+  const conflictingCurrent =
+    "# Fake Current Plan\n" +
+    "\n" +
+    `> **${MARKER_CURRENT}.** The current plan.\n` +
+    "\n" +
+    "## Body\n" +
+    "\n" +
+    `Superseded by an older record: ${MARKER_HISTORICAL}.\n`;
+  assert.deepEqual(
+    conflictingStatusMarkers(conflictingCurrent, MARKER_CURRENT),
+    [MARKER_HISTORICAL],
+    "a CURRENT plan that also claims HISTORICAL status must be rejected"
+  );
+
+  // Contradictory current-product framing: the required terms are present,
+  // but the self-serve Agent Desk is still presented as reopening/current.
+  const contradictoryFraming =
+    "The Website Appraisal is the audit product; delivery is human-reviewed.\n" +
+    "The self-serve Agent Desk is reopening as the current offer.\n";
+  const framingIssues = currentFramingIssues(contradictoryFraming);
+  assert.ok(framingIssues.some((issue) => issue.includes("Agent Desk")), `got: ${framingIssues.join("; ")}`);
+
+  // Positive guarantee/promise wording: the Boundaries section promises an
+  // outcome without an explicit negation.
+  const positiveGuarantee =
+    "# Implementation Plan: Fake\n" +
+    "\n" +
+    "## Boundaries\n" +
+    "\n" +
+    "- We guarantee the report within 90 days or a full refund.\n" +
+    "- Pricing is set on /pricing.\n";
+  assert.ok(boundaryGuaranteeIssues(positiveGuarantee).length > 0, "a positive guarantee must be rejected");
 });
