@@ -140,3 +140,36 @@ non-blocking on all six live pages, first paint does not wait for it, and fonts
 still load and apply under the production CSP. This closes dogfood finding
 b8f6046e942a ("Render-blocking resources on home") against the deployed site;
 the code-side fix and the CI enforcement were already merged as PRs #20 and #23.
+
+### Closeout re-verification (added 2026-08-09)
+
+Re-verified against the current origin/main head (a163327, "seo: add canonical
+URLs to the five public pages", merged 2026-08-09) after the subsequent page
+edits (heading hierarchy, apple-touch icon, schema.org, meta descriptions,
+canonical URLs, internal-link cleanup, App Store citation) — none of which was
+allowed to regress the guarantee. Two fresh measurements:
+
+1. `npm run check:render-blocking` on the current working tree (real Chromium,
+   production CSP, css2 intercepted and delayed 2500ms, stubbed response): all
+   six pages PASS — css2 non-blocking, first-contentful-paint never waits for it
+   (homepage 320ms, audit 84ms, desk 56ms, pricing 52ms, specimen 72ms,
+   brief-requested 68ms), no render-blocking resources other than the site's
+   own same-origin stylesheets, promoted sheet applied.
+
+2. Live re-measurement of the deployed pages in real Chromium (unthrottled):
+
+| Page | css2 renderBlockingStatus | FCP (ms) | css2 responseEnd (ms) | Render-blocking resources | Fonts load (Karla / Fraunces) | Promoted sheet applied |
+|---|---|---|---|---|---|---|
+| index.html (home) | non-blocking | 692 | 491 | same-origin index.css only | yes / yes | yes |
+| audit.html | non-blocking | 432 | 199 | same-origin audit.css, shared.css | yes / yes | yes |
+| agents.html | non-blocking | 356 | 142 | same-origin shared.css, agents.css | yes / yes | yes |
+| pricing.html | non-blocking | 360 | 139 | same-origin shared.css, pricing.css | yes / yes | yes |
+| specimen.html | non-blocking | 340 | 156 | same-origin shared.css, specimen.css | yes / yes | yes |
+| brief-requested.html | non-blocking | 300 | 130 | same-origin shared.css, brief-requested.css | yes / yes | yes |
+
+Same result as the earlier verification passes: no render-blocking scripts, no
+render-blocking external resources, first paint never waits for the font
+stylesheet, fonts still load and apply. Finding b8f6046e942a ("Render-blocking
+resources on home") remains closed on the code side (PRs #20 and #23), in CI
+(`npm run check:render-blocking`), and against the deployed site; this lane
+(2026-08-09) re-confirmed all three and found nothing further to change.
