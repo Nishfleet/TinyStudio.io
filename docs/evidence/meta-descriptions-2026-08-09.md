@@ -96,3 +96,41 @@ This closes dogfood finding 18dd05c10709 ("Missing meta description on home")
 against the deployed site: the code fix and the CI source guard were merged as
 PR #21, and the live deployment now serves exactly one valid, non-empty,
 unique meta description on the home page and on all four sibling public pages.
+
+### Closeout re-verification (added 2026-08-09)
+
+Re-verified against the current origin/main head (cd9184c, "seo: publish
+complete sitemap covering the five human-facing pages", merged 2026-08-09)
+after the subsequent page edits (heading hierarchy, apple-touch icon, schema.org
+structured data, canonical URLs, internal-link cleanup, App Store citation,
+sitemap) — none of which was allowed to regress the guarantee. Two fresh
+measurements:
+
+1. `npm run check` on the current working tree: PASS — the "Meta descriptions
+   (dogfood)" guard in `scripts/check-site.mjs` confirms each of the five pages
+   carries exactly one non-empty description tag in its head, within a
+   search-snippet length (≤ 160 chars), distinct per page, and free of the
+   forbidden promises.
+
+2. Live re-measurement of the deployed pages in real Chromium (headless,
+   `domcontentloaded`, tags counted in `document.head` and in the full
+   document; console and page errors captured):
+
+| Page | HTTP | description tags in head | tags in full doc | non-empty | length | unique | console errors |
+|---|---|---|---|---|---|---|---|
+| index.html (home) | 200 | 1 | 1 | yes | 150 | yes | none |
+| audit.html | 200 | 1 | 1 | yes | 157 | yes | none |
+| agents.html | 200 | 1 | 1 | yes | 155 | yes | none |
+| pricing.html | 200 | 1 | 1 | yes | 153 | yes | none |
+| specimen.html | 200 | 1 | 1 | yes | 145 | yes | none |
+
+Homepage description served live (150 chars):
+
+> TinyStudio: the free leak audit of high-ticket service homepages. Each fault named in order of what it costs you, with the fix beside it. Six a month.
+
+Same result as the earlier verification pass: exactly one valid, non-empty,
+unique meta description per page, on the page the finding flagged (home) and on
+all four sibling public pages. Finding 18dd05c10709 ("Missing meta description
+on home") remains closed on the code side (PR #21), in CI (`npm run check`),
+and against the deployed site; this lane (2026-08-09) re-confirmed all three
+and found nothing further to change.
