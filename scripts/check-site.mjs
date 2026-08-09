@@ -661,6 +661,34 @@ if (aiQuestions && aiEvidence) {
     }
   }
 
+  // External citation links (dogfood 78fcaed682fa, audit run
+  // 20260808T074205Z-msk2fl3n): the engine found apps.apple.com/app/tinystudio
+  // returning 404 on /audit.html (issue-19, "Broken external links on
+  // /audit.html"). The App Store family of hosts resolves only the
+  // id-carrying forms — https://apps.apple.com/app/<numeric-id> or
+  // https://apps.apple.com/<region>/app/<slug>/id<digits> — so a bare slug
+  // such as /app/tinystudio is structurally dead. This rule is checked
+  // offline, so CI never depends on the network.
+  for (const run of runs) {
+    for (const source of run.sources || []) {
+      let parsedUrl = null;
+      try {
+        parsedUrl = new URL(source.url);
+      } catch {
+        parsedUrl = null;
+      }
+      if (!parsedUrl) continue;
+      const host = parsedUrl.hostname.replace(/^www\./, "");
+      if (host === "apps.apple.com" || host === "itunes.apple.com") {
+        const path = parsedUrl.pathname;
+        const carriesAppId = /^\/app\/\d+/.test(path) || /\/id\d+/.test(path);
+        if (!carriesAppId) {
+          failures.push(`AI-search source URL is a dead App Store form (must carry an app id): ${run.questionId}/${run.engine} ${JSON.stringify(source.url)}`);
+        }
+      }
+    }
+  }
+
   // Strict state transition: "found" means the answer named the tested business
   // and its facts checked out against the site — so the run must cite the
   // business's own site. This prevents relabeling a wrong/absent result as
