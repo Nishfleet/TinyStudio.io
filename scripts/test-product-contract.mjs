@@ -24,8 +24,9 @@
 // document's H1; conflicting status claims are rejected, an active Agent Desk
 // framing fails even when the required current-product terms also appear, and
 // the current plan's no-guarantees boundary requires an explicit negation tied
-// to guarantee/promise language rather than a frozen sentence — every
-// guarantee/promise line must carry that negation, not just one.
+// to guarantee/promise language rather than a frozen sentence — every clause
+// carrying guarantee/promise language must carry that negation itself, and a
+// demotion word never excuses an active Agent Desk claim elsewhere on the line.
 //
 // The guard is deliberately scoped to repository contract truth. Runtime
 // behavior of public/ and src/ is owned by the application test suite, exact
@@ -108,11 +109,13 @@ function conflictingStatusMarkers(text, marker) {
 
 // --- Current-product framing ----------------------------------------------
 
-// Lines that mention the Agent Desk are truthful only when the desk is
-// negated ("not the current product") or demoted ("retired", "legacy").
-// Any positive claim that it is current, active, reopening, back, or the
-// product/offer is the regression this guard exists to reject — even in a
-// document that also names The Website Appraisal and human-reviewed delivery.
+// Lines that mention the Agent Desk must never present it as current, active,
+// reopening, back, or the product/offer — even in a document that also names
+// The Website Appraisal and human-reviewed delivery. The active claim is
+// detected first: a demotion word ("retired", "legacy") elsewhere on the line
+// does not excuse a line that reactivates the desk; the line passes only when
+// the clause holding the active claim carries its own explicit negation
+// ("not", "never", "no longer", "without").
 const AGENT_DESK_ACTIVE_PATTERNS = [
   /reopen/i,
   /Agent Desk[^\n.]{0,120}(current|active|alive|returning|back)/i,
@@ -120,20 +123,53 @@ const AGENT_DESK_ACTIVE_PATTERNS = [
   /Agent Desk[^\n.]{0,160}(is|remains|becomes?)\s+(the|our|a)?\s*(current\s+)?(product|offer)/i
 ];
 const AGENT_DESK_NEGATED = /\b(not|never|no longer|without)\b/i;
-const AGENT_DESK_DEMOTED = /\b(retired|legacy|demoted|historical|superseded)\b/i;
 
 // Returns violations for lines that present the retired Agent Desk as alive.
 function agentDeskFramingIssues(text) {
   const issues = [];
   for (const line of text.split(/\r?\n/)) {
     if (!/\bAgent Desk\b/i.test(line)) continue;
-    if (AGENT_DESK_NEGATED.test(line)) continue;
-    if (AGENT_DESK_DEMOTED.test(line)) continue;
-    if (AGENT_DESK_ACTIVE_PATTERNS.some((pattern) => pattern.test(line))) {
+    const activeMatch = AGENT_DESK_ACTIVE_PATTERNS
+      .map((pattern) => line.match(pattern))
+      .find((match) => match !== null);
+    if (activeMatch === undefined) continue;
+    const claimEnd = activeMatch.index + activeMatch[0].length;
+    if (!AGENT_DESK_NEGATED.test(clauseAround(line, claimEnd - 1))) {
       issues.push(`must not present the retired Agent Desk as current, reopening, or the product/offer: ${line.trim()}`);
     }
   }
   return issues;
+}
+
+// --- Clause boundaries ------------------------------------------------------
+
+// Clauses are separated at contrast words (but, however, yet) and at
+// sentence/semicolon boundaries. Commas and colons never split clauses, so
+// ordinary comma-separated outcome lists stay together.
+const CLAUSE_SEPARATOR = /\s*;\s*|[.!?]\s+|\s+\b(?:but|however|yet)\b\s*,?\s+/gi;
+
+// Returns the trimmed clauses of `line` split at clause boundaries.
+function clausesOf(line) {
+  const clauses = [];
+  let start = 0;
+  for (const match of line.matchAll(CLAUSE_SEPARATOR)) {
+    const clause = line.slice(start, match.index).trim();
+    if (clause !== "") clauses.push(clause);
+    start = match.index + match[0].length;
+  }
+  const tail = line.slice(start).trim();
+  if (tail !== "") clauses.push(tail);
+  return clauses;
+}
+
+// Returns the trimmed clause of `line` that contains character offset `index`.
+function clauseAround(line, index) {
+  let start = 0;
+  for (const match of line.matchAll(CLAUSE_SEPARATOR)) {
+    if (index < match.index) return line.slice(start, match.index).trim();
+    start = match.index + match[0].length;
+  }
+  return line.slice(start).trim();
 }
 
 // --- No-guarantees boundary ------------------------------------------------
@@ -148,31 +184,34 @@ function sectionText(text, heading) {
 }
 
 // The current plan keeps its no-guarantees boundary only when at least one
-// Boundaries line ties an explicit negation (no, never, must not, without) to
-// guarantee/promise language — and every other line carrying guarantee/promise
-// language is negated too. One safely negated line does not excuse a separate
-// positive guarantee/promise line. Exact sentences are not frozen.
+// Boundaries clause ties an explicit negation (no, not, never, must not,
+// without) to guarantee/promise language — and every other clause carrying
+// guarantee/promise language is negated too. Clauses are split at contrast
+// words (but, however, yet) and sentence/semicolon boundaries, never inside
+// comma-separated outcome lists, so a negation in one clause does not excuse a
+// positive guarantee/promise claim in another. Exact sentences are not frozen.
 const GUARANTEE_TERMS = /\b(guarantee|guarantees|promise|promises)\b/i;
-const GUARANTEE_NEGATIONS = /\b(no|never|must not|without)\b/i;
+const GUARANTEE_NEGATIONS = /\b(no|not|never|must not|without)\b/i;
 
 function boundaryGuaranteeIssues(text) {
   const section = sectionText(text, "## Boundaries");
   if (section === null) {
     return ["spec 004 must keep a Boundaries section"];
   }
-  const lines = section.split(/\r?\n/);
   const issues = [];
   let negated = false;
-  for (const line of lines) {
-    if (!GUARANTEE_TERMS.test(line)) continue;
-    if (GUARANTEE_NEGATIONS.test(line)) {
-      negated = true;
-      continue;
+  for (const line of section.split(/\r?\n/)) {
+    for (const clause of clausesOf(line)) {
+      if (!GUARANTEE_TERMS.test(clause)) continue;
+      if (GUARANTEE_NEGATIONS.test(clause)) {
+        negated = true;
+        continue;
+      }
+      issues.push(`spec 004 Boundaries must tie an explicit negation (no, not, never, must not, without) to guarantee/promise language: ${clause.trim()}`);
     }
-    issues.push(`spec 004 Boundaries must tie an explicit negation (no, never, must not) to guarantee/promise language: ${line.trim()}`);
   }
   if (!negated) {
-    issues.push("spec 004 Boundaries must tie an explicit negation (no, never, must not) to guarantee/promise language");
+    issues.push("spec 004 Boundaries must tie an explicit negation (no, not, never, must not, without) to guarantee/promise language");
   }
   return issues;
 }
@@ -345,6 +384,15 @@ test("checker rejects misplaced, conflicting, and contradictory truth (fixtures)
   const framingIssues = currentFramingIssues(contradictoryFraming);
   assert.ok(framingIssues.some((issue) => issue.includes("Agent Desk")), `got: ${framingIssues.join("; ")}`);
 
+  // A demotion word must not excuse an active claim: "retired" describes the
+  // desk, not the reopening, so the reactivation is still a regression.
+  const demotedReopening = "The retired Agent Desk is reopening as the current offer.\n";
+  const demotedIssues = currentFramingIssues(demotedReopening);
+  assert.ok(
+    demotedIssues.some((issue) => issue.includes("must not present the retired Agent Desk")),
+    `a demotion word must not excuse an active Agent Desk claim, got: ${demotedIssues.join("; ")}`
+  );
+
   // Positive guarantee/promise wording: the Boundaries section promises an
   // outcome without an explicit negation.
   const positiveGuarantee =
@@ -370,5 +418,19 @@ test("checker rejects misplaced, conflicting, and contradictory truth (fixtures)
   assert.ok(
     mixedIssues.some((issue) => issue.includes("guarantee the report within 90 days")),
     `the unnegated guarantee line must be reported even with a safe negated line, got: ${mixedIssues.join("; ")}`
+  );
+
+  // Clause-scoped guarantee check: a negation in one clause ("No refunds")
+  // must not excuse a positive guarantee claim after a contrast boundary.
+  const clauseGuarantee =
+    "# Implementation Plan: Fake\n" +
+    "\n" +
+    "## Boundaries\n" +
+    "\n" +
+    "- No refunds are available, but we guarantee a report within 90 days.\n";
+  const clauseIssues = boundaryGuaranteeIssues(clauseGuarantee);
+  assert.ok(
+    clauseIssues.some((issue) => issue.includes("guarantee a report within 90 days")),
+    `a negation outside the guarantee clause must not excuse it, got: ${clauseIssues.join("; ")}`
   );
 });
