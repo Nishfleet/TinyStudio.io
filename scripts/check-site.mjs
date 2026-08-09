@@ -1057,6 +1057,164 @@ for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
   }
 }
 
+// ---- Structured data (dogfood 975fdb784275) --------------------------------
+// The leak audit this site sells flags a homepage whose served HTML gives a
+// machine reader nothing to hold onto — no schema.org markup at all — so the
+// site's own five public pages must not carry that fault either. Each page
+// keeps exactly one application/ld+json block in its head: a @graph with a
+// stable Organization node (the same entity on every page), a WebSite node,
+// and the page's own WebPage node. Every value is bound to the page's own
+// head metadata — name to the og:title, description to the meta description,
+// url to the og:url — so the structured data cannot drift from what the page
+// actually says. The Organization node is identical on all five pages, and
+// the price stays where it belongs: pricing.html owns it, so no other page's
+// block may restate a dollar amount.
+const structuredDataPages = [
+  ["homepage", siteHome, "https://tinystudio.io/"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+];
+
+const ORGANIZATION_ID = "https://tinystudio.io/#organization";
+const WEBSITE_ID = "https://tinystudio.io/#website";
+const ORGANIZATION_NAME = "TinyStudio";
+const ORGANIZATION_LOGO = "https://tinystudio.io/apple-touch-icon.png";
+const ORGANIZATION_DESCRIPTION =
+  siteHome.match(/<meta\b[^>]*\bname="description"[^>]*\bcontent="([^"]*)"/i)?.[1] ?? "";
+
+// The page node name is bound to the og:title, whose HTML entities (e.g. the
+// pricing page's "&amp;") must be decoded before comparison.
+const decodeEntities = (text) =>
+  text.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+
+const jsonLdBlocksIn = (html) =>
+  [...html.matchAll(/<script\b[^>]*\btype="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
+    .map((match) => match[1]);
+
+const ogTitleOf = (html) =>
+  html.match(/<meta\b[^>]*\bproperty="og:title"[^>]*\bcontent="([^"]*)"/i)?.[1] ?? "";
+
+for (const [pageName, pageHtml, pageUrl] of structuredDataPages) {
+  const blocks = jsonLdBlocksIn(pageHtml);
+  if (blocks.length !== 1) {
+    failures.push(`Structured data must appear exactly once on ${pageName} (found ${blocks.length}).`);
+    continue;
+  }
+  const head = pageHtml.match(/<head\b[\s\S]*?<\/head>/i)?.[0] ?? "";
+  if (jsonLdBlocksIn(head).length !== 1) {
+    failures.push(`Structured data on ${pageName} must sit inside <head>.`);
+  }
+
+  let graph = null;
+  try {
+    graph = JSON.parse(blocks[0]);
+  } catch (error) {
+    failures.push(`Structured data on ${pageName} must be valid JSON (${error.message}).`);
+    continue;
+  }
+  if (graph["@context"] !== "https://schema.org") {
+    failures.push(`Structured data on ${pageName} must use the schema.org context.`);
+  }
+  if (!Array.isArray(graph["@graph"])) {
+    failures.push(`Structured data on ${pageName} must use an @graph array.`);
+    continue;
+  }
+
+  const nodes = graph["@graph"];
+  const nodeIds = nodes.map((node) => node["@id"]).filter(Boolean);
+  if (new Set(nodeIds).size !== nodeIds.length) {
+    failures.push(`Structured data on ${pageName} must use unique @id values within the graph.`);
+  }
+
+  const orgNodes = nodes.filter((node) => node["@type"] === "Organization");
+  const siteNodes = nodes.filter((node) => node["@type"] === "WebSite");
+  const pageNodes = nodes.filter((node) => node["@type"] === "WebPage");
+  if (orgNodes.length !== 1) {
+    failures.push(`Structured data on ${pageName} must carry exactly one Organization node (found ${orgNodes.length}).`);
+  } else {
+    const org = orgNodes[0];
+    if (org["@id"] !== ORGANIZATION_ID) {
+      failures.push(`Organization on ${pageName} must use the stable @id ${ORGANIZATION_ID}.`);
+    }
+    if (org.name !== ORGANIZATION_NAME) {
+      failures.push(`Organization on ${pageName} must be named ${ORGANIZATION_NAME} (found ${JSON.stringify(org.name)}).`);
+    }
+    if (org.url !== "https://tinystudio.io/") {
+      failures.push(`Organization on ${pageName} must point at https://tinystudio.io/ (found ${JSON.stringify(org.url)}).`);
+    }
+    if (org.logo !== ORGANIZATION_LOGO) {
+      failures.push(`Organization on ${pageName} must use the served logo ${ORGANIZATION_LOGO} (found ${JSON.stringify(org.logo)}).`);
+    }
+    if (org.description !== ORGANIZATION_DESCRIPTION) {
+      failures.push(`Organization description on ${pageName} must match the homepage meta description (stable entity).`);
+    }
+  }
+
+  if (siteNodes.length !== 1) {
+    failures.push(`Structured data on ${pageName} must carry exactly one WebSite node (found ${siteNodes.length}).`);
+  } else {
+    const site = siteNodes[0];
+    if (site["@id"] !== WEBSITE_ID) {
+      failures.push(`WebSite on ${pageName} must use the stable @id ${WEBSITE_ID}.`);
+    }
+    if (site.url !== "https://tinystudio.io/" || site.name !== ORGANIZATION_NAME) {
+      failures.push(`WebSite on ${pageName} must carry the site url and the TinyStudio name.`);
+    }
+    if (site.inLanguage !== "en") {
+      failures.push(`WebSite on ${pageName} must declare inLanguage "en".`);
+    }
+    if (site.publisher?.["@id"] !== ORGANIZATION_ID) {
+      failures.push(`WebSite on ${pageName} must name the Organization as its publisher.`);
+    }
+  }
+
+  const metaDescription = pageHtml.match(/<meta\b[^>]*\bname="description"[^>]*\bcontent="([^"]*)"/i)?.[1] ?? "";
+  const ogTitle = ogTitleOf(pageHtml);
+  if (pageNodes.length !== 1) {
+    failures.push(`Structured data on ${pageName} must carry exactly one WebPage node (found ${pageNodes.length}).`);
+  } else {
+    const page = pageNodes[0];
+    if (page["@id"] !== `${pageUrl}#webpage`) {
+      failures.push(`WebPage on ${pageName} must use the @id ${pageUrl}#webpage.`);
+    }
+    if (page.url !== pageUrl) {
+      failures.push(`WebPage on ${pageName} must carry its own url ${pageUrl} (found ${JSON.stringify(page.url)}).`);
+    }
+    if (page.name !== decodeEntities(ogTitle)) {
+      failures.push(`WebPage name on ${pageName} must equal the og:title (${JSON.stringify(decodeEntities(ogTitle))}).`);
+    }
+    if (page.description !== metaDescription) {
+      failures.push(`WebPage description on ${pageName} must equal the meta description.`);
+    }
+    if (page.inLanguage !== "en") {
+      failures.push(`WebPage on ${pageName} must declare inLanguage "en".`);
+    }
+    if (page.isPartOf?.["@id"] !== WEBSITE_ID) {
+      failures.push(`WebPage on ${pageName} must belong to the WebSite node.`);
+    }
+    if (page.about?.["@id"] !== ORGANIZATION_ID) {
+      failures.push(`WebPage on ${pageName} must be about the Organization node.`);
+    }
+  }
+
+  // The price is pricing.html's to state; no other page's structured data may
+  // restate a dollar amount (the pricing page mirrors its own meta
+  // description, which legitimately carries the price).
+  if (pageName !== "pricing page" && /\$\s?\d/.test(blocks[0])) {
+    failures.push(`Structured data on ${pageName} must not restate a dollar amount; pricing.html owns the price.`);
+  }
+  for (const claim of forbiddenClaims) {
+    if (blocks[0].toLowerCase().includes(claim.toLowerCase())) {
+      failures.push(`Structured data on ${pageName} must not promise: ${claim}`);
+    }
+  }
+  if (/\+\d[\d\s()-]{6,}\d/.test(blocks[0])) {
+    failures.push(`Structured data on ${pageName} must not capture phone numbers.`);
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
