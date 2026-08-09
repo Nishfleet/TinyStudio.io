@@ -1,5 +1,10 @@
 # Tasks: Self-Serve Agent Desk
 
+> **STATUS: HISTORICAL — SUPERSEDED.** This task list belongs to the retired
+> self-serve Agent Desk, which is no longer TinyStudio's current product. It
+> is kept only as history. The current product plan is
+> `specs/004-website-appraisal/plan.md` — read that plan first.
+
 - [x] Create new deployable public-site repo.
 - [x] Add Spec Kit project layer.
 - [x] Add Agent Desk public surface.

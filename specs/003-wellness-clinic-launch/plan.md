@@ -1,5 +1,13 @@
 # 003 - Premium Wellness Clinic Launch
 
+> **STATUS: NOT THE CURRENT PRODUCT PLAN.** This is an earlier approved
+> campaign plan (approved by Nish 2026-08-05), preserved verbatim as history
+> alongside the retired self-serve Agent Desk specs it builds on. The current
+> product plan is `specs/004-website-appraisal/plan.md`. All pricing,
+> guarantee, and funnel wording below is retained exactly as approved and is
+> not a statement of TinyStudio's current offer — the current offer and its
+> price live on the public site (`/pricing`).
+
 Status: approved by Nish 2026-08-05. Builds on the recovered minimal-input
 Agent Desk (`specs/002-minimal-input-agent-desk/`).
 

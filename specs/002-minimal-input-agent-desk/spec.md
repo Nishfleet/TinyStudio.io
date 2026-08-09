@@ -1,5 +1,10 @@
 # Feature Specification: Minimal-Input Agent Desk
 
+> **STATUS: HISTORICAL — SUPERSEDED.** This specification describes the
+> retired self-serve Agent Desk, which is no longer TinyStudio's current
+> product. It is kept only as history; do not read it as current guidance.
+> The current product plan is `specs/004-website-appraisal/plan.md`.
+
 ## What Went Wrong
 
 The Agent Desk drifted into an agency intake form. The UI required customers to pre-diagnose their offer, buyer, funnel, proof, follow-up, CRM, and weekly numbers before the agent could help.

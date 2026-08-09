@@ -1,5 +1,12 @@
 # Implementation Plan: Self-Serve Agent Desk
 
+> **STATUS: HISTORICAL — SUPERSEDED.** This plan describes the retired
+> self-serve Agent Desk, which is no longer TinyStudio's current product. It
+> is kept only as history; do not read it as current guidance. The current
+> product plan is `specs/004-website-appraisal/plan.md` — read that plan
+> first. The legacy `/api/agent-audit` mechanics it introduced remain live
+> and are documented as legacy in README.md and MEMORY.md.
+
 ## Scope
 
 Serve a self-serve AI Agent Desk from the TinyStudio.io domain family while keeping ad-platform actions, claims, and money-sensitive decisions approval-gated.

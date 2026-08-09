@@ -1,5 +1,10 @@
 # Feature Specification: Self-Serve Agent Desk
 
+> **STATUS: HISTORICAL — SUPERSEDED.** This specification describes the
+> retired self-serve Agent Desk, which is no longer TinyStudio's current
+> product. It is kept only as history; do not read it as current guidance.
+> The current product plan is `specs/004-website-appraisal/plan.md`.
+
 ## User Outcome
 
 Visitors can visit `tinystudio.io`, submit high-ticket pipeline context, and receive an AI-generated Pipeline Brief, Implementation Checklist, and Weekly Fix Report without a sales call.

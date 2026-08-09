@@ -1,5 +1,12 @@
 # Implementation Plan: Minimal-Input Agent Desk
 
+> **STATUS: HISTORICAL — SUPERSEDED.** This plan describes the retired
+> self-serve Agent Desk, which is no longer TinyStudio's current product. It
+> is kept only as history; do not read it as current guidance. The current
+> product plan is `specs/004-website-appraisal/plan.md` — read that plan
+> first. The legacy `/api/agent-audit` mechanics it corrected remain live
+> and are documented as legacy in README.md and MEMORY.md.
+
 ## Scope
 
 Correct the Agent Desk so it behaves like an agentic product: the customer provides a small seed, and the agents infer the rest unless a true blocker remains.

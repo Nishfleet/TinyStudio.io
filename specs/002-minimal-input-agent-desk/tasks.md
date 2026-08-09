@@ -1,5 +1,10 @@
 # Tasks: Minimal-Input Agent Desk
 
+> **STATUS: HISTORICAL — SUPERSEDED.** This task list belongs to the retired
+> self-serve Agent Desk, which is no longer TinyStudio's current product. It
+> is kept only as history. The current product plan is
+> `specs/004-website-appraisal/plan.md` — read that plan first.
+
 - [x] Write root-cause spec for the heavy-intake failure.
 - [x] Add implementation plan for the correction.
 - [x] Make offer, audience, funnel, proof, follow-up, CRM, and weekly numbers optional in the UI.
