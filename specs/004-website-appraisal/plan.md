@@ -35,7 +35,7 @@ self-serve Agent Desk framing.
 
 ## Boundaries
 
-- The public app stores email and lightweight usage metadata only; submitted business context is processed to generate output and is not stored.
+- `/api/signups` stores the submitted email and the normalized submitted website URL in D1 alongside lightweight request metadata (source/page path, referer, user agent, timestamps); submitted page content and media are processed to generate output and are not stored, and the website URL is used for appraisal and request handling.
 - No invented outcomes, prices, or guarantees: no revenue, ranking, ROAS, conversion, booked-call, or sales-volume promises anywhere in owned copy.
 - Human review gates fit, claims, client-facing work, delivery/acceptance, and renewal.
 - Current-offer truth lives in `/offer.md` and `/llms.txt`; `README.md`, `MEMORY.md`, and `package.json` must mirror it without contradicting it.
