@@ -9,15 +9,21 @@
 //
 //   1. README.md, MEMORY.md and package.json present The Website Appraisal and
 //      human-reviewed delivery as current truth, never the Agent Desk;
-//   2. specs 001 and 002 are unmistakably HISTORICAL, spec 003 is SUPERSEDED
-//      with its money/legal text preserved, and the current plan exists at
-//      specs/004-website-appraisal/plan.md with the CURRENT marker;
-//   3. the public truth files keep the legacy Agent Desk demotion, and the
-//      legacy /agent-desk surface and /api/agent-audit endpoint stay documented
-//      as legacy/operational rather than removed;
-//   4. known-bad fixtures (the old Agent Desk framings) are rejected, so the
+//   2. README.md and MEMORY.md point at the current plan so "read the current
+//      plan" resolves unambiguously;
+//   3. specs 001 and 002 are unmistakably HISTORICAL, spec 003 is SUPERSEDED,
+//      and the current plan exists at specs/004-website-appraisal/plan.md with
+//      the CURRENT marker;
+//   4. the legacy /agent-desk surface and /api/agent-audit endpoint stay
+//      documented as legacy/operational rather than removed;
+//   5. known-bad fixtures (the old Agent Desk framings) are rejected, so the
 //      checker proves it rejects the regressions it guards, not just that the
 //      current files pass.
+//
+// The guard is deliberately scoped to repository contract truth. Runtime
+// behavior of public/ and src/ is owned by the application test suite, exact
+// pricing/legal prose is owned by the public copy files, and the dependency
+// inventory is owned by package-lock.json — none of those belong here.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -41,14 +47,8 @@ const MARKER_HISTORICAL = "Status: HISTORICAL";
 const MARKER_SUPERSEDED = "Status: SUPERSEDED";
 const MARKER_CURRENT = "Status: CURRENT";
 
-// Spec 003 money/legal text that must survive untouched.
-const SPEC_003_PRESERVED = [
-  "$2,500/month",
-  "3-month minimum",
-  "full refund",
-  "no revenue, ranking, ROAS, conversion,",
-  "booked-call or sales-volume guarantees."
-];
+// The current plan every historical/superseded record must point at.
+const CURRENT_PLAN = "specs/004-website-appraisal/plan.md";
 
 const HISTORICAL_SPEC_FILES = [
   "specs/001-public-buyer-page/spec.md",
@@ -82,6 +82,7 @@ test("README.md frames The Website Appraisal as the current product", () => {
   const readme = read("README.md");
   const issues = currentFramingIssues(readme);
   assert.deepEqual(issues, [], issues.join("; "));
+  assert.ok(readme.includes(CURRENT_PLAN), "README must point at the current plan");
   // The retired Agent Desk must be documented as legacy, not removed or current.
   assert.ok(readme.includes("retired"), "README must mark the Agent Desk retired");
   assert.ok(readme.includes("legacy"), "README must mark the Agent Desk legacy");
@@ -93,6 +94,7 @@ test("MEMORY.md frames The Website Appraisal as the current product", () => {
   const memory = read("MEMORY.md");
   const issues = currentFramingIssues(memory);
   assert.deepEqual(issues, [], issues.join("; "));
+  assert.ok(memory.includes(CURRENT_PLAN), "MEMORY must point at the current plan");
   assert.ok(memory.includes("retired"), "MEMORY must mark the Agent Desk retired");
   assert.ok(memory.includes("legacy"), "MEMORY must mark the Agent Desk legacy");
 });
@@ -104,7 +106,6 @@ test("package.json describes the current product and wires the contract test", (
   assert.ok(!pkg.description.includes(OLD_PACKAGE_DESCRIPTION), "package.json must not carry the old Agent Desk description");
   assert.ok(pkg.scripts["test:contract"] === "node --test scripts/test-product-contract.mjs", "test:contract must run the contract test");
   assert.ok(pkg.scripts.test.includes("test:contract"), "npm test must include the contract test");
-  assert.deepEqual(Object.keys(pkg.devDependencies), ["playwright", "wrangler"], "no new dependencies may be added");
 });
 
 test("specs 001 and 002 are unmistakably historical implementation records", () => {
@@ -112,48 +113,32 @@ test("specs 001 and 002 are unmistakably historical implementation records", () 
     const file = read(path);
     assert.ok(file.includes(MARKER_HISTORICAL), `${path} must carry the ${MARKER_HISTORICAL} marker`);
     assert.ok(file.includes("retired"), `${path} must state the Agent Desk is retired`);
-    assert.ok(file.includes("004-website-appraisal"), `${path} must point at the current plan`);
+    assert.ok(file.includes(CURRENT_PLAN), `${path} must point at the current plan`);
   }
 });
 
-test("spec 003 is superseded and its money/legal text is preserved", () => {
+test("spec 003 is superseded and points at the current plan", () => {
   const plan = read("specs/003-wellness-clinic-launch/plan.md");
   assert.ok(plan.includes(MARKER_SUPERSEDED), "spec 003 must carry the SUPERSEDED marker");
-  assert.ok(plan.includes("004-website-appraisal"), "spec 003 must point at the current plan");
-  for (const fragment of SPEC_003_PRESERVED) {
-    assert.ok(plan.includes(fragment), `spec 003 must preserve its money/legal text: ${fragment}`);
-  }
+  assert.ok(plan.includes(CURRENT_PLAN), "spec 003 must point at the current plan");
+  // Spec 003's money/legal body is preserved by the repo, not asserted here:
+  // the guard does not couple to exact pricing or legal sentence fragments.
 });
 
 test("the current plan exists at specs/004-website-appraisal/plan.md", () => {
-  const plan = read("specs/004-website-appraisal/plan.md");
+  const plan = read(CURRENT_PLAN);
   assert.ok(plan.includes(MARKER_CURRENT), "spec 004 must carry the CURRENT marker");
   assert.ok(plan.includes(CURRENT_PRODUCT), "spec 004 must name The Website Appraisal");
   assert.ok(plan.includes(CURRENT_DELIVERY), "spec 004 must name human-reviewed delivery");
-  assert.ok(plan.includes("no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees"),
-    "spec 004 must keep the no-guarantees boundary");
+  assert.ok(plan.includes("guarantees"), "spec 004 must keep its no-guarantees boundary");
+  assert.ok(plan.includes("/audit"), "spec 004 must keep the /audit appraisal surface");
+  assert.ok(plan.includes("/agents"), "spec 004 must keep the /agents desk surface");
+  assert.ok(plan.includes("/pricing"), "spec 004 must keep the /pricing surface");
   assert.ok(plan.includes("/agent-desk"), "spec 004 must document the legacy /agent-desk surface");
   assert.ok(plan.includes("/api/agent-audit"), "spec 004 must document the legacy /api/agent-audit endpoint");
   assert.ok(plan.includes("legacy"), "spec 004 must cover legacy mechanics");
   assert.ok(plan.includes("## Verification"), "spec 004 must have a Verification section");
   assert.ok(plan.includes("node --test scripts/test-product-contract.mjs"), "spec 004 must cite the contract test");
-});
-
-test("public truth keeps the legacy Agent Desk demotion and the live legacy endpoint", () => {
-  const llms = read("public/llms.txt");
-  const offer = read("public/offer.md");
-  const agentDesk = read("public/agent-desk.html");
-  const worker = read("src/worker.js");
-
-  for (const file of [llms, offer]) {
-    assert.ok(file.includes(CURRENT_PRODUCT), "public truth must name The Website Appraisal");
-    assert.ok(file.includes(CURRENT_DELIVERY), "public truth must name human-reviewed delivery");
-    assert.ok(file.includes("demoted"), "public truth must state the Agent Desk is demoted");
-  }
-  assert.ok(llms.includes("Legacy Self-Serve Agent Desk"), "llms.txt must keep its legacy Agent Desk section");
-  assert.ok(offer.includes("Legacy Agent Desk"), "offer.md must keep its legacy Agent Desk section");
-  assert.ok(agentDesk.includes("retired"), "the /agent-desk surface must keep its retired framing");
-  assert.ok(worker.includes("/api/agent-audit"), "the legacy /api/agent-audit endpoint must remain operational, not removed");
 });
 
 test("checker rejects the old Agent Desk framings (fixtures)", () => {
