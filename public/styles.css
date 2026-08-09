@@ -315,7 +315,7 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 12px;
   list-style-position: inside;
 }
@@ -352,7 +352,7 @@ textarea:focus {
 .agent-form button,
 .output-actions button {
   cursor: pointer;
-  min-height: 42px;
+  min-height: 44px;
   border: 1px solid var(--ink);
   border-radius: 7px;
   padding: 0 16px;
@@ -465,7 +465,7 @@ textarea:focus {
 }
 
 .output-actions button {
-  min-height: 40px;
+  min-height: 44px;
   color: var(--ink);
   background: var(--paper);
 }
@@ -615,6 +615,31 @@ textarea:focus {
     padding: 12px;
   }
 
+  /* tap targets: every control keeps a >=44px hit area on touch */
+  .brand {
+    padding: 6px 0;
+  }
+
+  input,
+  select {
+    min-height: 44px;
+  }
+
+  .optional-panel summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+  }
+
+  .output-tabs button {
+    min-height: 44px;
+  }
+
+  .agent-footer a {
+    padding: 14px 0;
+  }
+
   .app-header,
   .metric-grid,
   .output-panel,
@@ -629,13 +654,6 @@ textarea:focus {
 
   .field-grid {
     grid-template-columns: 1fr;
-  }
-
-  .optional-panel summary {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 2px;
-    padding: 10px 12px;
   }
 
   .output-panel {

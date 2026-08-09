@@ -61,7 +61,7 @@ form.lead:hover,form.lead:focus-within{border-color:rgba(164,126,60,.42)}
 form.lead input{flex:1;border:0;background:transparent;outline:none;font-family:'Karla',sans-serif;
   font-size:16px;color:var(--ink);padding:12px 0}
 form.lead input::placeholder{color:#AC9E8B}
-form.lead button{border:0;cursor:pointer;border-radius:999px;padding:15px 20px;white-space:nowrap;
+form.lead button{border:0;cursor:pointer;border-radius:999px;padding:16px 20px;white-space:nowrap;
   font-family:'Karla',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
   color:#FBF7EF;background:linear-gradient(168deg,#241D16,#100C09);
   box-shadow:0 6px 18px -8px rgba(25,20,16,.6);
@@ -114,6 +114,11 @@ form.lead.two button{flex:0 0 auto}
   .wrap{padding:0 20px}
   nav{flex-wrap:wrap;row-gap:14px}
   .navlinks{flex-wrap:wrap;gap:10px 14px}
+  /* tap targets: every nav/footer link keeps a >=44px hit area on touch */
+  .logo{padding:11px 0}
+  .navlinks a{padding:15px 0}
+  .navcta{padding:15px 20px}
+  footer a{padding:16px 0}
   .band{padding:38px 26px;margin-top:80px}
   .band h2{font-size:30px}
   .band p{font-size:15px}
