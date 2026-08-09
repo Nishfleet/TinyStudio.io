@@ -1,5 +1,9 @@
 # Feature Specification: Minimal-Input Agent Desk
 
+> **Status: superseded — historical record.** This spec documents the retired
+> self-serve Agent Desk. Current offer: the Website Appraisal
+> (`specs/004-website-appraisal/plan.md`).
+
 ## What Went Wrong
 
 The Agent Desk drifted into an agency intake form. The UI required customers to pre-diagnose their offer, buyer, funnel, proof, follow-up, CRM, and weekly numbers before the agent could help.

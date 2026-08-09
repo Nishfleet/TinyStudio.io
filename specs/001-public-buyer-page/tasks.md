@@ -1,5 +1,9 @@
 # Tasks: Self-Serve Agent Desk
 
+> **Status: superseded — historical record.** These tasks belong to the
+> retired self-serve Agent Desk. Current offer: the Website Appraisal
+> (`specs/004-website-appraisal/plan.md`).
+
 - [x] Create new deployable public-site repo.
 - [x] Add Spec Kit project layer.
 - [x] Add Agent Desk public surface.

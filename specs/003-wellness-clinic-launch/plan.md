@@ -3,6 +3,11 @@
 Status: approved by Nish 2026-08-05. Builds on the recovered minimal-input
 Agent Desk (`specs/002-minimal-input-agent-desk/`).
 
+Status: superseded by the current offer, the Website Appraisal
+(`specs/004-website-appraisal/plan.md`). Historical record: the Growth Desk
+retainer offer below is not the current offer. The money, pricing, and
+guarantee body that follows is preserved verbatim.
+
 ## Goal
 
 Land 3 retainer clients at $2,500/month, 3-month minimum, from premium wellness

@@ -1,5 +1,11 @@
 # Implementation Plan: Minimal-Input Agent Desk
 
+> **Status: superseded — historical record.** This plan documents the retired
+> self-serve Agent Desk. The minimal-input mechanics it shipped remain live
+> as legacy surfaces (`/agent-desk`, `/api/agent-audit`, `/api/signups`) with
+> their safety rails. Current offer: the Website Appraisal
+> (`specs/004-website-appraisal/plan.md`).
+
 ## Scope
 
 Correct the Agent Desk so it behaves like an agentic product: the customer provides a small seed, and the agents infer the rest unless a true blocker remains.

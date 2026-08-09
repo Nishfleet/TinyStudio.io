@@ -1,5 +1,9 @@
 # Tasks: Minimal-Input Agent Desk
 
+> **Status: superseded — historical record.** These tasks belong to the
+> retired self-serve Agent Desk. Current offer: the Website Appraisal
+> (`specs/004-website-appraisal/plan.md`).
+
 - [x] Write root-cause spec for the heavy-intake failure.
 - [x] Add implementation plan for the correction.
 - [x] Make offer, audience, funnel, proof, follow-up, CRM, and weekly numbers optional in the UI.
