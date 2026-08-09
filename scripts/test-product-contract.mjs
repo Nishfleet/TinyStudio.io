@@ -24,7 +24,8 @@
 // document's H1; conflicting status claims are rejected, an active Agent Desk
 // framing fails even when the required current-product terms also appear, and
 // the current plan's no-guarantees boundary requires an explicit negation tied
-// to guarantee/promise language rather than a frozen sentence.
+// to guarantee/promise language rather than a frozen sentence — every
+// guarantee/promise line must carry that negation, not just one.
 //
 // The guard is deliberately scoped to repository contract truth. Runtime
 // behavior of public/ and src/ is owned by the application test suite, exact
@@ -146,9 +147,11 @@ function sectionText(text, heading) {
   return lines.slice(start + 1, end === -1 ? undefined : end).join("\n");
 }
 
-// The current plan keeps its no-guarantees boundary only when a line in the
-// Boundaries section ties an explicit negation (no, never, must not) to
-// guarantee/promise language. Exact sentences are not frozen.
+// The current plan keeps its no-guarantees boundary only when at least one
+// Boundaries line ties an explicit negation (no, never, must not, without) to
+// guarantee/promise language — and every other line carrying guarantee/promise
+// language is negated too. One safely negated line does not excuse a separate
+// positive guarantee/promise line. Exact sentences are not frozen.
 const GUARANTEE_TERMS = /\b(guarantee|guarantees|promise|promises)\b/i;
 const GUARANTEE_NEGATIONS = /\b(no|never|must not|without)\b/i;
 
@@ -157,13 +160,21 @@ function boundaryGuaranteeIssues(text) {
   if (section === null) {
     return ["spec 004 must keep a Boundaries section"];
   }
-  const negated = section.split(/\r?\n/).some(
-    (line) => GUARANTEE_TERMS.test(line) && GUARANTEE_NEGATIONS.test(line)
-  );
-  if (!negated) {
-    return ["spec 004 Boundaries must tie an explicit negation (no, never, must not) to guarantee/promise language"];
+  const lines = section.split(/\r?\n/);
+  const issues = [];
+  let negated = false;
+  for (const line of lines) {
+    if (!GUARANTEE_TERMS.test(line)) continue;
+    if (GUARANTEE_NEGATIONS.test(line)) {
+      negated = true;
+      continue;
+    }
+    issues.push(`spec 004 Boundaries must tie an explicit negation (no, never, must not) to guarantee/promise language: ${line.trim()}`);
   }
-  return [];
+  if (!negated) {
+    issues.push("spec 004 Boundaries must tie an explicit negation (no, never, must not) to guarantee/promise language");
+  }
+  return issues;
 }
 
 // Returns a list of human-readable violations for the top-level framing of a
@@ -344,4 +355,20 @@ test("checker rejects misplaced, conflicting, and contradictory truth (fixtures)
     "- We guarantee the report within 90 days or a full refund.\n" +
     "- Pricing is set on /pricing.\n";
   assert.ok(boundaryGuaranteeIssues(positiveGuarantee).length > 0, "a positive guarantee must be rejected");
+
+  // Mixed guarantee wording: a safely negated guarantee/promise line does not
+  // excuse a separate positive guarantee/promise line in the same Boundaries
+  // section; the section must be rejected even though a negation exists.
+  const mixedGuarantee =
+    "# Implementation Plan: Fake\n" +
+    "\n" +
+    "## Boundaries\n" +
+    "\n" +
+    "- No invented outcomes or guarantees: no revenue or ranking promises.\n" +
+    "- We guarantee the report within 90 days or a full refund.\n";
+  const mixedIssues = boundaryGuaranteeIssues(mixedGuarantee);
+  assert.ok(
+    mixedIssues.some((issue) => issue.includes("guarantee the report within 90 days")),
+    `the unnegated guarantee line must be reported even with a safe negated line, got: ${mixedIssues.join("; ")}`
+  );
 });
