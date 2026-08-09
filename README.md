@@ -4,6 +4,13 @@ TinyStudio's public website: The Website Appraisal — the free leak audit of
 high-ticket service homepages — and the human-reviewed desk that closes what
 the audit finds.
 
+## Current Plan
+
+The current product plan is `specs/004-website-appraisal/plan.md` (Status:
+CURRENT). Specs 001 and 002 are HISTORICAL records of the retired Agent Desk,
+and spec 003 is a SUPERSEDED campaign plan. Start from the current plan before
+changing product truth.
+
 ## What This Repo Owns
 
 - The public `tinystudio.io` and `www.tinystudio.io` Website Appraisal site: the homepage, the appraisal flow, the human-reviewed desk, pricing, specimen, and the agent-readable truth at `/llms.txt` and `/offer.md`.
