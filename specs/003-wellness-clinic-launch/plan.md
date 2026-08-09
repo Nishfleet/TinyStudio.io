@@ -1,6 +1,10 @@
 # 003 - Premium Wellness Clinic Launch
 
-Status: approved by Nish 2026-08-05. Builds on the recovered minimal-input
+Status: approved by Nish 2026-08-05. Superseded as the current plan by
+`specs/004-website-appraisal/plan.md` (2026-08-10), which is the current
+plan. This campaign plan is kept for its offer history; the desk terms it
+specifies — $2,500/month, 3-month minimum, delivery guarantee — remain the
+desk's terms on pricing.html. Builds on the recovered minimal-input
 Agent Desk (`specs/002-minimal-input-agent-desk/`).
 
 ## Goal

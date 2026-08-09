@@ -1,3 +1,9 @@
+> **Spec status: COMPLETED — SUPERSEDED.** This plan was delivered: the
+> minimal-input Agent Desk it built is live as the legacy Agent Desk and is
+> no longer the current offer. The current offer is the Website Appraisal
+> and the current plan is `specs/004-website-appraisal/plan.md`. This file
+> is kept for history and must not be treated as current guidance.
+
 # Implementation Plan: Minimal-Input Agent Desk
 
 ## Scope

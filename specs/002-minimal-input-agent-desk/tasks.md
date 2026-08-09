@@ -1,3 +1,9 @@
+> **Spec status: COMPLETED — SUPERSEDED.** All work delivered: the
+> minimal-input Agent Desk is live as the legacy Agent Desk and is no longer
+> the current offer. The current offer is the Website Appraisal and the
+> current plan is `specs/004-website-appraisal/plan.md`. This file is kept
+> for history.
+
 # Tasks: Minimal-Input Agent Desk
 
 - [x] Write root-cause spec for the heavy-intake failure.

@@ -1,3 +1,9 @@
+> **Spec status: COMPLETED — SUPERSEDED.** All work delivered: the
+> self-serve Agent Desk is live as the legacy Agent Desk and is no longer
+> the current offer. The current offer is the Website Appraisal and the
+> current plan is `specs/004-website-appraisal/plan.md`. This file is kept
+> for history.
+
 # Tasks: Self-Serve Agent Desk
 
 - [x] Create new deployable public-site repo.
@@ -15,4 +21,4 @@
 - [x] Run local and browser verification.
 - [x] Create GitHub repo and push.
 - [x] Run Cloudflare dry run.
-- [ ] Deploy Agent Desk routes after review gate.
+- [x] Deploy Agent Desk routes after review gate. (Delivered — the routes are live as the legacy Agent Desk surface, superseded as the current offer by the Website Appraisal.)
