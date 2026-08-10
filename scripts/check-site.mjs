@@ -393,6 +393,58 @@ for (const [file, needles] of responsiveCss) {
   }
 }
 
+// Tap-target regression guard (finding: mobile tap targets under WCAG sizes).
+// On every served page the touch hit areas were below the 44px bar the finding
+// holds the site to: marketing nav links ~15px tall, the nav CTA ~35px, the
+// logo ~25px, footer links ~13px, and the primary lead-form CTA 42px. The fix
+// grows every interactive element in the mobile nav, footer and lead forms to
+// a >=44px hit area, scoped to the existing mobile blocks so desktop widths
+// are untouched. These are STATIC SOURCE GUARDS (exact-string and regex checks
+// over the served CSS), not behavioral tests: CI has no browser. The
+// behavioral, measured layout proof for this fix lives in
+// docs/evidence/tap-targets-2026-08-09.md (unfixed nav link ~15px, nav CTA
+// ~34px, lead CTA ~42px at 390x844; fixed all >=44px).
+const tapTargetCss = [
+  // [file, mobile-block needles, whole-file needles]
+  ["shared.css",
+    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
+    ["border-radius:999px;padding:16px 20px"]],
+  ["index.css",
+    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}"],
+    ["border-radius:999px;padding:16px 20px"]],
+  ["audit.css",
+    [".navcta{flex:1 1 100%;text-align:center;padding:15px 20px}"],
+    []],
+  ["brief-requested.css",
+    [],
+    ["padding:15px 0;text-decoration:underline"]],
+  ["styles.css",
+    [".brand {\n    padding: 6px 0;", "input,\n  select {\n    min-height: 44px;", ".output-tabs button {\n    min-height: 44px;", ".agent-footer a {\n    padding: 14px 0;"],
+    ["cursor: pointer;\n  min-height: 44px;\n  border: 1px solid var(--ink);",
+     ".output-actions button {\n  min-height: 44px;",
+     "justify-content: space-between;\n  gap: 12px;\n  min-height: 44px;"]]
+];
+for (const [file, blockNeedles, fileNeedles] of tapTargetCss) {
+  const css = read(`public/${file}`);
+  const mobile = css.match(/@media \(max-width:\s*(?:760|680)px\)\s*\{([\s\S]*)\}\s*$/)?.[1] ?? "";
+  for (const needle of fileNeedles) {
+    if (!css.includes(needle)) failures.push(`Missing tap-target rule in ${file}: ${needle}`);
+  }
+  for (const needle of blockNeedles) {
+    if (!mobile.includes(needle)) failures.push(`Missing mobile tap-target rule in ${file}: ${needle}`);
+  }
+}
+
+// The behavioral tap-target proof (real Chromium measurement, local static
+// copy) is checked in so the static guards above stay distinguishable from it.
+// Existence and section anchors only — this does not re-verify measurements.
+const tapTargetReceipt = read("docs/evidence/tap-targets-2026-08-09.md");
+for (const anchor of ["unfixed", "390x844", "44px", "not CI proof", "Exact verification method"]) {
+  if (!tapTargetReceipt.includes(anchor)) {
+    failures.push(`Tap-target evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+  }
+}
+
 // Render-blocking font stylesheet guards (dogfood finding b8f6046e942a).
 // The Google Fonts css2 stylesheet was fetched render-blocking on every public
 // page — a <link rel="stylesheet"> in the homepage head, and an @import chain
@@ -992,6 +1044,36 @@ for (const [pageName, pageHtml] of ownedPages) {
   if (!pageHtml.includes("tinystudio.io")) {
     failures.push(`Every owned page must anchor the identity to the domain: ${pageName}`);
   }
+}
+
+// ---- Retired Agent Desk index guard (dogfood: Google still presents the
+// retired self-serve "TinyStudio Agent Desk" title/snippet for tinystudio.io)
+// ----------------------------------------------------------------------------
+// The self-serve Agent Desk moved off the root when the leak-audit site took
+// over; public/agent-desk.html is still served at /agent-desk and
+// /agent-desk.html as a legacy surface. It is absent from the sitemap, no page
+// links to it, and llms.txt/offer.md demote it ("is not the current offer") —
+// but its head still carried the retired product's title and no robots
+// exclusion, so Google kept presenting that title/snippet for tinystudio.io.
+// The captured evidence is evidence-fixtures/ai-search/evidence.json, q5 /
+// google (2026-08-06): title "tinystudio.io - TinyStudio Agent Desk" against
+// the homepage URL, the legacy page's title consolidated through its canonical.
+// The legacy page must therefore stay out of the index: its head keeps a
+// robots noindex, nofollow meta, and its title and description frame the
+// surface as retired, so neither the search index nor a scraper can re-present
+// the retired self-serve product as the current offer.
+const retiredDeskHead = index.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
+if (!robotsMeta.test(retiredDeskHead)) {
+  failures.push("Retired Agent Desk page must keep a robots noindex, nofollow meta in its head.");
+}
+if (!/\bretired\b/i.test(retiredDeskHead)) {
+  failures.push("Retired Agent Desk page head must frame the surface as retired (title and/or description).");
+}
+const retiredDeskDescription =
+  retiredDeskHead.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0] ?? "";
+if (!/\bretired\b/i.test(retiredDeskDescription)) {
+  failures.push("Retired Agent Desk description must frame the surface as retired.");
 }
 
 // ---- Meta descriptions (dogfood) -------------------------------------------
