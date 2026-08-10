@@ -91,7 +91,9 @@ becoming `Found` — is not met, and the item honestly stays open.
 
 - `controlled-questions.json` is byte-identical. The `q5` truth still names
   the Agent Desk; replacing that retired ground truth is a separate open
-  item and was not claimed by this pass.
+  item and was not claimed by this pass. (Update 2026-08-11: that separate
+  item is now done — the `q5` truth was aligned to the current offer in
+  `docs/evidence/ai-search/2026-08-11-q5-ground-truth-alignment.md`.)
 - No page-specific remediation (`remediation.page`) is claimed anywhere:
   the same-domain citations in the `q2`, `q6` and `q7` runs do not support
   the answers' content, which the fixture rules say is necessary before a
