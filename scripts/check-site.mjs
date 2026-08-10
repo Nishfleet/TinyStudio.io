@@ -1492,6 +1492,63 @@ for (const [pageName, pageHtml, expected] of canonicalPages) {
   }
 }
 
+// ---- Document titles (brand consistency) ----------------------------------
+// Two served pages still branded themselves "The Tiny Studio" — the spaced
+// name the site's own identity copy disavows (it collides with "The Tiny
+// Studio LA" and other unrelated businesses) — while every other title said
+// "TinyStudio": /pricing served "Pricing & terms — The Tiny Studio" and
+// /brief-requested served "Request received — The Tiny Studio", both
+// byte-identical on origin/main. Title tags are a first-order SERP signal, so
+// every one of the six served appraisal pages must now name the brand in its
+// document title and must never return the spaced "The Tiny Studio" form.
+// The retired /agent-desk surface is deliberately excluded: its title frames
+// itself as retired and it is noindex.
+const titlePages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
+];
+
+for (const [pageName, pageHtml] of titlePages) {
+  const title = pageHtml.match(/<title>([^<]*)<\/title>/i)?.[1] ?? "";
+  if (!title) {
+    failures.push(`Document title must exist on ${pageName}.`);
+    continue;
+  }
+  if (!title.includes("TinyStudio")) {
+    failures.push(`Document title on ${pageName} must name TinyStudio (found ${JSON.stringify(title)}).`);
+  }
+  if (title.includes("The Tiny Studio")) {
+    failures.push(`Document title on ${pageName} must not use the spaced "The Tiny Studio" form (found ${JSON.stringify(title)}).`);
+  }
+}
+
+// ---- Intake field labels (activation) -------------------------------------
+// Both appraisal intake forms (homepage and /audit) labelled their fields
+// only with placeholder text, which disappears the moment a buyer starts
+// typing and is not a persistent programmatic label. Each intake input must
+// carry a non-empty aria-label so the field keeps its name for assistive
+// tech and for the browser's own validation announcements, no matter what
+// the field contains.
+const intakePages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit]
+];
+
+for (const [pageName, pageHtml] of intakePages) {
+  for (const input of pageHtml.matchAll(/<input\b[^>]*>/gi)) {
+    const tag = input[0];
+    if (!/\bname="(?:website|email)"/.test(tag)) continue;
+    const aria = tag.match(/\baria-label="([^"]*)"/)?.[1] ?? "";
+    if (!aria.trim()) {
+      failures.push(`Intake input on ${pageName} must carry a persistent programmatic aria-label (placeholder-only labels disappear as buyers type): ${tag}`);
+    }
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
