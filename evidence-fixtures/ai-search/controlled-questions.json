@@ -30,7 +30,7 @@
       "id": "q5-what-is-tinystudio-io",
       "name": "Whether tinystudio.io is named",
       "prompt": "What is tinystudio.io?",
-      "truth": "tinystudio.io is TinyStudio's own site: the leak audit, plus the Agent Desk behind it."
+      "truth": "tinystudio.io is TinyStudio's own site: the leak audit, plus the desk that closes the leaks the audit finds."
     },
     {
       "id": "q6-client-work",
