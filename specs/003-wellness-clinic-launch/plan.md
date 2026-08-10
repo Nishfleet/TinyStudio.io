@@ -1,5 +1,10 @@
 # 003 - Premium Wellness Clinic Launch
 
+> **Status: SUPERSEDED — historical campaign plan.** Approved 2026-08-05 but
+> never the current product plan. The current plan is The Website Appraisal
+> (`specs/004-website-appraisal/plan.md`). Body, pricing, and legal text below
+> are preserved untouched.
+
 Status: approved by Nish 2026-08-05. Builds on the recovered minimal-input
 Agent Desk (`specs/002-minimal-input-agent-desk/`).
 
