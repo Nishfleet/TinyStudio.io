@@ -1076,6 +1076,41 @@ if (!/\bretired\b/i.test(retiredDeskDescription)) {
   failures.push("Retired Agent Desk description must frame the surface as retired.");
 }
 
+// The legacy page must never canonicalize to the homepage or any other live
+// page: the canonical-to-homepage was the consolidation path that handed the
+// retired page's title to tinystudio.io in the first place (see the receipt
+// above), and a noindex page pointing its canonical at a live page tells
+// Google it is a duplicate of that page while the noindex removal is
+// processing. The canonical must name the legacy page itself (or be absent),
+// and og:url must not name any other page either.
+const legacyPageUrl = "https://tinystudio.io/agent-desk.html";
+const retiredDeskCanonical =
+  retiredDeskHead.match(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/i)?.[0] ?? "";
+const retiredDeskCanonicalHref =
+  retiredDeskCanonical.match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+if (retiredDeskCanonicalHref && retiredDeskCanonicalHref !== legacyPageUrl) {
+  failures.push(
+    `Retired Agent Desk canonical must be self-referencing (${legacyPageUrl}) or absent; found ${retiredDeskCanonicalHref}.`
+  );
+}
+const retiredDeskOgUrl =
+  retiredDeskHead.match(/<meta\b[^>]*\bproperty\s*=\s*["']og:url["'][^>]*>/i)?.[0] ?? "";
+const retiredDeskOgUrlHref = retiredDeskOgUrl.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+if (retiredDeskOgUrlHref && retiredDeskOgUrlHref !== legacyPageUrl) {
+  failures.push(
+    `Retired Agent Desk og:url must be self-referencing (${legacyPageUrl}) or absent; found ${retiredDeskOgUrlHref}.`
+  );
+}
+
+// The worker's retired 410 responses (app.tinystudio.io / api.tinystudio.io)
+// must not re-present the retired self-serve Agent Desk as what the main
+// domain "now runs": that phrasing claims the retired product is the current
+// offer of tinystudio.io and stays crawlable on 410 pages until they drop out
+// of the index.
+if (/now runs the self-serve Agent Desk/i.test(worker)) {
+  failures.push("Worker retired 410 responses must not claim the main domain now runs the self-serve Agent Desk.");
+}
+
 // ---- Meta descriptions (dogfood) -------------------------------------------
 // The leak audit this site sells flags a homepage whose served HTML carries no
 // description, so the site's own five public pages must not carry the same
