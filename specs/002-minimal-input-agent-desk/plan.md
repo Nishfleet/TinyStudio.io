@@ -1,5 +1,10 @@
 # Implementation Plan: Minimal-Input Agent Desk
 
+> **Status: HISTORICAL — retired.** Records the minimal-input Agent Desk
+> correction. The self-serve Agent Desk is retired and is not the current
+> product; the current offer is The Website Appraisal
+> (`specs/004-website-appraisal/plan.md`). Body kept as a historical record.
+
 ## Scope
 
 Correct the Agent Desk so it behaves like an agentic product: the customer provides a small seed, and the agents infer the rest unless a true blocker remains.
