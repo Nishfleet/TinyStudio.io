@@ -1183,9 +1183,9 @@ if (!worker.includes('"/apple-touch-icon.png"')) {
 const socialSharePages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
 
@@ -1257,9 +1257,9 @@ for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
 const structuredDataPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 
 const ORGANIZATION_ID = "https://tinystudio.io/#organization";
@@ -1447,14 +1447,15 @@ for (const [pageName, pageHtml] of internalLinkPages) {
 // keeps exactly one <link rel="canonical"> — parsed across the whole document,
 // ignoring commented-out markup and accepting single or double quotes — that
 // link sits inside the head and points at the absolute https://tinystudio.io
-// address the page is served under (the .html form; the worker also serves
-// extensionless twins).
+// address of the page. The deployed worker 307-redirects every .html form to
+// its clean extensionless twin, so a canonical must name the address that
+// serves 200, never the redirecting form.
 const canonicalPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 
 const canonicalLinkPattern = /<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi;
