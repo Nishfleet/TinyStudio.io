@@ -1,5 +1,10 @@
 # Implementation Plan: Self-Serve Agent Desk
 
+> **Status: HISTORICAL — retired.** Records the original Agent Desk
+> implementation. The self-serve Agent Desk is retired and is not the current
+> product; the current offer is The Website Appraisal
+> (`specs/004-website-appraisal/plan.md`). Body kept as a historical record.
+
 ## Scope
 
 Serve a self-serve AI Agent Desk from the TinyStudio.io domain family while keeping ad-platform actions, claims, and money-sensitive decisions approval-gated.
