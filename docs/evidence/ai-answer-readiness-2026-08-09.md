@@ -95,3 +95,77 @@ now declares, per controlled question, the preferred source page an engine
 should read first, and CI fails if that declaration drifts, unmaps a
 question, names an unserved page, or lets a price question point anywhere
 but `pricing.html`.
+
+### Closeout re-verification (added 2026-08-11)
+
+Re-verified against the current origin/main head (8b42e0a,
+"docs(evidence): close out apple touch icon finding 98a7bf8e08fc against
+current main and live (#77)") after thirteen further commits touched main
+since the 2026-08-09 closeout. Four of them touched the public surface or
+the guard file: c5e2f2b (de-index the retired Agent Desk: `agent-desk.html`
+plus a new `check-site.mjs` guard block), ac05bec (mobile tap targets:
+CSS-only plus a new tap-target guard block in `check-site.mjs`), f9f0b0f
+(footer daily-reads link on home), 1cc7a4e (audit-page canonical/og:url/
+JSON-LD cleanup). None regressed the Answer Readiness declaration:
+`public/llms.txt`, `public/offer.md`, `scripts/test-agent-ui.mjs` and
+`evidence-fixtures/ai-search/` are byte-identical to the closeout commit
+95d2248 (`git diff 95d2248..HEAD -- <file>` is empty for each), and the only
+`check-site.mjs` edit in that range touching the guard's neighborhood is a
+comment refresh in 1cc7a4e on the sitemap-membership note — the
+`ANSWER_READINESS_HEADING` section, its question-coverage loop, its
+exactly-one-page rule, its served-page membership check, its price-ownership
+rule and its mirror check are all unchanged. The audit-page embed was not
+touched (1cc7a4e changes only canonical, `og:url` and JSON-LD `@id`/`url`
+lines).
+
+Three checks:
+
+1. Source checks on this head: `npm run check` passes — the "AI Answer
+   Readiness (dogfood 4473a99a9bc9)" guard in `scripts/check-site.mjs`
+   requires both `llms.txt` and `offer.md` to carry the `## Answer
+   Readiness: Preferred Source Pages` section, maps every controlled
+   question in the fixture to exactly one served page (sitemap membership,
+   either spelling), forces the price questions (q2, q7) to `pricing.html`,
+   and fails if `offer.md` mirrors a different page — and the full `npm
+   test` suite passes (check, headings, sitemap, worker 53/53, UI 16/16
+   including the "every controlled question maps to a preferred source
+   page" subtest, contract 8/8; 90 tests total). `git diff --check` is
+   clean.
+
+2. Fresh live measurement of the deployed site (2026-08-11, HTTPS fetch
+   against `https://tinystudio.io`, same deterministic checks the source
+   guard runs, applied to the served bytes):
+
+   | URL | HTTP | content-type | CSP header | bytes | Answer Readiness section |
+   |---|---|---|---|---|---|
+   | `/llms.txt` | 200 | text/plain | yes | 4076 | present |
+   | `/offer.md` | 200 | text/markdown | yes | 3319 | present |
+   | `/sitemap.xml` | 200 | — | — | — | used for membership |
+
+   The live section carries all seven controlled questions, each mapped to
+   exactly one served page: q1 → `https://tinystudio.io/` (homepage), q2 →
+   `https://tinystudio.io/pricing.html`, q3 → `https://tinystudio.io/audit.html`,
+   q4 → `https://tinystudio.io/audit.html`, q5 →
+   `https://tinystudio.io/` (homepage), q6 → `https://tinystudio.io/audit.html`,
+   q7 → `https://tinystudio.io/pricing.html`. Both price questions point at
+   `pricing.html`, which owns the price; every mapped page is a served page
+   per the live sitemap; and `offer.md` mirrors the identical
+   question-to-page mapping. The served bytes are byte-identical to
+   `public/llms.txt` and `public/offer.md` on this head, so the deployed
+   pair and the guarded source cannot drift without changing the served
+   bytes themselves.
+
+3. The fixture is untouched: `evidence-fixtures/ai-search/controlled-questions.json`
+   and `evidence.json` remain byte-identical to the closeout commit, so the
+   checks above ran against the same question registry the 2026-08-09 pass
+   used.
+
+## Limitation (unchanged)
+
+This is still a repository-side declaration plus a served-bytes measurement,
+not a live engine run: nothing here claims that any engine now cites the
+preferred page or answers the price. That question remains a future
+controlled re-run recorded through the same fixture, with a captured answer,
+cited sources and a strict state — and the tracker cannot re-open the
+declaration itself, because it is now guarded on both sides of the deploy
+boundary.
