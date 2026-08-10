@@ -1,5 +1,10 @@
 # Feature Specification: Self-Serve Agent Desk
 
+> **Status: HISTORICAL — retired.** Records the original Agent Desk
+> implementation. The self-serve Agent Desk is retired and is not the current
+> product; the current offer is The Website Appraisal
+> (`specs/004-website-appraisal/plan.md`). Body kept as a historical record.
+
 ## User Outcome
 
 Visitors can visit `tinystudio.io`, submit high-ticket pipeline context, and receive an AI-generated Pipeline Brief, Implementation Checklist, and Weekly Fix Report without a sales call.
