@@ -874,9 +874,9 @@ if (aiQuestions && aiEvidence) {
 const ANSWER_READINESS_HEADING = "## Answer Readiness: Preferred Source Pages";
 
 // The sitemap lists the indexable public surface at its clean extensionless
-// addresses; the worker also serves each page at its canonical .html twin,
-// which is the form the canonical links and the preferred-source mapping
-// use. Membership accepts either spelling (home stays "/").
+// addresses; the worker also serves each page at its .html twin, which the
+// preferred-source mapping uses. Membership accepts either spelling (home
+// stays "/").
 const servedPageUrls = new Set(
   [...sitemap.matchAll(/<loc>(https:\/\/tinystudio\.io\/[^<]*)<\/loc>/g)]
     .map((match) => match[1])
@@ -1209,7 +1209,7 @@ if (!worker.includes('"/apple-touch-icon.png"')) {
 // once.
 const socialSharePages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
-  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit"],
   ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
   ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
   ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
@@ -1283,7 +1283,7 @@ for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
 // block may restate a dollar amount.
 const structuredDataPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
-  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit"],
   ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
   ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
   ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
@@ -1474,11 +1474,14 @@ for (const [pageName, pageHtml] of internalLinkPages) {
 // keeps exactly one <link rel="canonical"> — parsed across the whole document,
 // ignoring commented-out markup and accepting single or double quotes — that
 // link sits inside the head and points at the absolute https://tinystudio.io
-// address the page is served under (the .html form; the worker also serves
-// extensionless twins).
+// address of the page. The deployed worker 307-redirects every .html form to
+// its clean extensionless twin, so a canonical must name the address that
+// serves 200, never the redirecting form: the audit page's canonical is the
+// clean /audit, while the remaining pages keep their .html form here until
+// they are migrated the same way.
 const canonicalPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
-  ["audit page", siteAudit, "https://tinystudio.io/audit.html"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit"],
   ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
   ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
   ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
