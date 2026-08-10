@@ -1,5 +1,10 @@
 # Tasks: Self-Serve Agent Desk
 
+> **Status: HISTORICAL — retired.** Records the original Agent Desk
+> implementation. The self-serve Agent Desk is retired and is not the current
+> product; the current offer is The Website Appraisal
+> (`specs/004-website-appraisal/plan.md`). Body kept as a historical record.
+
 - [x] Create new deployable public-site repo.
 - [x] Add Spec Kit project layer.
 - [x] Add Agent Desk public surface.

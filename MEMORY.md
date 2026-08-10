@@ -4,22 +4,22 @@
 
 - This repo is the deployable public website source for `tinystudio.io`.
 - The Growth Brain operating repo remains at `/Users/nish/Documents/TINY STUDIO` and is the source of deeper offer/delivery truth.
-- As of the Agent Desk pass, `tinystudio.io` is reopening as a self-serve AI workspace for high-ticket pipeline setup.
-- Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report from user-submitted context through `/api/agent-audit`.
+- The current offer is The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds. Public truth lives at `/llms.txt` and `/offer.md`.
+- The current plan is `specs/004-website-appraisal/plan.md`; specs 001 and 002 are historical records of the retired Agent Desk, and spec 003 is a superseded campaign plan.
+- The self-serve Agent Desk is retired. Its surfaces and the `/api/agent-audit` generation endpoint still exist operationally as legacy mechanics and must not be presented as the current product.
 
 ## Product Truth
 
-- TinyStudio Agent Desk generates a Pipeline Brief, Implementation Checklist, and Weekly Fix Report covering readiness diagnosis, funnel path, audience/pain map, first creative tests, lead qualification, follow-up/setter flow, CRM/tracking checklist, weekly metrics, and decision plan.
-- The default customer intake is minimal: email plus business snapshot. Offer, buyer, funnel, proof, follow-up, CRM, constraints, and weekly metrics are optional detail inputs, and agents should infer missing context before asking blocker questions.
+- TinyStudio's current offer is The Website Appraisal: a written report on one page of the visitor's choosing, each fault named in order of what it costs, with the fix beside each, reviewed by a person. The human-reviewed desk closes what the audit finds.
+- The appraisal intake is minimal: one page of the visitor's choosing; the desk's price and terms live on `pricing.html`, and TinyStudio makes no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
 - Email capture remains live through `/api/signups`.
-- The public app stores email and lightweight agent usage metadata in D1, including daily rate-limit counters and a daily IP-derived rate-limit key, but not the submitted business snapshot, optional details, weekly metrics, or generated artifacts.
+- The public app stores email and lightweight agent usage metadata in D1, including daily rate-limit counters and a daily IP-derived rate-limit key, but not submitted business context or generated artifacts.
 - Public copy must not promise revenue, ROAS, SEO ranking, AI visibility, conversion lift, booked calls, sales lift, autonomous ad buying, or unapproved ad spend changes.
 
-## Agent Desk Safety
+## Legacy Agent Desk
 
-- Agents can generate planning assets and recommendations.
-- Human approval remains required for claims, ad spend, campaign publishing, platform connections, CRM outcome syncing, compliance-sensitive actions, and anything that would affect money or external accounts.
-- Client-side code must not call model providers, Cloudflare admin APIs, D1, ad-platform APIs, or private credentials directly.
+- The earlier self-serve Agent Desk (one-shot Pipeline Brief through `/api/agent-audit`) is demoted, retired, and is not the product TinyStudio sells.
+- Legacy Agent Desk surfaces still reachable on this site are legacy, not the current offer, and keep their safety rails: no campaign publishing, no ad spend changes, no ad account connection, no prospect message sending; client-side code never calls model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
 ## Deployment Boundary
 
@@ -35,6 +35,6 @@
 
 - Run `npm test` before any deploy.
 - Apply D1 migrations locally and remotely before deploying schema-dependent Worker changes.
-- Verify `/api/agent-audit` with a sample high-ticket scenario before deploy.
+- Verify the legacy `/api/agent-audit` still responds as operational legacy; it is not current-offer truth.
 - For visual changes, run the Worker and inspect desktop and mobile browser views.
-- Verify old deep links such as `/pipeline-sprint/` render the Agent Desk, not stale public pages.
+- Verify old deep links such as `/pipeline-sprint/` still resolve to the legacy Agent Desk surface, not stale public pages.
