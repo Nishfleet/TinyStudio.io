@@ -1046,6 +1046,26 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
 }
 
+// ---- Developer REPLACE comments (dogfood: public/index.html shipped two of
+// them inside the "Who signs it" section — an empty sig-note paragraph and a
+// photo swap note — so the live homepage source carried an unfinished
+// credential line next to its strongest credibility claim). A served marketing
+// page must never ship a "REPLACE:" instruction meant for the editor's eye.
+const placeholderScanPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
+];
+
+for (const [pageName, pageHtml] of placeholderScanPages) {
+  if (pageHtml.includes("<!-- REPLACE:")) {
+    failures.push(`Owned page must not ship a developer REPLACE comment: ${pageName}`);
+  }
+}
+
 // ---- Retired Agent Desk index guard (dogfood: Google still presents the
 // retired self-serve "TinyStudio Agent Desk" title/snippet for tinystudio.io)
 // ----------------------------------------------------------------------------

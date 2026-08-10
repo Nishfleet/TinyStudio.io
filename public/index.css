@@ -192,7 +192,6 @@
   .sig-body h2{font-family:'Fraunces',serif;font-weight:200;font-size:40px;letter-spacing:-.028em;
     line-height:1.1;margin-top:14px}
   .sig-body p{margin-top:20px;font-size:16.5px;line-height:1.75;color:var(--soft);max-width:58ch}
-  .sig-note:empty{display:none}
   @media (max-width:760px){.signer{grid-template-columns:1fr;gap:26px}}
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */

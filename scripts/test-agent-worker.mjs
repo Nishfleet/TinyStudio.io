@@ -60,7 +60,7 @@ class FakeStatement {
 
   async all() {
     this.db.calls.push({ method: "all", sql: this.sql, values: this.values });
-    return { results: [] };
+    return { results: [{ name: "agent_runs" }, { name: "agent_usage_limits" }] };
   }
 }
 
@@ -1044,4 +1044,33 @@ test("worker does not serve unlisted asset-like paths outside the public allow-l
   const env = { ASSETS: { fetch: async () => new Response("should not be reached", { status: 200 }) } };
   const res = await worker.fetch(new Request("https://tinystudio.io/not-listed.js"), env);
   assert.equal(res.status, 404);
+});
+
+test("retired app surface names the current offer, not a live Agent Desk", async () => {
+  const env = {};
+  const res = await worker.fetch(new Request("https://app.tinystudio.io/"), env);
+  assert.equal(res.status, 410);
+  const html = await res.text();
+  assert.match(html, /retired/i, "app surface must keep its retired framing");
+  assert.match(html, /Website Appraisal/, "app surface must name the current offer");
+  assert.doesNotMatch(html, /Agent Desk/i, "app surface must not revive the retired product name");
+});
+
+test("retired api surface names the current offer, not a live Agent Desk", async () => {
+  const env = {};
+  const res = await worker.fetch(new Request("https://api.tinystudio.io/"), env);
+  assert.equal(res.status, 410);
+  const body = await res.json();
+  assert.equal(body.status, "retired");
+  assert.match(body.message, /Website Appraisal/, "api surface must name the current offer");
+  assert.doesNotMatch(body.message, /Agent Desk/i, "api surface must not revive the retired product name");
+});
+
+test("worker health endpoint reports the current offer surface, not the retired Agent Desk", async () => {
+  const env = { DB: new FakeDB(), AI: {} };
+  const res = await worker.fetch(new Request("https://tinystudio.io/health"), env);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.surface, "website-appraisal");
+  assert.ok(body.ok, "health endpoint must report healthy with configured AI and DB");
 });
