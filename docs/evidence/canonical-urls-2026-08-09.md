@@ -105,3 +105,61 @@ This closes dogfood finding 6631c0ab0454 ("Missing canonical URL on home")
 against the deployed site: the code fix and the CI source guard were merged as
 PR #29, and the live deployment now serves exactly one valid, non-empty,
 unique canonical link on the home page and on all four sibling public pages.
+
+### Closeout re-verification (added 2026-08-11)
+
+Re-verified against the current origin/main head (1cc7a4e, "fix(public): point
+appraisal-page canonicals and JSON-LD @ids at the clean /audit URL (#56)") after
+five further commits touched the public surface since the 2026-08-09 closeout —
+95d2248 (preferred source pages for AI answers), c5e2f2b (de-index the retired
+Agent Desk), ac05bec (mobile tap targets: CSS only), f9f0b0f (footer
+attribution link on home), 1cc7a4e (canonical/JSON-LD URL cleanup on /audit).
+Only the last touched a canonical link — the audit page's moved from the
+redirecting `https://tinystudio.io/audit.html` to the clean
+`https://tinystudio.io/audit`, with the `check-site.mjs` guard expectation
+updated to match (verified per commit: `git show <sha> -- public/` contains no
+canonical-line change in any other commit). The home-page canonical the
+finding flagged is byte-identical to the one the closeout measured. Three
+checks:
+
+1. Source checks on this head: `npm run check` passes — the "Canonical URLs
+   (dogfood)" guard in `scripts/check-site.mjs` requires exactly one
+   non-commented `<link rel="canonical">` inside `<head>` per page, with a
+   non-empty href pointing at the page's canonical `https://tinystudio.io`
+   address (home expected: `https://tinystudio.io/`) and no URL duplicated
+   across pages — and the full `npm test` suite passes (check, headings 6/6,
+   sitemap, worker, ui, contract).
+
+2. Fresh live measurement of the deployed site (2026-08-11, headless Chromium,
+   same method as the receipt above, `domcontentloaded` wait, canonical read
+   from `document.head` and from the full document, console/page errors
+   captured): every page returns 200 with the CSP header, serves exactly one
+   canonical link in its head and one across the whole document, and logs no
+   console or page errors. Measured canonical hrefs (unique across pages):
+
+   | Page | HTTP | CSP header | canonical links in head | links in full doc | href | console errors |
+   |---|---|---|---|---|---|---|
+   | index.html (home, `/`) | 200 | yes | 1 | 1 | `https://tinystudio.io/` | none |
+   | audit.html (`/audit`) | 200 | yes | 1 | 1 | `https://tinystudio.io/audit.html` | none |
+   | agents.html (`/agents`) | 200 | yes | 1 | 1 | `https://tinystudio.io/agents.html` | none |
+   | pricing.html (`/pricing`) | 200 | yes | 1 | 1 | `https://tinystudio.io/pricing.html` | none |
+   | specimen.html (`/specimen`) | 200 | yes | 1 | 1 | `https://tinystudio.io/specimen.html` | none |
+
+   Homepage canonical served live, unchanged from the closeout receipt:
+
+   > `<link rel="canonical" href="https://tinystudio.io/">`
+
+3. Deployment-lag note (honesty, not a canonical regression): the live
+   deployment lags current main by exactly the two newest commits — f9f0b0f
+   (footer attribution link on home) and 1cc7a4e (canonical/JSON-LD URL
+   cleanup on /audit) — so the live audit page still names the redirecting
+   `https://tinystudio.io/audit.html` form that PR #56 already corrected on
+   main to the clean `/audit`. Neither lagging commit touches the home page's
+   canonical; the address the finding flagged (home, `https://tinystudio.io/`)
+   is identical on main and live and was already served correctly at the
+   2026-08-09 closeout.
+
+Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
+code side (PR #29), in CI (`npm run check` guard), and against the deployed
+site; this lane (2026-08-11) re-confirmed all three against current main and
+found nothing further to change on the finding's page.
