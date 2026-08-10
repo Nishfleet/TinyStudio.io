@@ -178,3 +178,83 @@ growth-loop packet with what was requested and when.
 - G2's request form, category taxonomy, and review flow may change after this date;
   when they do, apply the truthfulness tests above rather than this table verbatim.
 - Nothing here predicts publication, visibility, traffic, leads, or revenue.
+
+## Re-verification (added 2026-08-11, lane 1)
+
+Re-verified against the current origin/main head (354e725, "docs(evidence):
+re-verify structured-data finding 975fdb784275 against current main and live
+(#78)") and the live site on 2026-08-11, before landing this handoff on main.
+Every first-party claim the profile table and the "Never on the profile" list
+depend on was checked against the live surfaces it cites. The commits that
+landed since 2026-08-09 — canonical/JSON-LD URL cleanup on /audit (1cc7a4e),
+agent-desk de-index, tap targets, internal links, the Website Appraisal
+contract doc, render-blocking and sitemap re-verify receipts — none of them
+changed the identity, offer, contact, or terms statements this profile uses.
+Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) still carry, verbatim: the
+   offer ("The Website Appraisal — the free leak audit of high-ticket service
+   homepages — and the human-reviewed desk that closes what the audit
+   finds"), "reviewed by a person, not autonomous software", "month one
+   corrects the costliest fault; months two and three build the loop", "Six
+   appraisals a month, done by hand. When the sixth is taken, the intake
+   closes until the next", "run by Nish, who signs every audit", "The site
+   states no base city or office address", "clients are never named",
+   "Contact: hello@tinystudio.io", and the price-and-terms pointer to
+   `https://tinystudio.io/pricing.html`.
+2. Live `https://tinystudio.io/` (HTTP 200) still carries the public free
+   intake CTA "Request the appraisal" and the "Where TinyStudio is based"
+   disclosure; live `https://tinystudio.io/pricing.html` (served via the
+   Worker's redirect to the clean `/pricing`, HTTP 200) still states the desk
+   runs "at $2,500 a month on a three-month minimum". As on 2026-08-09, the
+   profile description deliberately does not restate the price in dollars —
+   llms.txt and offer.md point price and terms at pricing.html, and G2 copy
+   rules keep URLs out of the description — so the handoff is unchanged.
+3. Live `https://tinystudio.io/audit.html` (clean `/audit`, HTTP 200) still
+   answers q3 "Where is TinyStudio based?" with "The site does not state a
+   base city or office address" and q6 "Does TinyStudio publish client work?"
+   with "TinyStudio does not publish client work: no logos, no case studies,
+   no testimonials, no 'as seen at'"; the visible page text still says
+   "Clients are never named, and the site states no base city or office
+   address". The location and clients fields stay empty.
+4. The official G2 pages were re-fetched 2026-08-11 and still document the
+   flow and rules this handoff relies on:
+   - `https://sell.g2.com/create-a-profile` still says the submitted product
+     or service "will be conditionally approved", the G2 research team
+     "verifies your product or service—in about 3-5 business days—before
+     placing it in the right category", "your profile is live on our site
+     and ready to be claimed", the claim request is reviewed "for final
+     approval within 1-3 business days", and "You can claim your profile for
+     free"; its "Add your product/service" link still opens
+     `https://www.g2.com/products/new`.
+   - `https://www.g2digitalmarkets.com/listing-guidelines` (still "Last
+     updated on May 4, 2026") still requires the offer to be "publicly
+     available, with a call to action that highlights an offer on sale to
+     the public", still states "we do not list custom-made/bespoke
+     software", still requires the listing "under the product or service
+     name on the Vendor's website", and still carries the copy rules the
+     table obeys: no first-person point of view ("e.g., we, our, us"), no
+     calls to action, no "phone, email, fax, URL" inside the description, no
+     superlatives or comparative language ("e.g., best, most, fastest"), no
+     suffixes in the company name ("e.g., no Inc, Corporation, LLC, etc."),
+     and "the final copy is subject to the discretion of our content team".
+   - `https://research.g2.com/methodology/research-faq` still says "Service
+     providers are represented with one profile per vendor" and still advises
+     first checking that the product or company is not "already listed on G2
+     under a different name".
+5. No G2 receipt exists in the product state (no G2 profile URL or rejection
+   response anywhere in the repo on this head); the receipt block below
+   remains unfilled and the human submission remains the open action. This
+   lane could not re-run the external search baseline (the public search
+   endpoints blocked scripted queries from the VPS — DuckDuckGo returned an
+   anomaly challenge and Google returned no result content), so the
+   2026-08-09 baseline stands with its own caveat: it is a baseline, not
+   proof of non-existence. If a profile has been published under a different
+   name form, the "What this document does not claim" section above applies —
+   compare it against llms.txt before changing anything.
+
+Same result as the 2026-08-09 preparation: every field in the table can still
+be filled truthfully from live first-party surfaces, nothing needs to move to
+the "Never on the profile" list, and no reject condition is triggered. The
+handoff is ready for Nish's manual submission unchanged.
