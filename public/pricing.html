@@ -128,6 +128,11 @@
   <div class="band">
     <h2>The appraisal costs you an email. The rest is a decision you can make later.</h2>
     <p>Six a month, done by hand. When this month's sixth is taken the intake closes until the next one opens.</p>
+    <form class="lead two" action="/api/signups" method="post">
+      <input type="text" name="website" required inputmode="url" autocomplete="url" placeholder="yourwebsite.com" aria-label="Your website domain" pattern="(https?://)?([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(:[0-9]+)?(/[^\s]*)?" title="Enter your domain, like example.com">
+      <input type="email" name="email" required placeholder="Your work email" aria-label="Your work email">
+      <button>Request the appraisal</button>
+    </form>
     <div class="note">No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees. The delivery guarantee above is the only promise we make about outcomes, and it is a promise about our work, not your market.</div>
   </div>
 
