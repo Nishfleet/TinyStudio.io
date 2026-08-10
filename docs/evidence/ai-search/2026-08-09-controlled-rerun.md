@@ -115,7 +115,7 @@ implies a ranking, visibility, lead, or revenue outcome.
 
 ## Verification (reproduce)
 
-```
+```sh
 npm run check
 npm test
 git diff --check
