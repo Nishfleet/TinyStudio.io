@@ -123,3 +123,50 @@ home") against the deployed site: the code fix and the CI source test were
 merged as PR #28, `npm run check` and `npm test` pass on current main, and
 the live deployment now serves a gap-free heading outline with exactly one
 leading `h1` on the home page and on all five sibling served pages.
+
+### Closeout re-verification (added 2026-08-11)
+
+Re-verified against the current origin/main head (1cc7a4e, "fix(public): point
+appraisal-page canonicals and JSON-LD @ids at the clean /audit URL (#56)") after
+five further commits touched the public surface since the 2026-08-09 closeout —
+95d2248 (preferred source pages for AI answers), c5e2f2b (de-index the retired
+Agent Desk), ac05bec (mobile tap targets: CSS only), f9f0b0f (footer
+attribution link), 1cc7a4e (canonical/JSON-LD URL cleanup on /audit) — none of
+which changed a single heading tag in any of the six served pages (verified per
+commit: `git show <sha> -- public/` contains zero `<h1>`–`<h6>` line changes),
+and none of which was allowed to regress the guarantee. Three checks:
+
+1. Source checks on this head: `npm run test:headings` passes 6/6 — the
+   regression test locks the corrected outline of each of the six served
+   pages and includes fixtures proving the checker rejects the pre-fix
+   shapes (h2->h4 skips, non-leading or repeated `h1`, headings hidden in
+   comments) — `npm run check` passes, and the full `npm test` suite passes.
+
+2. Fresh live measurement of the deployed site (2026-08-11, headless Chromium,
+   same method as the receipt above): every page returns 200 with the CSP
+   header, serves exactly one leading `h1`, descends without skipped levels,
+   and logs no page errors. Measured outlines (identical to the 2026-08-09
+   measurement and to the locked outlines in `scripts/test-heading-hierarchy.mjs`):
+
+   | Page | heading outline | heading issues |
+   |---|---|---|
+   | index.html (home, `/`) | `1-2-2-2-3-3-3-3-2-3-3-3-3-2-3-3-3-3-3-3-2-2-2-3-3-3-3-2` | none |
+   | audit.html (`/audit`) | `1-2-2-3-3-3-3-2-2-2-2` | none |
+   | agents.html (`/agents`) | `1-2-2-2-2-2-2-2-2-2-2-2` | none |
+   | pricing.html (`/pricing`) | `1-2-2-3-3-3-3-2-3-3-3-3-3-2-2` | none |
+   | specimen.html (`/specimen`) | `1-2-2-2-2-3-2` | none |
+   | brief-requested.html (`/brief-requested`) | `1-2-2-2` | none (same unrelated GTM/CSP console note as the 2026-08-09 receipt) |
+
+3. Deployment-lag note (honesty, not a heading issue): the live deployment
+   currently lags current main by exactly the two newest commits — f9f0b0f
+   (footer attribution link on home) and 1cc7a4e (canonical/JSON-LD URL
+   cleanup on /audit). `diff` of the served bytes against main-minus-those-
+   commits is empty for both pages; neither commit touches headings. The
+   heading-hierarchy fix itself (PR #28) has been live since before the
+   2026-08-09 closeout and its outlines remain intact today, so this finding
+   is unaffected.
+
+Finding e6e153bdadd0 ("Heading hierarchy needs cleanup on home") remains
+closed on the code side (PR #28), in CI (`test:headings`), and against the
+deployed site; this lane (2026-08-11) re-confirmed all three against current
+main and found nothing further to change.
