@@ -1183,9 +1183,9 @@ if (!worker.includes('"/apple-touch-icon.png"')) {
 const socialSharePages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
 
@@ -1257,9 +1257,9 @@ for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
 const structuredDataPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 
 const ORGANIZATION_ID = "https://tinystudio.io/#organization";
@@ -1449,15 +1449,14 @@ for (const [pageName, pageHtml] of internalLinkPages) {
 // link sits inside the head and points at the absolute https://tinystudio.io
 // address of the page. The deployed worker 307-redirects every .html form to
 // its clean extensionless twin, so a canonical must name the address that
-// serves 200, never the redirecting form: the audit page's canonical is the
-// clean /audit, while the remaining pages keep their .html form here until
-// they are migrated the same way.
+// serves 200, never the redirecting form: every page's canonical is the clean
+// extensionless URL (home stays "/").
 const canonicalPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 
 const canonicalLinkPattern = /<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi;
