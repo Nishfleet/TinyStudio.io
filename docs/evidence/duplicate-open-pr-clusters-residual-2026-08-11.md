@@ -38,7 +38,7 @@ gains the `brief-requested` page entry plus the `brief-requested.html` →
 `/brief-requested` target. Verified: the `public/brief-requested.html` diff is
 byte-identical between the two fix commits (`db7b2b1` vs `ad5164e`); the
 `scripts/check-site.mjs` guard extension is identical apart from comment
-wording. #60 is the original branch (created against a stale base, nine
+wording. #60 is the original branch (created against a stale base, twelve
 main-merge commits deep), BEHIND current main; #97 is the re-land, CLEAN,
 sitting directly on current `origin/main` HEAD (`a30f2ad`), and its body
 documents the detector fix plus the negative probe.
