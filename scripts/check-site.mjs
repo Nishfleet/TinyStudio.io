@@ -1405,17 +1405,21 @@ for (const [pageName, pageHtml, pageUrl] of structuredDataPages) {
 // point at the final destination URL: the dogfood run reported every .html
 // navigation target on home ("index.html" -> "/", "audit.html" -> "/audit",
 // "agents.html" -> "/agents", "pricing.html" -> "/pricing", "specimen.html" ->
-// "/specimen") as a redirecting internal link. The five public pages must
+// "/specimen") as a redirecting internal link. The public pages must
 // therefore point every page link at the clean URL the worker serves, never
-// at a .html file that resolves to it. These are STATIC SOURCE GUARDS (regex
-// over the served files): CI has no browser, so they assert the .html target
-// shape cannot return, not that the redirects are absent on the network.
+// at a .html file that resolves to it. brief-requested.html (the noindex
+// post-signup surface the 303 signup redirect lands on) is covered too: its
+// nav and back links also target the clean twins, never the .html forms that
+// 307-redirect. These are STATIC SOURCE GUARDS (regex over the served files):
+// CI has no browser, so they assert the .html target shape cannot return, not
+// that the redirects are absent on the network.
 const internalLinkPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
-  ["specimen page", read("public/specimen.html")]
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
 ];
 
 const htmlPageTargets = {
