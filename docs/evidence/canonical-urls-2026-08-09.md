@@ -163,3 +163,48 @@ Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
 code side (PR #29), in CI (`npm run check` guard), and against the deployed
 site; this lane (2026-08-11) re-confirmed all three against current main and
 found nothing further to change on the finding's page.
+
+### Ship verification, "origin/main past 2e042258 so merged PRs #56 and #70 go live" (added 2026-08-11)
+
+This section closes the deploy-lag item that tracked shipping main past
+2e042258 so the merged PR #56 (clean `/audit` canonical/og:url/JSON-LD) and
+PR #70 (homepage footer attribution) reach production. The deployment-lag
+note above (point 3, recorded earlier on 2026-08-11) is hereby resolved.
+Both halves of the item are verified true on this head (e6f42c1, current
+origin/main):
+
+1. Main is 25 commits past 2e042258 and both named PRs are in that history:
+   `git log --oneline origin/main --not 2e042258` shows 25 commits, including
+   `1cc7a4e` "point appraisal-page canonicals and JSON-LD @ids at the clean
+   /audit URL (#56)" and `f9f0b0f` "link Nish's daily reads from the homepage
+   footer (#70)" — plus every later public-facing merge (#86 footer tap
+   target, #96 tablet form, #100 retired-hosts truth, #99 docs).
+
+2. The live deployment now matches origin/main byte-for-byte on all five
+   public pages: `curl https://tinystudio.io/{/,/audit,/agents,/pricing,/specimen}`
+   diffed against the `public/*.html` files on this head shows zero
+   differences on every page. The live audit page serves the clean
+   `https://tinystudio.io/audit` canonical and og:url, JSON-LD WebPage
+   `@id`/`url` `https://tinystudio.io/audit#webpage`/`https://tinystudio.io/audit`,
+   and `curl -I https://tinystudio.io/audit` returns HTTP 200 with no
+   `Location` header (no 307); the live home page head contains the
+   `Nish's daily reads · inish.in` footer line from #70.
+
+3. Ship mechanism and release state: the armed fleet-release pipeline
+   (policy "on") shipped this head at 2026-08-11T10:49:53 IST from a clean
+   detached worktree of the exact sha, accepted against the live URL
+   ("live HTTP 200, marker ok"), and `release-state-tinystudio-io.json` now
+   pins `e6f42c1`, strictly past 2e042258. The round also carried the two
+   commits that had landed after the previous 08:38 deploy of 872fd23 — #100
+   (app/api 410 messages now name The Website Appraisal, verified live on
+   both hosts) and #99 (docs).
+
+4. Source and CI on this head: `npm run check` passes ("TinyStudio.io checks
+   passed"; the canonical guard enforces exactly one link per page), the full
+   `npm test` suite passes (headings 6/6, sitemap 7/7, worker 55/55, ui 16/16,
+   contract 8/8), and GitHub Actions `verify` and `Gitleaks` both report
+   success on e6f42c1.
+
+The item is satisfied: origin/main is past 2e042258, the merged PRs #56 and
+#70 are served live (along with everything merged since), and nothing further
+on this item remains to ship.
