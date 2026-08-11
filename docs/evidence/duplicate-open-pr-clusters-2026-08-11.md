@@ -88,23 +88,49 @@ phrasing, re-landed on the fresh base.
 
 **Superior delivery path: #90.** #53 closed as the stale duplicate.
 
-## Reconciliation actions taken (2026-08-11)
+## Reconciliation actions taken (2026-08-11, lane-1 run)
 
-- Closed PR #59, #61, #54, #53 with a comment on each naming the surviving
-  PR and the reason (stale base / conflict-locked / superseded by the
-  reprise).
-- Kept open, as the single delivery path per surface: #96 (lead form), #95
-  (canonicals), #91 (Agent Desk canonical), #90 (q5 ground truth).
-- Verified each surviving branch on its own tree: `npm run check` passes on
-  `fix/lead-form-tablet-squeeze-reprise`, `fix/canonical-clean-urls-agents-pricing-specimen`,
-  `fix/agent-desk-canonical-lane1`, and `fix/q5-ground-truth-drop-agent-desk`
-  (2026-08-11, fetched fresh).
+The plan above was executed on the lane-1 run; the closures below are the
+actual GitHub state changes, each with the comment naming the surviving
+delivery path:
+
+- Closed PR **#59** (2026-08-11T05:29:31Z): the identical fix already landed
+  on main via the reprise #96 (merged 2026-08-11T02:30Z, commit `6f85c61`), so
+  the stale branch carried zero changes main lacks and was conflict-locked
+  against it.
+- Closed PR **#61** (2026-08-11T05:29:32Z): conflict-locked stale duplicate;
+  #95 re-lands the identical per-page edits on the fresh base and passes
+  `npm run check` on its own tree.
+- Closed PR **#54** (2026-08-11T05:29:33Z): stale-base duplicate; #91 re-lands
+  the byte-identical `public/agent-desk.html` change with the stronger guard.
+- Closed PR **#53** (2026-08-11T05:29:34Z): stale duplicate; #90 re-lands the
+  same two-file change with the wording consistent with the fixture's own
+  q1/q2 phrasing.
+
+Pre-closure verification on this run (2026-08-11):
+
+- Per-cluster two-dot diffs confirmed the stale branches carried no unique
+  fix content: #59 had no unique commits over #96 (only old `Merge branch
+  'main'` commits); #61 vs #95 differed only in main-evolution guard
+  deltas (including #61's stale `/audit.html` expectation); #54 vs #91
+  differed only in the guard comment (byte-identical `agent-desk.html`);
+  #53 vs #90 differed only in the q5 wording.
+- `npm run check` re-run green on the three still-open survivors
+  (`fix/canonical-clean-urls-agents-pricing-specimen`,
+  `fix/agent-desk-canonical-lane1`, `fix/q5-ground-truth-drop-agent-desk`),
+  each fetched fresh and checked on its own tree; each sits directly on
+  current `origin/main` HEAD (`e6f42c1`).
+
+Kept open, as the single delivery path per surface: #96 (lead form — already
+merged to main), #95 (canonicals), #91 (Agent Desk canonical), #90 (q5 ground
+truth).
 
 ## What closes the item
 
-- Every surface now has exactly one open PR carrying its fix, and that PR is
-  the fresh re-land (mergeable, evidence receipt current, `npm run check`
-  green on its own tree).
+- Every surface now has exactly one delivery path for its fix: the fresh
+  re-land PR (mergeable, evidence receipt current, `npm run check` green on
+  its own tree) or, for the lead-form cluster, main itself via the merged
+  reprise #96.
 - The four stale duplicates are closed; none of them carried a change the
   survivor lacks (verified per-cluster by diffing the two branches: the only
   differences are staleness, evidence-doc currency, or guard-comment
