@@ -1532,6 +1532,35 @@ for (const [pageName, pageHtml, expected] of canonicalPages) {
   }
 }
 
+// ---- Specimen in-content conversion CTA ------------------------------------
+// The /specimen proof page is where the homepage routes its "Read the
+// specimen" call-out, so the reader who finishes the sample needs an
+// in-content conversion CTA — not just the nav link — to request their own
+// appraisal. The page must keep a .band block carrying an explicit CTA link
+// to the request surface (/#start, same target as the nav CTA), and the
+// band CTA must keep a >=44px hit area to stay within the site's own
+// tap-target standard. These are STATIC SOURCE GUARDS (regex over the served
+// HTML/CSS), not behavioral tests: CI has no browser.
+const specimenCtaHtml = read("public/specimen.html");
+const specimenCtaBand = specimenCtaHtml.match(/<div class="band">([\s\S]*?)<\/div>\s*<footer>/);
+if (!specimenCtaBand) {
+  failures.push("Specimen page must keep an in-content conversion CTA band between the report and the footer.");
+} else {
+  if (!/<a\b[^>]*class="cta"[^>]*href="\/#start"[^>]*>Request the appraisal<\/a>/.test(specimenCtaBand[1])) {
+    failures.push("Specimen conversion band must carry a .cta link to /#start labelled \"Request the appraisal\".");
+  }
+  if (!/No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees\. Only the work\./.test(specimenCtaBand[1])) {
+    failures.push("Specimen conversion band must keep the no-guarantees note.");
+  }
+}
+const specimenCtaCss = read("public/specimen.css");
+if (!specimenCtaCss.includes(".band .cta")) {
+  failures.push("specimen.css must style the band conversion CTA (.band .cta).");
+}
+if (!/\.band \.cta\{[^}]*padding:16px 24px/.test(specimenCtaCss)) {
+  failures.push("Specimen band CTA must keep a >=44px tap target (padding:16px 24px).");
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
