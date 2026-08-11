@@ -1266,7 +1266,7 @@ function retiredAppResponse() {
   <body>
     <main>
       <h1>TinyStudio app retired.</h1>
-      <p>The old TinyStudio app has been retired. TinyStudio.io now runs the self-serve Agent Desk from the main domain.</p>
+      <p>The old TinyStudio app has been retired. TinyStudio.io now runs The Website Appraisal — the free leak audit of high-ticket service homepages, reviewed by a person — and the human-reviewed desk that closes what the audit finds.</p>
       <a href="https://tinystudio.io/">Go to TinyStudio.io</a>
     </main>
   </body>
@@ -1288,7 +1288,7 @@ function retiredApiResponse() {
       {
         ok: false,
         status: "retired",
-        message: "The old TinyStudio API has been retired. TinyStudio.io now runs the self-serve Agent Desk from the main domain.",
+        message: "The old TinyStudio API has been retired. TinyStudio.io now runs The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds.",
         publicSite: "https://tinystudio.io/"
       },
       {
