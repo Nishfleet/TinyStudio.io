@@ -230,10 +230,11 @@
   .wrap{padding:0 20px}
   nav{flex-wrap:wrap;row-gap:14px}
   .navlinks{flex-wrap:wrap;gap:10px 14px}
-  /* tap targets: every nav link keeps a >=44px hit area on touch */
+  /* tap targets: every nav/footer link keeps a >=44px hit area on touch */
   .logo{padding:11px 0}
   .navlinks a{padding:15px 0}
   .navcta{padding:15px 20px}
+  footer a{padding:16px 0}
   header{padding:56px 0 0}
   .meta{grid-template-columns:1fr;gap:18px}
   .meta div{border-right:0}
