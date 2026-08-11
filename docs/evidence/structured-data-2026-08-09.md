@@ -253,3 +253,44 @@ Finding 975fdb784275 ("Structured data opportunity on home") remains closed
 on the code side (PR #32), in CI (`npm run check` guard), and against the
 deployed site; this lane (2026-08-11) re-confirmed all three against current
 main and found nothing further to change on the finding's page.
+
+### Ship verification, "origin/main past b004c11 so PR #32 goes live" (added 2026-08-11)
+
+This section closes the checklist item that tracked shipping main past
+b004c11 (PR #30, apple touch icon) so the merged PR #32 structured data
+reaches the five public pages in production. Both halves of the item are
+verified true on this head (c934538, current origin/main):
+
+1. Main is 34 commits past b004c11, and PR #32 is in that history: `git log
+   --oneline origin/main --not b004c11` shows 34 commits, and `git log
+   --oneline origin/main --grep="#32"` shows fa8d83c "seo: add schema.org
+   structured data to the five public pages (dogfood 975fdb784275) (#32)" —
+   the direct child of b004c11 and an ancestor of origin/main head.
+
+2. The live deployment now matches origin/main byte-for-byte on all five
+   public pages: `curl https://tinystudio.io/{/,/audit,/agents,/pricing,/specimen}`
+   diffed against the `public/*.html` files on this head shows zero
+   differences on every page. This includes the two commits the 2026-08-11
+   re-verification above recorded as lagging — f9f0b0f (footer attribution
+   link on home) and 1cc7a4e (canonical/JSON-LD URL cleanup on /audit) — so
+   that deployment-lag note is now resolved: the live audit page serves the
+   clean `https://tinystudio.io/audit#webpage` `@id`/url that PR #56
+   established on main.
+
+3. Fresh live contract check (2026-08-11, same contract as the CI guard):
+   each of the five pages serves exactly one `application/ld+json` block in
+   the document whose `@graph` carries exactly one `Organization`, one
+   `WebSite`, and one `WebPage` node; `WebPage` `@id`s served live are
+   `https://tinystudio.io/#webpage`, `/audit#webpage`, `/agents.html#webpage`,
+   `/pricing.html#webpage`, `/specimen.html#webpage` — matching the head
+   files and the PR #32 contract.
+
+4. Source and CI on this head: `npm run check` passes ("TinyStudio.io checks
+   passed"; the "Structured data (dogfood 975fdb784275)" guard enforces
+   exactly one valid block per page), the full `npm test` suite passes
+   (headings 6/6, sitemap 7/7, worker 53, ui 16, contract 8), and GitHub
+   Actions CI and secret-scan both report success on c934538.
+
+The item is satisfied: origin/main is past b004c11, the merged PR #32
+structured data is served live on all five appraisal-facing public pages,
+and nothing further on this item remains to ship.
