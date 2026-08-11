@@ -976,7 +976,9 @@ const ownedPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
   ["desk page", read("public/agents.html")],
-  ["specimen page", read("public/specimen.html")]
+  ["specimen page", read("public/specimen.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
 ];
 
 const identityFacts = [
