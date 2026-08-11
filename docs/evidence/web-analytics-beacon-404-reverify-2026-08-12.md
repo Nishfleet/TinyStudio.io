@@ -110,6 +110,30 @@ workaround exists: the edge answers `/cdn-cgi/rum` before any Worker, and the
 only token the zone ever knew is revoked. The dashboard steps to restore
 analytics are recorded in the 2026-08-09 diagnosis doc.
 
+### 7. Independent lane-1 re-verification and acceptance verdict (2026-08-12)
+
+An independent headless-Chromium run (this lane, Playwright 1.62.1, fresh
+session, the same method as section 1) re-measured the deployed site:
+
+| Page | viewport | HTTP | beacon tag in DOM | analytics requests | console errors |
+|---|---|---|---|---|---|
+| `https://tinystudio.io/` | 1280x900 | 200 | none | none | 0 |
+| `https://tinystudio.io/` | 390x844 | 200 | none | none | 0 |
+| `https://tinystudio.io/pricing.html` | 1280x900 | 200 | none | none | 0 |
+| `https://www.tinystudio.io/` | 1280x900 | 200 | none | none | 0 |
+
+Against the item's acceptance criteria — fresh live loads of `/` on desktop
+and mobile report zero console errors, and the beacon either demonstrably
+collects (dashboard receipt) or is removed from the zone configuration — the
+criterion is met on this run: zero console errors on `/` at 1280x900 and
+390x844, and the beacon is absent from the zone configuration (no edge
+injection, no beacon tag in the served HTML, no analytics request fired). A
+direct `POST https://tinystudio.io/cdn-cgi/rum?` probe still answers the edge's
+generic 404, but no browser request ever reaches it while the injection stays
+off. Only the dashboard-side receipt / analytics restoration remains
+(actions in the 2026-08-09 diagnosis doc, restored to this branch so the
+reference chain is complete on main).
+
 ## Source checks on the current head
 
 1. `npm test` passes on this branch (current main + this receipt): the
