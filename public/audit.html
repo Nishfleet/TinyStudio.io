@@ -78,8 +78,8 @@
     <h1>We read your page <em>as a customer with intent reads it.</em></h1>
     <p class="sub">Four passes, by hand, on the surfaces that decide whether someone who arrived ready to buy stays that way. You get a short, plain document — each fault named, in order of what it costs you, with the fix beside each one. No deck. No dashboard.</p>
     <form class="lead two" id="start" action="/api/signups" method="post">
-      <input type="text" name="website" required inputmode="url" autocomplete="url" placeholder="yourwebsite.com" pattern="(https?://)?([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(:[0-9]+)?(/[^\s]*)?" title="Enter your domain, like example.com">
-      <input type="email" name="email" required placeholder="Your work email">
+      <input type="text" name="website" required inputmode="url" autocomplete="url" placeholder="yourwebsite.com" aria-label="Your website domain" pattern="(https?://)?([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(:[0-9]+)?(/[^\s]*)?" title="Enter your domain, like example.com">
+      <input type="email" name="email" required placeholder="Your work email" aria-label="Your work email">
       <button>Request the appraisal</button>
     </form>
     <p class="micro">Thirty seconds to ask. Findings inside five working days. Yours to keep either way.</p>
