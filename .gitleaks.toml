@@ -1,13 +1,25 @@
 # Gitleaks configuration for TinyStudio.io.
 #
 # Starts from the full upstream default rule set and narrows NOTHING globally.
-# The single allowlist below exempts one already-public string in one evidence
-# document; every other path, rule and secret shape is scanned exactly as
-# gitleaks ships them.
+# The single per-rule allowlist below exempts one already-public string in one
+# evidence document; every other path, rule and secret shape is scanned exactly
+# as gitleaks ships them.
 [extend]
 useDefault = true
 
-[[allowlists]]
+# generic-api-key is redeclared with only the id so the [extend] merge keeps
+# the upstream rule (regex, entropy, keywords, allowlists) verbatim while
+# appending the per-rule allowlist below. This is required, not stylistic:
+# gitleaks >= 8.19 ignores top-level [[allowlists]] entries for rules that
+# ship their own per-rule allowlists, and generic-api-key is one of them
+# (verified against the gitleaks version the Secret Scan action runs — the
+# previous top-level allowlist left the scan red). Do NOT add a regex or
+# secret-group here: a redefined regex drifts from upstream and a mismatched
+# secret-group silently drops every finding of the rule.
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
 description = """
 Cloudflare Web Analytics beacon site tag, quoted verbatim from the served
 public HTML inside a debugging write-up.
