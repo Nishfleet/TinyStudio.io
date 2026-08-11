@@ -1,6 +1,6 @@
 {
   "schema": "ai-search-evidence/v1",
-  "testedOn": "2026-08-06",
+  "testedOn": "2026-08-12",
   "business": {
     "name": "TinyStudio",
     "site": "https://tinystudio.io/",
@@ -42,14 +42,117 @@
   "runs": [
     {
       "questionId": "q1-what-tinystudio-does",
+      "engine": "duckduckgo",
+      "state": "wrong",
+      "testedAt": "2026-08-12",
+      "captured": "TinyStudio is a platform that offers resources and inspiration for fiber and yarn artists, including a digital magazine, tutorials, and personal stories from artists to enhance creativity and simplify the fiber crafting experience.",
+      "sources": [
+        {
+          "title": "Fiberygoodness - what is tinyStudio",
+          "url": "https://www.fiberygoodness.com/whatistinystudio/"
+        }
+      ],
+      "remediation": {
+        "text": "The answer described a fibre-arts publication, a different business. No page on tinystudio.io was cited, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q2-what-tinystudio-charges",
+      "engine": "duckduckgo",
+      "state": "wrong",
+      "testedAt": "2026-08-12",
+      "captured": "TinyStudio is a free Mac application that allows users to generate subtitles for video and audio files without any cost.",
+      "sources": [
+        {
+          "title": "TinyStudio - App Store",
+          "url": "https://apps.apple.com/us/app/tinystudio/id6448954288?mt=12"
+        }
+      ],
+      "remediation": {
+        "text": "The answer priced a different business (a Mac subtitling app) as free. No page on tinystudio.io was cited, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q5-what-is-tinystudio-io",
+      "engine": "duckduckgo",
+      "state": "wrong",
+      "testedAt": "2026-08-12",
+      "captured": "TinyStudio.io is a free Mac application that generates subtitles for video and audio files using OpenAI's Whisper technology. It is designed for users without technical expertise, offering a user-friendly interface and fast performance.",
+      "sources": [
+        {
+          "title": "TinyStudio - App Store",
+          "url": "https://apps.apple.com/us/app/tinystudio/id6448954288?mt=12"
+        }
+      ],
+      "remediation": {
+        "text": "The answer named tinystudio.io but described the Mac subtitling app, a different business; the App Store citation does not support the answer's content. The organic tinystudio.io listing on the same result page still carried the retired 'TinyStudio Agent Desk' title, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q1-what-tinystudio-does",
+      "engine": "bing",
+      "state": "wrong",
+      "testedAt": "2026-08-12",
+      "captured": "TinyStudio is a versatile tool that serves multiple purposes: TinyStudio IDE: An open-source IDE for makers, allowing users to write Arduino sketches, upload code, and deploy apps all in one place. It is built around the tinyBoards family and supports Arduino sketches and boards. Subtitle Generation: A Mac app that automatically generates subtitles for video and audio files using OpenAI's Whisper technology. It supports subtitle import and export, and features a rule-based correction system for accuracy. AI-Powered Tools: TinyStudio offers AI-powered tools that streamline various tasks, making them effortless and efficient. TinyStudio is designed to be user-friendly and powerful, catering to a wide range of applications from development to content creation and beyond.",
+      "sources": [
+        {
+          "title": "GitHub - Mister-Industries/tinyStudio",
+          "url": "https://github.com/Mister-Industries/tinyStudio"
+        },
+        {
+          "title": "TinyStudio - tinystudio.co",
+          "url": "https://tinystudio.co/blogs/journal/what-is-tiny-studio"
+        },
+        {
+          "title": "TinyStudio - Toolidx",
+          "url": "https://toolidx.com/tool/tinystudio"
+        }
+      ],
+      "remediation": {
+        "text": "The answer was built from an Arduino IDE project (GitHub), a South-African small-tools site and a tool directory. No page on tinystudio.io was cited, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q5-what-is-tinystudio-io",
+      "engine": "bing",
+      "state": "absent",
+      "testedAt": "2026-08-12",
+      "captured": "No AI-generated answer was produced. The result page returned organic links only; tinystudio.io appeared as 'TinyStudio Agent Desk' with the description 'Self-serve AI agents for high-ticket pipeline setup: offer, funnel, creative, qualification, follow-up, CRM, tracking, and decision plans.'",
+      "sources": [],
+      "remediation": {
+        "text": "There was no AI answer to correct. The organic listing still carries the retired Agent Desk title, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q7-what-tinystudio-io-charges",
+      "engine": "bing",
+      "state": "absent",
+      "testedAt": "2026-08-12",
+      "captured": "No AI-generated answer was produced. The result page returned organic links only; tinystudio.io appeared as 'TinyStudio Agent Desk' with the description 'Self-serve AI agents for high-ticket pipeline setup: offer, funnel, creative, qualification, follow-up, CRM, tracking, and decision plans.', and no tinystudio.io pricing was surfaced.",
+      "sources": [],
+      "remediation": {
+        "text": "There was no AI answer to correct. The organic listing still carries the retired Agent Desk title, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q1-what-tinystudio-does",
       "engine": "google",
       "state": "wrong",
       "testedAt": "2026-08-06",
       "captured": "TinyStudio most commonly refers to a free Mac application that uses artificial intelligence to generate video and audio subtitles locally. Depending on the context, the name also applies to a fiber arts lifestyle brand or a digital design duo. ...",
       "sources": [
-        { "title": "Fiberygoodness - what is tinyStudio", "url": "https://www.fiberygoodness.com/whatistinystudio" },
-        { "title": "TinyStudio - App Store", "url": "https://apps.apple.com/us/app/tinystudio/id6448954288" },
-        { "title": "TinyStudio (design agency)", "url": "https://tinystudio.ch/" }
+        {
+          "title": "Fiberygoodness - what is tinyStudio",
+          "url": "https://www.fiberygoodness.com/whatistinystudio"
+        },
+        {
+          "title": "TinyStudio - App Store",
+          "url": "https://apps.apple.com/us/app/tinystudio/id6448954288"
+        },
+        {
+          "title": "TinyStudio (design agency)",
+          "url": "https://tinystudio.ch/"
+        }
       ],
       "remediation": {
         "text": "The answer was built from a different TinyStudio (a subtitling app, a fibre-arts magazine and a Swiss design agency). No page on tinystudio.io contributed to it, so no page-specific fix is claimed."
@@ -62,9 +165,18 @@
       "testedAt": "2026-08-06",
       "captured": "Because \"TinyStudio\" matches a few different well-known brands, businesses, and software platforms, the cost depends on exactly which one you are looking for: ... Tiny Studios ... Small Studio Tier: $0 per month ... Starter Tier: $99 per month ... tinyStudio Creative Life Magazine ... $4.95 per month ... The Tiny Studio LA ... starting at $30 to $40 per hour ...",
       "sources": [
-        { "title": "Fiberygoodness", "url": "https://www.fiberygoodness.com/" },
-        { "title": "The Tiny Studio LA - Tagvenue", "url": "https://www.tagvenue.com/" },
-        { "title": "GetSpaces", "url": "https://www.getspaces.com/" }
+        {
+          "title": "Fiberygoodness",
+          "url": "https://www.fiberygoodness.com/"
+        },
+        {
+          "title": "The Tiny Studio LA - Tagvenue",
+          "url": "https://www.tagvenue.com/"
+        },
+        {
+          "title": "GetSpaces",
+          "url": "https://www.getspaces.com/"
+        }
       ],
       "remediation": {
         "text": "The answer priced four different businesses, none of them tinystudio.io. No page on our site was read, so no page-specific fix is claimed."
@@ -77,9 +189,18 @@
       "testedAt": "2026-08-06",
       "captured": "Because \"Tiny Studio\" (or TinyStudio) is a common name used by several different creative companies worldwide, it depends on which specific business you mean: ... Jakarta, Indonesia and Paris, France ... London, United Kingdom ... Manchester, United Kingdom ... Bristol, United Kingdom ... North Hollywood, Los Angeles, CA ... Toronto, Canada.",
       "sources": [
-        { "title": "Tiny Studio - Instagram", "url": "https://www.instagram.com/t.i.n.y.studio/" },
-        { "title": "The Tiny Studio LA - Tagvenue", "url": "https://www.tagvenue.com/" },
-        { "title": "Tiny Studios - Studio Laar", "url": "https://www.studiolaar.nl/projects/tiny-studios" }
+        {
+          "title": "Tiny Studio - Instagram",
+          "url": "https://www.instagram.com/t.i.n.y.studio/"
+        },
+        {
+          "title": "The Tiny Studio LA - Tagvenue",
+          "url": "https://www.tagvenue.com/"
+        },
+        {
+          "title": "Tiny Studios - Studio Laar",
+          "url": "https://www.studiolaar.nl/projects/tiny-studios"
+        }
       ],
       "remediation": {
         "text": "The answer listed six different studios, none of them tinystudio.io. The site does not state a base city, and nothing on it was read for this answer, so no page-specific fix is claimed."
@@ -92,8 +213,14 @@
       "testedAt": "2026-08-06",
       "captured": "Tiny Studio (a video production studio) works with brands, charities, businesses, and agencies-anyone who has a message to communicate.",
       "sources": [
-        { "title": "TinyStudio TV", "url": "https://www.tinystudio.tv/" },
-        { "title": "Fiberygoodness", "url": "https://www.fiberygoodness.com/" }
+        {
+          "title": "TinyStudio TV",
+          "url": "https://www.tinystudio.tv/"
+        },
+        {
+          "title": "Fiberygoodness",
+          "url": "https://www.fiberygoodness.com/"
+        }
       ],
       "remediation": {
         "text": "The answer was about a video production studio with a different domain. No page on tinystudio.io was read, so no page-specific fix is claimed."
@@ -106,7 +233,10 @@
       "testedAt": "2026-08-06",
       "captured": "TinyStudio is an AI agent platform designed to turn business strategies-such as your offer, target audience, marketing funnels, and CRM context-into practical lead-to-call execution plans.",
       "sources": [
-        { "title": "tinystudio.io - TinyStudio Agent Desk", "url": "https://tinystudio.io/" }
+        {
+          "title": "tinystudio.io - TinyStudio Agent Desk",
+          "url": "https://tinystudio.io/"
+        }
       ],
       "remediation": {
         "text": "The answer named tinystudio.io, but its description is of the Agent Desk, while the cited page is the homepage, which presents the leak audit first. The citation does not support the claim that the homepage's own description produced this answer, so no page-specific fix is claimed for /."
@@ -119,7 +249,10 @@
       "testedAt": "2026-08-06",
       "captured": "Yes, multiple entities named \"Tiny Studio\" or \"tinyStudio\" publish client or featured work depending on which organization you mean. ... Tiny Studio LLC ... www.tinystudiollc.com ...",
       "sources": [
-        { "title": "Tiny Studio LLC", "url": "https://www.tinystudiollc.com/" }
+        {
+          "title": "Tiny Studio LLC",
+          "url": "https://www.tinystudiollc.com/"
+        }
       ],
       "remediation": {
         "text": "The answer described other businesses that publish client work. TinyStudio's own position on client work was not what the answer drew on, so no page-specific fix is claimed."
@@ -134,33 +267,6 @@
       "sources": [],
       "remediation": {
         "text": "There was no AI answer to correct, and no tinystudio.io page was read to produce one, so no page-specific fix is claimed."
-      }
-    },
-    {
-      "questionId": "q1-what-tinystudio-does",
-      "engine": "bing",
-      "state": "wrong",
-      "testedAt": "2026-08-06",
-      "captured": "TinyStudio is a versatile tool designed to assist users in various tasks, particularly in the creative and business sectors. ... Subtitle Generation ... Traffic Management ... Invoice Processing ...",
-      "sources": [
-        { "title": "About TinyStudio - tinystudio.ai", "url": "https://tinystudio.ai/about-tinystudio/" },
-        { "title": "tinystudio.ai", "url": "https://tinystudio.ai/" }
-      ],
-      "remediation": {
-        "text": "The answer was built from tinystudio.ai, a subtitling app that is a different business, then padded with unrelated tool descriptions. No page on tinystudio.io was cited, so no page-specific fix is claimed."
-      }
-    },
-    {
-      "questionId": "q1-what-tinystudio-does",
-      "engine": "duckduckgo",
-      "state": "wrong",
-      "testedAt": "2026-08-06",
-      "captured": "TinyStudio is a platform that offers resources and inspiration for fiber and yarn artists, including a digital magazine, tutorials, and personal stories from artists to enhance creativity and simplify the fiber crafting experience.",
-      "sources": [
-        { "title": "Fiberygoodness", "url": "https://www.fiberygoodness.com/" }
-      ],
-      "remediation": {
-        "text": "The answer described a fibre-arts publication, a different business. No page on tinystudio.io was cited, so no page-specific fix is claimed."
       }
     },
     {
