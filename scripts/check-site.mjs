@@ -437,7 +437,7 @@ const tapTargetCss = [
     [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
     ["border-radius:999px;padding:16px 20px"]],
   ["index.css",
-    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}"],
+    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
     ["border-radius:999px;padding:16px 20px"]],
   ["audit.css",
     [".navcta{flex:1 1 100%;text-align:center;padding:15px 20px}"],
