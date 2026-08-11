@@ -268,6 +268,42 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
+// Intake field labels (Grok review finding): both appraisal intake forms
+// (homepage and /audit) named their website and email fields only with
+// placeholder text, which disappears the moment a buyer starts typing and is
+// not a persistent programmatic label — assistive tech and the browser's own
+// validation announcements then have no stable name for the field. Each
+// intake input must carry a non-empty aria-label that survives typing, so
+// the field keeps its accessible name whatever the field contains.
+// The behavioral proof (real Chromium accessible-name measurement, local
+// static copy) lives in docs/evidence/intake-field-labels-2026-08-11.md.
+const intakePages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit]
+];
+
+for (const [pageName, pageHtml] of intakePages) {
+  for (const input of pageHtml.matchAll(/<input\b[^>]*>/gi)) {
+    const tag = input[0];
+    if (!/\bname="(?:website|email)"/.test(tag)) continue;
+    const aria = tag.match(/\baria-label="([^"]*)"/)?.[1] ?? "";
+    if (!aria.trim()) {
+      failures.push(`Intake input on ${pageName} must carry a persistent programmatic aria-label (placeholder-only labels disappear as buyers type): ${tag}`);
+    }
+  }
+}
+
+// The behavioral intake-label proof (real Chromium accessible-name
+// measurement, local static copy) is checked in so the static guard above
+// stays distinguishable from it. Existence and section anchors only — this
+// does not re-verify measurements.
+const intakeLabelReceipt = read("docs/evidence/intake-field-labels-2026-08-11.md");
+for (const anchor of ["unfixed", "aria-label", "not CI proof", "Exact verification method"]) {
+  if (!intakeLabelReceipt.includes(anchor)) {
+    failures.push(`Intake-label evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+  }
+}
+
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
