@@ -1018,6 +1018,34 @@ test("signup handler accepts a bare-domain website with a test email and stores 
   assert.equal(insert.values[7], "https://example.com");
 });
 
+test("signup handler redirects a rejected email to /?signal=invalid so the homepage can render it", async () => {
+  // The browser's type=email accepts "a@b", but the worker's stricter regex
+  // requires a dot in the domain. The rejection must 303 back to the homepage
+  // with ?signal=invalid (rendered by public/index.js), not fail silently.
+  const db = new FakeDB();
+  const env = { DB: db, AI: new FakeAI("") };
+  const res = await worker.fetch(
+    new Request("https://tinystudio.io/api/signups", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Origin": "https://tinystudio.io",
+        "Accept": "text/html",
+        "User-Agent": "tinystudio-worker-test"
+      },
+      body: new URLSearchParams({ website: "example.com", email: "a@b" }).toString()
+    }),
+    env
+  );
+
+  assert.equal(res.status, 303);
+  const location = new URL(res.headers.get("Location"));
+  assert.equal(location.pathname, "/");
+  assert.equal(location.searchParams.get("signal"), "invalid");
+  const insert = db.calls.find((call) => call.sql.includes("INSERT INTO email_signups"));
+  assert.equal(insert, undefined, "rejected signup must not persist a row");
+});
+
 test("worker serves the same-origin font promotion script (render-blocking fix b8f6046e942a)", async () => {
   // The production CSP (script-src 'self', no unsafe-inline) blocks inline
   // onload handlers, so the pages promote the preloaded Google Fonts css2

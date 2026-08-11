@@ -270,6 +270,46 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
+// Signup rejection-signal guard (dogfood: failed-signup dead end). The worker
+// 303-redirects a rejected signup back to /?signal=invalid (the server email
+// regex is stricter than the browser's type=email check — e.g. "a@b" passes
+// client-side but not server-side), so the homepage must render that state:
+// a role=alert banner, hidden until index.js reads the signal, moves focus
+// into it, and strips the query so a refresh or a copied link does not
+// re-show the error. These are STATIC SOURCE GUARDS, not behavioral tests.
+const signalBanner = siteHome.match(/<p\b[^>]*id="signal-invalid"[^>]*>/i)?.[0] || "";
+if (!signalBanner) {
+  failures.push("Homepage must carry the id=\"signal-invalid\" signup rejection banner.");
+} else {
+  if (!/\brole="alert"/i.test(signalBanner)) {
+    failures.push("Signup rejection banner must expose role=\"alert\".");
+  }
+  if (!/\bhidden(?:\s|>|=)/i.test(signalBanner)) {
+    failures.push("Signup rejection banner must start hidden (revealed only by the signal handler).");
+  }
+}
+const homeScript = read("public/index.js");
+if (!homeScript.includes("signal-invalid")) {
+  failures.push("index.js must reference the signal-invalid banner.");
+}
+if (!/signal=([^&]+)/.test(homeScript)) {
+  failures.push("index.js must read the ?signal= query parameter.");
+}
+if (!homeScript.includes("replaceState")) {
+  failures.push("index.js must strip the signal query with history.replaceState after revealing the banner.");
+}
+const homeCss = read("public/index.css");
+if (!/\.signal\b/.test(homeCss)) {
+  failures.push("index.css must style the signup rejection banner (.signal).");
+}
+if (!/\.signal\[hidden\]\s*\{[^}]*display:\s*none/i.test(homeCss)) {
+  failures.push(".signal[hidden] must force display:none so the banner stays hidden until revealed.");
+}
+if (!worker.includes("htmlRedirect(url, \"invalid\")")) {
+  failures.push("Worker must keep 303-redirecting rejected signups to /?signal=invalid (the homepage banner renders it).");
+}
+
+
 if (!retiredDesk.includes("role=\"tabpanel\"") || !retiredDesk.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
