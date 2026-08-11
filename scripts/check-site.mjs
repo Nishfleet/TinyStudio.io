@@ -274,6 +274,33 @@ if (!retiredDesk.includes("role=\"tabpanel\"") || !retiredDesk.includes("aria-la
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
+// Pricing closing-callout regression (Grok finding: the /pricing closing band
+// ended in a dead end — "The appraisal costs you an email" with no way to send
+// one — while every other served conversion surface carried a real intake
+// form). The band must keep the actual signup form: a form.lead inside the
+// .band posting website + email to /api/signups, both fields with a
+// persistent programmatic aria-label, and a submit button reading "Request
+// the appraisal". STATIC SOURCE GUARD (regex over pricing.html), matching the
+// repo's other source-string guards.
+const sitePricing = read("public/pricing.html");
+const pricingBand = sitePricing.match(/<div class="band">([\s\S]*?)<\/div>\s*<section id="confidential">/)?.[1] ?? "";
+const pricingForm = pricingBand.match(/<form\b[^>]*class="lead[^>]*"[^>]*>[\s\S]*?<\/form>/i)?.[0] ?? "";
+
+if (!pricingForm || !pricingForm.includes('action="/api/signups"') || !pricingForm.includes('method="post"')) {
+  failures.push("Pricing closing callout must carry the real signup form (form.lead posting website + email to /api/signups) so the appraisal ask is actionable in place.");
+}
+for (const input of pricingForm.matchAll(/<input\b[^>]*>/gi)) {
+  const tag = input[0];
+  if (!/\bname="(?:website|email)"/.test(tag)) continue;
+  const aria = tag.match(/\baria-label="([^"]*)"/)?.[1] ?? "";
+  if (!aria.trim()) {
+    failures.push(`Pricing intake input must carry a persistent programmatic aria-label (placeholder-only labels disappear as buyers type): ${tag}`);
+  }
+}
+if (!/Request the appraisal/i.test(pricingForm)) {
+  failures.push('Pricing closing callout submit button must read "Request the appraisal".');
+}
+
 // Mobile layout regression: at 390x844 the /audit page previously overflowed
 // horizontally (navlinks measured to x=569, the 53-of-89 stat to x=451).
 // The mobile treatment must live in audit.css behind the shared 760px
