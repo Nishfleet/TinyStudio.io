@@ -1045,3 +1045,23 @@ test("worker does not serve unlisted asset-like paths outside the public allow-l
   const res = await worker.fetch(new Request("https://tinystudio.io/not-listed.js"), env);
   assert.equal(res.status, 404);
 });
+
+test("retired app host frames the current offer as The Website Appraisal, not the Agent Desk", async () => {
+  const res = await worker.fetch(new Request("https://app.tinystudio.io/"), {});
+  assert.equal(res.status, 410);
+  const html = await res.text();
+  assert.match(html, /The Website Appraisal/, "retired app host must name the current offer");
+  assert.match(html, /free leak audit of high-ticket service homepages/, "retired app host must state the current offer truth");
+  assert.doesNotMatch(html, /self-serve Agent Desk/, "retired app host must not point at the retired Agent Desk as the current offer");
+});
+
+test("retired API host frames the current offer as The Website Appraisal, not the Agent Desk", async () => {
+  const res = await worker.fetch(new Request("https://api.tinystudio.io/"), {});
+  assert.equal(res.status, 410);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.status, "retired");
+  assert.match(body.message, /The Website Appraisal/, "retired API host message must name the current offer");
+  assert.match(body.message, /free leak audit of high-ticket service homepages/, "retired API host message must state the current offer truth");
+  assert.doesNotMatch(body.message, /self-serve Agent Desk/, "retired API host message must not point at the retired Agent Desk as the current offer");
+});
