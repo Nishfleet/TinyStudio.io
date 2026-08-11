@@ -208,3 +208,59 @@ origin/main):
 The item is satisfied: origin/main is past 2e042258, the merged PRs #56 and
 #70 are served live (along with everything merged since), and nothing further
 on this item remains to ship.
+
+### Re-verification (added 2026-08-12, lane 1)
+
+Re-verified against the current origin/main head (18128e8, "fix(public): serve
+rel=icon on /brief-requested and guard favicon links in check-site.mjs (#113)")
+after six further commits touched the public surface since the last re-verify
+at ee50e17: 0ad7481 (home-page footer tap target), 6f85c61 (tablet-width
+intake form), 2ae7504 (search-intent bridge for "conversion audit"), d4a2c30
+(appraisal intake field labels and document titles), 9302611 (rel=icon
+favicon on every page), 18128e8 (rel=icon on /brief-requested and the favicon
+guard). None touched a canonical link or the canonical guard:
+`git log -p ee50e17..origin/main -- public/` and
+`git diff ee50e17..origin/main -- scripts/check-site.mjs` contain no
+canonical-line change, so the home-page canonical the finding flagged is
+byte-identical to the one every prior receipt measured. Three checks:
+
+1. Source checks on this head: `npm run check` passes ("TinyStudio.io checks
+   passed") — the "Canonical URLs (dogfood)" guard in
+   `scripts/check-site.mjs` requires exactly one non-commented
+   `<link rel="canonical">` inside `<head>` per page, with a non-empty href
+   pointing at the page's canonical `https://tinystudio.io` address (home
+   expected: `https://tinystudio.io/`) and no URL duplicated across pages —
+   and the full `npm test` suite passes (check, headings 6/6, sitemap 7/7,
+   worker 55/55, ui 16/16, contract 8/8).
+
+2. Fresh live measurement of the deployed site (2026-08-12, headless
+   Chromium, same method as the closeout receipt above, `domcontentloaded`
+   wait, canonical read from `document.head` and from the full document,
+   console/page errors captured): every page returns 200 with the CSP header,
+   serves exactly one canonical link in its head and one across the whole
+   document, and logs no console or page errors. Measured canonical hrefs
+   (unique across pages):
+
+   | Page | HTTP | CSP header | canonical links in head | links in full doc | href | console errors |
+   |---|---|---|---|---|---|---|
+   | index.html (home, `/`) | 200 | yes | 1 | 1 | `https://tinystudio.io/` | none |
+   | audit.html (`/audit`) | 200 | yes | 1 | 1 | `https://tinystudio.io/audit` | none |
+   | agents.html (`/agents`) | 200 | yes | 1 | 1 | `https://tinystudio.io/agents.html` | none |
+   | pricing.html (`/pricing`) | 200 | yes | 1 | 1 | `https://tinystudio.io/pricing.html` | none |
+   | specimen.html (`/specimen`) | 200 | yes | 1 | 1 | `https://tinystudio.io/specimen.html` | none |
+
+   Homepage canonical served live, unchanged from every prior receipt:
+
+   > `<link rel="canonical" href="https://tinystudio.io/">`
+
+3. Deployment parity: the live deployment matches origin/main byte-for-byte
+   on all five public pages — `curl -sL https://tinystudio.io/{index,audit,
+   agents,pricing,specimen}.html` (following the .html forms' 307 redirects to
+   their clean extensionless twins) diffed against the `public/*.html` files
+   on this head shows zero differences on every page, so no deployment lag and
+   no drift between the source guard and the served bytes.
+
+Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
+code side (PR #29), in CI (`npm run check` guard), and against the deployed
+site; this lane (2026-08-12) re-confirmed all three against current main and
+live and found nothing further to change on the finding's page.
