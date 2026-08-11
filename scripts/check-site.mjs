@@ -3,9 +3,14 @@ import { execFileSync } from "node:child_process";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-// The Agent Desk moved to /agent-desk when the leak-audit site took the root.
-// These checks are about the Desk's markup, so they follow it.
-const index = read("public/agent-desk.html");
+// The leak-audit site took the root; the retired self-serve Agent Desk is
+// still served at /agent-desk and /agent-desk.html as a frozen legacy surface
+// (de-indexed, no page links to it). The current homepage (index.html) owns
+// the site's copy contract, so the required-copy and forbidden-claim guards
+// read it; the desk-markup, legacy-form and retired-head checks below follow
+// the retired page so the still-served surface keeps working as shipped.
+const index = read("public/index.html");
+const retiredDesk = read("public/agent-desk.html");
 const styles = read("public/styles.css");
 const script = read("public/script.js");
 const llms = read("public/llms.txt");
@@ -19,23 +24,20 @@ const wranglerConfig = JSON.parse(wrangler);
 
 const failures = [];
 
+// The required copy of the CURRENT homepage (public/index.html, "The Website
+// Appraisal"): the offer line, the capacity and no-call promises, the claims
+// policy, the primary CTA, and the contact and identity anchors. The retired
+// Agent Desk page carries its own framing guards below; its self-serve copy
+// is no longer the site's copy contract.
 const requiredIndexCopy = [
-  "The Tiny Studio Agent Desk",
-  "Build the pipeline system before you buy more ads.",
-  "Cloudflare AI",
-  "Self-serve",
-  "Approval-gated",
-  "data-agent-form",
-  "Generate Pipeline Loop",
-  "Business snapshot",
-  "Give the agent raw context",
-  "Optional detail pack",
-  "Pipeline Brief, Implementation Checklist, and Weekly Fix Report",
-  "Current weekly numbers",
-  "data-output-tab",
-  "No ad account access. No spend changes.",
-  "The business snapshot, optional details, weekly metrics, and generated artifacts are processed for the output and are not saved by this app.",
-  "hello@tinystudio.io"
+  "TinyStudio — The Website Appraisal",
+  "the free leak audit of high-ticket service homepages",
+  "Six a month.",
+  "No call at any point.",
+  "No revenue, ranking or booking guarantees. Only the work.",
+  "Show me where our site undersells us",
+  "hello@tinystudio.io",
+  "TinyStudio is the business behind this site"
 ];
 
 const requiredAgentStack = [
@@ -157,11 +159,11 @@ const forbiddenClaims = [
 ];
 
 for (const text of requiredIndexCopy) {
-  if (!index.includes(text)) failures.push(`Missing Agent Desk page copy: ${text}`);
+  if (!index.includes(text)) failures.push(`Missing homepage copy: ${text}`);
 }
 
 for (const text of requiredAgentStack) {
-  if (!index.includes(text)) failures.push(`Missing Agent Desk agent: ${text}`);
+  if (!retiredDesk.includes(text)) failures.push(`Missing Agent Desk agent: ${text}`);
 }
 
 for (const text of requiredScriptCopy) {
@@ -191,7 +193,7 @@ function fieldName(tag) {
   return tag.match(/\bname="([^"]+)"/i)?.[1] || "";
 }
 
-const formFields = formFieldTags(index);
+const formFields = formFieldTags(retiredDesk);
 const requiredFields = formFields
   .filter((tag) => /\srequired(?:\s|>|=)/i.test(tag))
   .map(fieldName)
@@ -268,7 +270,7 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
-if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
+if (!retiredDesk.includes("role=\"tabpanel\"") || !retiredDesk.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
@@ -315,8 +317,21 @@ for (const anchor of [
   }
 }
 
+// The forbidden-claim guard scans the CURRENT site's copy contract — the five
+// public pages plus the llms.txt / offer.md mirror pair. The retired Agent
+// Desk page and its script are a frozen, de-indexed legacy surface describing
+// a retired product; their copy is governed by the retired-framing guards
+// below, not by the current offer's claims policy.
+const currentClaimPages = [
+  siteHome,
+  siteAudit,
+  read("public/agents.html"),
+  read("public/pricing.html"),
+  read("public/specimen.html")
+];
+
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = [...currentClaimPages, llms, offer].join("\n").toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }
@@ -410,7 +425,7 @@ const tapTargetCss = [
     [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
     ["border-radius:999px;padding:16px 20px"]],
   ["index.css",
-    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}"],
+    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
     ["border-radius:999px;padding:16px 20px"]],
   ["audit.css",
     [".navcta{flex:1 1 100%;text-align:center;padding:15px 20px}"],
@@ -442,6 +457,43 @@ const tapTargetReceipt = read("docs/evidence/tap-targets-2026-08-09.md");
 for (const anchor of ["unfixed", "390x844", "44px", "not CI proof", "Exact verification method"]) {
   if (!tapTargetReceipt.includes(anchor)) {
     failures.push(`Tap-target evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+  }
+}
+
+// Lead-form tablet squeeze guard (review finding on the homepage intake form):
+// the homepage form shares the .lead class with the checks-section header,
+// whose gap:70px / space-between / flex-end treatment leaked onto it and,
+// together with the nowrap submit button, squeezed the domain and email
+// inputs to ~100px at tablet width (measured 99/98px at 761px, 103/102px at
+// 768px, and never above 139px — the "yourwebsite.com" placeholder clipped —
+// at any width under the fix). The fix scopes the checks-header rules to
+// .checks .lead and gives the two-field form its own 900px stacking
+// breakpoint, so the one-line layout keeps >=208px inputs and anything
+// narrower goes full-width stacked. These are STATIC SOURCE GUARDS (regex
+// over the served CSS), not behavioral tests: CI has no browser. The
+// behavioral, measured layout proof lives in
+// docs/evidence/lead-form-tablet-squeeze-2026-08-10.md.
+const indexCss = read("public/index.css");
+if (!indexCss.includes(".checks .lead{display:flex;justify-content:space-between;align-items:flex-end;gap:70px}")) {
+  failures.push("Homepage checks header must scope .lead to .checks .lead (the shared class leaks its gap onto the lead form).");
+}
+if (!indexCss.includes("@media (max-width:900px){")) {
+  failures.push("Two-field lead form must carry its own 900px stacking breakpoint (tablet squeeze guard).");
+}
+if (!indexCss.includes("form.two{flex-direction:column;align-items:stretch;border-radius:20px;padding:8px;max-width:100%;gap:18px}")) {
+  failures.push("Two-field lead form must stack below 900px with an explicit gap (tablet squeeze guard).");
+}
+if (indexCss.includes("@media (max-width:760px){\n    form.two{flex-direction:column")) {
+  failures.push("Two-field lead form must not stack at 760px (squeezes the inputs to ~100px at tablet widths).");
+}
+
+// The behavioral lead-form proof (real Chromium measurement, local static
+// copy) is checked in so the static guards above stay distinguishable from it.
+// Existence and section anchors only — this does not re-verify measurements.
+const leadFormReceipt = read("docs/evidence/lead-form-tablet-squeeze-2026-08-10.md");
+for (const anchor of ["unfixed", "761px", "**fixed**", "208px", "not CI proof", "Exact verification method"]) {
+  if (!leadFormReceipt.includes(anchor)) {
+    failures.push(`Lead-form evidence receipt must record the ${JSON.stringify(anchor)} section.`);
   }
 }
 
@@ -1062,7 +1114,7 @@ for (const [pageName, pageHtml] of ownedPages) {
 // robots noindex, nofollow meta, and its title and description frame the
 // surface as retired, so neither the search index nor a scraper can re-present
 // the retired self-serve product as the current offer.
-const retiredDeskHead = index.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+const retiredDeskHead = retiredDesk.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
 const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
 if (!robotsMeta.test(retiredDeskHead)) {
   failures.push("Retired Agent Desk page must keep a robots noindex, nofollow meta in its head.");
