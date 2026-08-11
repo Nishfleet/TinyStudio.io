@@ -3,9 +3,14 @@ import { execFileSync } from "node:child_process";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-// The Agent Desk moved to /agent-desk when the leak-audit site took the root.
-// These checks are about the Desk's markup, so they follow it.
-const index = read("public/agent-desk.html");
+// The leak-audit site took the root; the retired self-serve Agent Desk is
+// still served at /agent-desk and /agent-desk.html as a frozen legacy surface
+// (de-indexed, no page links to it). The current homepage (index.html) owns
+// the site's copy contract, so the required-copy and forbidden-claim guards
+// read it; the desk-markup, legacy-form and retired-head checks below follow
+// the retired page so the still-served surface keeps working as shipped.
+const index = read("public/index.html");
+const retiredDesk = read("public/agent-desk.html");
 const styles = read("public/styles.css");
 const script = read("public/script.js");
 const llms = read("public/llms.txt");
@@ -19,23 +24,20 @@ const wranglerConfig = JSON.parse(wrangler);
 
 const failures = [];
 
+// The required copy of the CURRENT homepage (public/index.html, "The Website
+// Appraisal"): the offer line, the capacity and no-call promises, the claims
+// policy, the primary CTA, and the contact and identity anchors. The retired
+// Agent Desk page carries its own framing guards below; its self-serve copy
+// is no longer the site's copy contract.
 const requiredIndexCopy = [
-  "The Tiny Studio Agent Desk",
-  "Build the pipeline system before you buy more ads.",
-  "Cloudflare AI",
-  "Self-serve",
-  "Approval-gated",
-  "data-agent-form",
-  "Generate Pipeline Loop",
-  "Business snapshot",
-  "Give the agent raw context",
-  "Optional detail pack",
-  "Pipeline Brief, Implementation Checklist, and Weekly Fix Report",
-  "Current weekly numbers",
-  "data-output-tab",
-  "No ad account access. No spend changes.",
-  "The business snapshot, optional details, weekly metrics, and generated artifacts are processed for the output and are not saved by this app.",
-  "hello@tinystudio.io"
+  "TinyStudio — The Website Appraisal",
+  "the free leak audit of high-ticket service homepages",
+  "Six a month.",
+  "No call at any point.",
+  "No revenue, ranking or booking guarantees. Only the work.",
+  "Show me where our site undersells us",
+  "hello@tinystudio.io",
+  "TinyStudio is the business behind this site"
 ];
 
 const requiredAgentStack = [
@@ -157,11 +159,11 @@ const forbiddenClaims = [
 ];
 
 for (const text of requiredIndexCopy) {
-  if (!index.includes(text)) failures.push(`Missing Agent Desk page copy: ${text}`);
+  if (!index.includes(text)) failures.push(`Missing homepage copy: ${text}`);
 }
 
 for (const text of requiredAgentStack) {
-  if (!index.includes(text)) failures.push(`Missing Agent Desk agent: ${text}`);
+  if (!retiredDesk.includes(text)) failures.push(`Missing Agent Desk agent: ${text}`);
 }
 
 for (const text of requiredScriptCopy) {
@@ -191,7 +193,7 @@ function fieldName(tag) {
   return tag.match(/\bname="([^"]+)"/i)?.[1] || "";
 }
 
-const formFields = formFieldTags(index);
+const formFields = formFieldTags(retiredDesk);
 const requiredFields = formFields
   .filter((tag) => /\srequired(?:\s|>|=)/i.test(tag))
   .map(fieldName)
@@ -268,7 +270,7 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
-if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
+if (!retiredDesk.includes("role=\"tabpanel\"") || !retiredDesk.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
@@ -315,8 +317,21 @@ for (const anchor of [
   }
 }
 
+// The forbidden-claim guard scans the CURRENT site's copy contract — the five
+// public pages plus the llms.txt / offer.md mirror pair. The retired Agent
+// Desk page and its script are a frozen, de-indexed legacy surface describing
+// a retired product; their copy is governed by the retired-framing guards
+// below, not by the current offer's claims policy.
+const currentClaimPages = [
+  siteHome,
+  siteAudit,
+  read("public/agents.html"),
+  read("public/pricing.html"),
+  read("public/specimen.html")
+];
+
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = [...currentClaimPages, llms, offer].join("\n").toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }
@@ -1099,7 +1114,7 @@ for (const [pageName, pageHtml] of ownedPages) {
 // robots noindex, nofollow meta, and its title and description frame the
 // surface as retired, so neither the search index nor a scraper can re-present
 // the retired self-serve product as the current offer.
-const retiredDeskHead = index.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+const retiredDeskHead = retiredDesk.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
 const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
 if (!robotsMeta.test(retiredDeskHead)) {
   failures.push("Retired Agent Desk page must keep a robots noindex, nofollow meta in its head.");
