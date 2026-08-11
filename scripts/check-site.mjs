@@ -445,6 +445,43 @@ for (const anchor of ["unfixed", "390x844", "44px", "not CI proof", "Exact verif
   }
 }
 
+// Lead-form tablet squeeze guard (review finding on the homepage intake form):
+// the homepage form shares the .lead class with the checks-section header,
+// whose gap:70px / space-between / flex-end treatment leaked onto it and,
+// together with the nowrap submit button, squeezed the domain and email
+// inputs to ~100px at tablet width (measured 99/98px at 761px, 103/102px at
+// 768px, and never above 139px — the "yourwebsite.com" placeholder clipped —
+// at any width under the fix). The fix scopes the checks-header rules to
+// .checks .lead and gives the two-field form its own 900px stacking
+// breakpoint, so the one-line layout keeps >=208px inputs and anything
+// narrower goes full-width stacked. These are STATIC SOURCE GUARDS (regex
+// over the served CSS), not behavioral tests: CI has no browser. The
+// behavioral, measured layout proof lives in
+// docs/evidence/lead-form-tablet-squeeze-2026-08-10.md.
+const indexCss = read("public/index.css");
+if (!indexCss.includes(".checks .lead{display:flex;justify-content:space-between;align-items:flex-end;gap:70px}")) {
+  failures.push("Homepage checks header must scope .lead to .checks .lead (the shared class leaks its gap onto the lead form).");
+}
+if (!indexCss.includes("@media (max-width:900px){")) {
+  failures.push("Two-field lead form must carry its own 900px stacking breakpoint (tablet squeeze guard).");
+}
+if (!indexCss.includes("form.two{flex-direction:column;align-items:stretch;border-radius:20px;padding:8px;max-width:100%;gap:18px}")) {
+  failures.push("Two-field lead form must stack below 900px with an explicit gap (tablet squeeze guard).");
+}
+if (indexCss.includes("@media (max-width:760px){\n    form.two{flex-direction:column")) {
+  failures.push("Two-field lead form must not stack at 760px (squeezes the inputs to ~100px at tablet widths).");
+}
+
+// The behavioral lead-form proof (real Chromium measurement, local static
+// copy) is checked in so the static guards above stay distinguishable from it.
+// Existence and section anchors only — this does not re-verify measurements.
+const leadFormReceipt = read("docs/evidence/lead-form-tablet-squeeze-2026-08-10.md");
+for (const anchor of ["unfixed", "761px", "**fixed**", "208px", "not CI proof", "Exact verification method"]) {
+  if (!leadFormReceipt.includes(anchor)) {
+    failures.push(`Lead-form evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+  }
+}
+
 // Render-blocking font stylesheet guards (dogfood finding b8f6046e942a).
 // The Google Fonts css2 stylesheet was fetched render-blocking on every public
 // page — a <link rel="stylesheet"> in the homepage head, and an @import chain
