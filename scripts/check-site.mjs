@@ -708,6 +708,7 @@ if (aiQuestions && aiEvidence) {
     if (!AI_STATES.includes(run.state)) failures.push(`AI-search run has an unknown state: ${run.state}`);
     if (!questionIds.has(run.questionId)) failures.push(`AI-search run references an unknown question: ${run.questionId}`);
     if (!engines.has(run.engine)) failures.push(`AI-search run references an unknown engine: ${run.engine}`);
+    if (!run.testedAt) failures.push(`AI-search run must record when it was tested: ${run.questionId}/${run.engine}`);
     if (run.state === "not-tested") {
       if (!run.reason) failures.push(`not-tested run must state a reason: ${run.questionId}/${run.engine}`);
       if (run.captured || (run.sources || []).length) {
@@ -717,6 +718,9 @@ if (aiQuestions && aiEvidence) {
       if (!run.captured) failures.push(`run must capture what was observed: ${run.questionId}/${run.engine}`);
       if (run.state !== "absent" && !(run.sources || []).length) {
         failures.push(`run must cite its sources: ${run.questionId}/${run.engine}`);
+      }
+      if (run.state === "absent" && (run.sources || []).length) {
+        failures.push(`absent run must not carry sources: ${run.questionId}/${run.engine}`);
       }
     }
     if (run.remediation && run.remediation.page) {
