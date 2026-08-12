@@ -82,6 +82,12 @@ const MAX_FIELD_LENGTH = 1800;
 const MAX_REQUEST_BYTES = 24000;
 const SOFT_AGENT_RUNS_PER_EMAIL_PER_DAY = 5;
 const MAX_AGENT_RUNS_PER_IP_PER_DAY = 20;
+// The current product's public intake (homepage and /audit) posts to
+// /api/signups. Its rows and the public /health surface must be labeled with
+// the current offer — The Website Appraisal — never the retired self-serve
+// Agent Desk, which keeps its own "agent-self-serve" labels on the legacy
+// /api/agent-audit path.
+const APPRAISAL_SURFACE = "website-appraisal";
 const CURRENCY_AMOUNT_PATTERN = String.raw`(?:(?:₹|\$|€|£|inr|usd|us\$|aud|cad|sgd|gbp|eur|rs\.?|rupees?)\s*\d[\d,.]*(?:\s*(?:k|lakh|lakhs|l|cr))?|\d[\d,.]*\s*(?:inr|usd|aud|cad|sgd|gbp|eur|rupees?))`;
 const METRIC_VALUE_PATTERN = String.raw`(?:${CURRENCY_AMOUNT_PATTERN}|\b\d[\d,.]*\b)`;
 const WEEKLY_METRIC_LABELS = [
@@ -359,7 +365,7 @@ async function signupResponse(request, env, url) {
     return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
   }
 
-  await saveEmailSignup(request, env, url, email, "agent-self-serve", website);
+  await saveEmailSignup(request, env, url, email, APPRAISAL_SURFACE, website);
 
   if (wantsHtmlRedirect(request)) {
     return htmlRedirect(url, "saved");
@@ -1228,7 +1234,7 @@ async function healthResponse(env) {
     {
       ok,
       service: "tinystudio-io-public",
-      surface: "agent-desk",
+      surface: APPRAISAL_SURFACE,
       ai: checks.ai ? "configured" : "missing",
       db: checks.db ? "configured" : "missing",
       checks,
