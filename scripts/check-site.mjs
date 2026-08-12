@@ -748,6 +748,7 @@ if (aiQuestions && aiEvidence) {
     if (!AI_STATES.includes(run.state)) failures.push(`AI-search run has an unknown state: ${run.state}`);
     if (!questionIds.has(run.questionId)) failures.push(`AI-search run references an unknown question: ${run.questionId}`);
     if (!engines.has(run.engine)) failures.push(`AI-search run references an unknown engine: ${run.engine}`);
+    if (!run.testedAt) failures.push(`AI-search run must record when it was tested: ${run.questionId}/${run.engine}`);
     if (run.state === "not-tested") {
       if (!run.reason) failures.push(`not-tested run must state a reason: ${run.questionId}/${run.engine}`);
       if (run.captured || (run.sources || []).length) {
@@ -757,6 +758,9 @@ if (aiQuestions && aiEvidence) {
       if (!run.captured) failures.push(`run must capture what was observed: ${run.questionId}/${run.engine}`);
       if (run.state !== "absent" && !(run.sources || []).length) {
         failures.push(`run must cite its sources: ${run.questionId}/${run.engine}`);
+      }
+      if (run.state === "absent" && (run.sources || []).length) {
+        failures.push(`absent run must not carry sources: ${run.questionId}/${run.engine}`);
       }
     }
     if (run.remediation && run.remediation.page) {
@@ -1255,6 +1259,53 @@ try {
 }
 if (!worker.includes('"/apple-touch-icon.png"')) {
   failures.push("Worker must serve /apple-touch-icon.png from the public asset allow-list.");
+}
+
+// ---- Favicon (dogfood) -------------------------------------------------------
+// A homepage with no favicon link leaves every browser to fall back on
+// /favicon.ico, which this worker does not serve, so each page load fires a
+// 404 — even though /favicon.svg exists and is allow-listed. Every served
+// HTML page must keep exactly one <link rel="icon"> inside its head pointing
+// at the served /favicon.svg asset, and the asset itself must stay a tracked,
+// valid SVG so a dropped or rewritten file cannot silently leave the pages
+// pointing at nothing.
+const faviconPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")],
+  ["agent-desk page", read("public/agent-desk.html")]
+];
+
+for (const [pageName, pageHtml] of faviconPages) {
+  const head = pageHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const links = [...head.matchAll(/<link\b[^>]*\brel="icon"[^>]*>/gi)].map((match) => match[0]);
+  if (links.length !== 1) {
+    failures.push(`Favicon link must appear exactly once in the head of ${pageName} (found ${links.length}).`);
+    continue;
+  }
+  const href = links[0].match(/\bhref="([^"]*)"/i)?.[1] ?? "";
+  if (href.trim() !== "/favicon.svg") {
+    failures.push(`Favicon on ${pageName} must point at /favicon.svg (found ${JSON.stringify(href)}).`);
+  }
+}
+
+const faviconBytes = readFileSync(new URL("../public/favicon.svg", import.meta.url), "utf8");
+if (!faviconBytes.trimStart().startsWith("<svg")) {
+  failures.push("public/favicon.svg must be a valid SVG file.");
+}
+try {
+  execFileSync("git", ["ls-files", "--error-unmatch", "public/favicon.svg"], {
+    cwd: new URL("..", import.meta.url),
+    stdio: "ignore"
+  });
+} catch {
+  failures.push("public/favicon.svg must be tracked by git.");
+}
+if (!worker.includes('"/favicon.svg"')) {
+  failures.push("Worker must serve /favicon.svg from the public asset allow-list.");
 }
 
 // ---- Social share tags (dogfood d87d715be3d0) -----------------------------
