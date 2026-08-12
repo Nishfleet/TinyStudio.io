@@ -82,6 +82,12 @@ const MAX_FIELD_LENGTH = 1800;
 const MAX_REQUEST_BYTES = 24000;
 const SOFT_AGENT_RUNS_PER_EMAIL_PER_DAY = 5;
 const MAX_AGENT_RUNS_PER_IP_PER_DAY = 20;
+// The current product's public intake (homepage and /audit) posts to
+// /api/signups. Its rows and the public /health surface must be labeled with
+// the current offer — The Website Appraisal — never the retired self-serve
+// Agent Desk, which keeps its own "agent-self-serve" labels on the legacy
+// /api/agent-audit path.
+const APPRAISAL_SURFACE = "website-appraisal";
 const CURRENCY_AMOUNT_PATTERN = String.raw`(?:(?:₹|\$|€|£|inr|usd|us\$|aud|cad|sgd|gbp|eur|rs\.?|rupees?)\s*\d[\d,.]*(?:\s*(?:k|lakh|lakhs|l|cr))?|\d[\d,.]*\s*(?:inr|usd|aud|cad|sgd|gbp|eur|rupees?))`;
 const METRIC_VALUE_PATTERN = String.raw`(?:${CURRENCY_AMOUNT_PATTERN}|\b\d[\d,.]*\b)`;
 const WEEKLY_METRIC_LABELS = [
@@ -359,7 +365,7 @@ async function signupResponse(request, env, url) {
     return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
   }
 
-  await saveEmailSignup(request, env, url, email, "agent-self-serve", website);
+  await saveEmailSignup(request, env, url, email, APPRAISAL_SURFACE, website);
 
   if (wantsHtmlRedirect(request)) {
     return htmlRedirect(url, "saved");
@@ -1206,9 +1212,16 @@ async function agentAuditResponse(request, env, url) {
 }
 
 async function healthResponse(env) {
+  // The current product (The Website Appraisal) depends on exactly one
+  // backend: the D1 `email_signups` table behind /api/signups. The retired
+  // self-serve Agent Desk's machinery (the AI binding and its own agent_runs /
+  // agent_usage_limits tables) is reported as legacy state, never as the
+  // current product's readiness: /health must not go red when the appraisal
+  // intake is healthy, nor green when the signup path is broken.
   const checks = {
-    ai: Boolean(env.AI),
     db: Boolean(env.DB),
+    signupsTable: false,
+    ai: Boolean(env.AI),
     agentRunsTable: false,
     usageLimitsTable: false
   };
@@ -1216,9 +1229,10 @@ async function healthResponse(env) {
   if (env.DB) {
     try {
       const tableResult = await env.DB.prepare(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('agent_runs', 'agent_usage_limits')"
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('email_signups', 'agent_runs', 'agent_usage_limits')"
       ).all();
       const tables = new Set((tableResult.results || []).map((row) => row.name));
+      checks.signupsTable = tables.has("email_signups");
       checks.agentRunsTable = tables.has("agent_runs");
       checks.usageLimitsTable = tables.has("agent_usage_limits");
     } catch (error) {
@@ -1226,14 +1240,14 @@ async function healthResponse(env) {
     }
   }
 
-  const ok = checks.ai && checks.db && checks.agentRunsTable && checks.usageLimitsTable;
+  // The current-product readiness verdict keys off the intake path only.
+  const ok = checks.db && checks.signupsTable;
 
   return jsonResponse(
     {
       ok,
       service: "tinystudio-io-public",
-      surface: "agent-desk",
-      ai: checks.ai ? "configured" : "missing",
+      surface: APPRAISAL_SURFACE,
       db: checks.db ? "configured" : "missing",
       checks,
       routes: ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", "api.tinystudio.io"]
