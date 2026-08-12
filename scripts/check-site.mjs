@@ -174,6 +174,29 @@ for (const text of requiredWorkerCopy) {
   if (!worker.includes(text)) failures.push(`Missing worker agent behavior: ${text}`);
 }
 
+// The current-product readiness verdict must key off the intake path only.
+// The Website Appraisal depends on the D1 email_signups table behind
+// /api/signups; the retired Agent Desk's AI binding and agent tables are
+// reported as legacy state, never as the current product's readiness. A
+// regression that lets the legacy machinery gate /health — or that drops the
+// intake table from the check — would make the machine-readable truth lie.
+const requiredHealthCopy = [
+  "surface: APPRAISAL_SURFACE",
+  "signupsTable",
+  "checks.db && checks.signupsTable",
+  "email_signups",
+  "agentRunsTable",
+  "usageLimitsTable"
+];
+
+for (const text of requiredHealthCopy) {
+  if (!worker.includes(text)) failures.push(`Missing worker health truth: ${text}`);
+}
+
+if (worker.includes("checks.ai && checks.db")) {
+  failures.push("Worker /health verdict must not gate on the retired Agent Desk AI binding");
+}
+
 for (const text of requiredPublicArtifacts) {
   // llms.txt and offer.md are mirrors of the same offer contract. A fact must
   // appear in BOTH (case-insensitively, since one file may head it while the

@@ -1016,6 +1016,77 @@ test("signup handler accepts a bare-domain website with a test email and stores 
   assert.ok(insert, "signup handler must persist through the existing email_signups path");
   assert.equal(insert.values[0], "audit-check+test@example.com");
   assert.equal(insert.values[7], "https://example.com");
+  // The current appraisal intake must label its rows with the current offer,
+  // never the retired self-serve Agent Desk surface name.
+  assert.equal(insert.values[1], "website-appraisal", "current intake signups must carry the current-offer source label");
+  assert.notEqual(insert.values[1], "agent-self-serve", "current intake signups must not carry the retired Agent Desk source label");
+});
+
+test("worker /health names the current Website Appraisal surface, not the retired Agent Desk", async () => {
+  class HealthStatement extends FakeStatement {
+    async all() {
+      this.db.calls.push({ method: "all", sql: this.sql, values: this.values });
+      return { results: [{ name: "email_signups" }, { name: "agent_runs" }, { name: "agent_usage_limits" }] };
+    }
+  }
+
+  class HealthDB extends FakeDB {
+    prepare(sql) {
+      return new HealthStatement(this, sql);
+    }
+  }
+
+  const res = await worker.fetch(new Request("https://tinystudio.io/health"), { DB: new HealthDB(), AI: {} });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.service, "tinystudio-io-public");
+  assert.equal(body.surface, "website-appraisal", "health surface must name the current offer");
+  assert.notEqual(body.surface, "agent-desk", "health surface must not name the retired Agent Desk");
+  assert.equal(body.ok, true);
+});
+
+test("worker /health verdict keys off the current intake path, not the retired Agent Desk machinery", async () => {
+  // The current product depends on the D1 email_signups table behind
+  // /api/signups. The retired Agent Desk's AI binding and agent tables must
+  // not gate the current product's readiness verdict: a green /health while
+  // the signup path is broken would be a false positive, and a red /health
+  // when the appraisal intake is healthy would be a false alarm. The env
+  // deliberately carries no AI binding — the current product has no model
+  // dependency.
+  class HealthStatement extends FakeStatement {
+    async all() {
+      this.db.calls.push({ method: "all", sql: this.sql, values: this.values });
+      return { results: [{ name: "email_signups" }] };
+    }
+  }
+
+  class HealthDB extends FakeDB {
+    prepare(sql) {
+      return new HealthStatement(this, sql);
+    }
+  }
+
+  const res = await worker.fetch(new Request("https://tinystudio.io/health"), { DB: new HealthDB() });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.ok, true, "the current product is ready even without the retired Agent Desk machinery");
+  assert.equal(body.checks.signupsTable, true, "the intake table is present");
+  assert.equal(body.checks.ai, false, "the retired AI binding is absent");
+  assert.equal(body.checks.agentRunsTable, false, "the retired agent_runs table is absent");
+  assert.equal(body.checks.usageLimitsTable, false, "the retired usage-limits table is absent");
+});
+
+test("legacy /api/agent-audit still labels its rows with the retired self-serve source", async () => {
+  const db = new FakeDB();
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(agentRequest(validBody()), { DB: db, AI: ai });
+  assert.equal(res.status, 200);
+  const signupInsert = db.calls.find((call) => call.sql.includes("INSERT INTO email_signups"));
+  assert.ok(signupInsert, "agent audit must persist through the existing email_signups path");
+  assert.equal(signupInsert.values[1], "agent-self-serve", "the legacy surface keeps its own source label");
+  const runInsert = db.calls.find((call) => call.sql.includes("INSERT INTO agent_runs"));
+  assert.ok(runInsert, "agent audit must record the legacy run");
+  assert.equal(runInsert.values[2], "agent-self-serve", "the legacy run keeps its own source label");
 });
 
 test("signup handler redirects a rejected email to /?signal=invalid so the homepage can render it", async () => {
