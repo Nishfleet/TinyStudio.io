@@ -184,3 +184,113 @@ merged as PR #32, `npm run check` and `npm test` pass on current main, and
 the live deployment now serves exactly one valid schema.org `@graph` block —
 a stable `Organization`, the `WebSite`, and the page's own `WebPage` — on the
 home page and on all four sibling public pages.
+
+### Closeout re-verification (added 2026-08-11)
+
+Re-verified against the current origin/main head (8b42e0a, "docs(evidence):
+close out apple touch icon finding 98a7bf8e08fc against current main and
+live (#77)") after five commits touched the public surface since the
+2026-08-09 closeout — 95d2248 (preferred source pages for AI answers),
+c5e2f2b (de-index the retired Agent Desk), ac05bec (mobile tap targets: CSS
+only), f9f0b0f (footer attribution link on home), 1cc7a4e (canonical/JSON-LD
+URL cleanup on /audit). Only the last touched a structured-data block — the
+audit page's `WebPage` `@id`/`url` moved from the redirecting
+`https://tinystudio.io/audit.html` to the clean `https://tinystudio.io/audit`
+(plus the page's canonical and `og:url`), with the `check-site.mjs` guard
+expectation updated in the same commit to match (verified per commit: `git
+show <sha> -- public/` contains no `ld+json`/`@id`/`@graph` change in any
+other commit). The home-page block the finding flagged is byte-identical to
+the one the closeout measured (diff of the served block against
+`public/index.html` on this head: zero differences). Three checks:
+
+1. Source checks on this head: `npm run check` passes — the "Structured data
+   (dogfood 975fdb784275)" guard in `scripts/check-site.mjs` requires exactly
+   one `application/ld+json` block in the head of each of the five pages, a
+   valid schema.org `@graph` with unique `@id` values, exactly one
+   `Organization` node (stable `@id` `https://tinystudio.io/#organization`,
+   name `TinyStudio`, url `https://tinystudio.io/`, served logo, homepage-meta
+   description), exactly one `WebSite` node (stable `@id`
+   `https://tinystudio.io/#website`, publisher pointing at the `Organization`),
+   and exactly one `WebPage` node bound to the page's own metadata — and the
+   full `npm test` suite passes (check, headings 6/6, sitemap 7/7, worker 53,
+   ui 16, contract 8).
+
+2. Fresh live measurement of the deployed site (2026-08-11, headless
+   Chromium, same method as the receipt above, `domcontentloaded` wait,
+   blocks counted in `document.head` and the full document, each block parsed
+   and checked against the same contract as the CI guard, console/page errors
+   captured): every page returns 200 with the CSP header, serves exactly one
+   `application/ld+json` block in its head and one across the whole document
+   whose graph carries exactly one `Organization`, one `WebSite` and one
+   `WebPage` node with unique `@id` values (organization and site nodes
+   matching the stable entities, `WebPage` bound to the page's own metadata),
+   and logs no console or page errors.
+
+   | Page | HTTP | CSP header | ld+json blocks in head | blocks in full doc | graph nodes | WebPage @id | console errors |
+   |---|---|---|---|---|---|---|---|
+   | index.html (home, `/`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/#webpage` | none |
+   | audit.html (`/audit`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/audit.html#webpage` | none |
+   | agents.html (`/agents`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/agents.html#webpage` | none |
+   | pricing.html (`/pricing`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/pricing.html#webpage` | none |
+   | specimen.html (`/specimen`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/specimen.html#webpage` | none |
+
+   Homepage structured data served live, unchanged from the closeout receipt
+   (the block quoted above; diffed byte-for-byte against `public/index.html`
+   on this head: identical).
+
+3. Deployment-lag note (honesty, not a structured-data regression): the live
+   deployment lags current main by at least the two newest public-surface
+   commits — f9f0b0f (footer attribution link on home) and 1cc7a4e
+   (canonical/JSON-LD URL cleanup on /audit) — so the live audit page still
+   names the redirecting `https://tinystudio.io/audit.html` form in its
+   `WebPage` `@id`/`url` that PR #56 already corrected on main to the clean
+   `/audit` (matching the lag this lane's canonical re-verification
+   documented on the same page). Neither lagging commit touches the home
+   page's block; the address the finding flagged (home, `/`) is identical on
+   main and live and was already served correctly at the 2026-08-09 closeout.
+
+Finding 975fdb784275 ("Structured data opportunity on home") remains closed
+on the code side (PR #32), in CI (`npm run check` guard), and against the
+deployed site; this lane (2026-08-11) re-confirmed all three against current
+main and found nothing further to change on the finding's page.
+
+### Ship verification, "origin/main past b004c11 so PR #32 goes live" (added 2026-08-11)
+
+This section closes the checklist item that tracked shipping main past
+b004c11 (PR #30, apple touch icon) so the merged PR #32 structured data
+reaches the five public pages in production. Both halves of the item are
+verified true on this head (c934538, current origin/main):
+
+1. Main is 34 commits past b004c11, and PR #32 is in that history: `git log
+   --oneline origin/main --not b004c11` shows 34 commits, and `git log
+   --oneline origin/main --grep="#32"` shows fa8d83c "seo: add schema.org
+   structured data to the five public pages (dogfood 975fdb784275) (#32)" —
+   the direct child of b004c11 and an ancestor of origin/main head.
+
+2. The live deployment now matches origin/main byte-for-byte on all five
+   public pages: `curl https://tinystudio.io/{/,/audit,/agents,/pricing,/specimen}`
+   diffed against the `public/*.html` files on this head shows zero
+   differences on every page. This includes the two commits the 2026-08-11
+   re-verification above recorded as lagging — f9f0b0f (footer attribution
+   link on home) and 1cc7a4e (canonical/JSON-LD URL cleanup on /audit) — so
+   that deployment-lag note is now resolved: the live audit page serves the
+   clean `https://tinystudio.io/audit#webpage` `@id`/url that PR #56
+   established on main.
+
+3. Fresh live contract check (2026-08-11, same contract as the CI guard):
+   each of the five pages serves exactly one `application/ld+json` block in
+   the document whose `@graph` carries exactly one `Organization`, one
+   `WebSite`, and one `WebPage` node; `WebPage` `@id`s served live are
+   `https://tinystudio.io/#webpage`, `/audit#webpage`, `/agents.html#webpage`,
+   `/pricing.html#webpage`, `/specimen.html#webpage` — matching the head
+   files and the PR #32 contract.
+
+4. Source and CI on this head: `npm run check` passes ("TinyStudio.io checks
+   passed"; the "Structured data (dogfood 975fdb784275)" guard enforces
+   exactly one valid block per page), the full `npm test` suite passes
+   (headings 6/6, sitemap 7/7, worker 53, ui 16, contract 8), and GitHub
+   Actions CI and secret-scan both report success on c934538.
+
+The item is satisfied: origin/main is past b004c11, the merged PR #32
+structured data is served live on all five appraisal-facing public pages,
+and nothing further on this item remains to ship.

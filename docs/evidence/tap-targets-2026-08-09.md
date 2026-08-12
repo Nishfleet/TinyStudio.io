@@ -86,3 +86,62 @@ await browser.close();
 ## Limitation
 
 This is local static-server proof, not CI proof and not a hosted/live claim. The repo's CI (`npm test`) has no browser dependency, so it runs only the source-string guards in `scripts/check-site.mjs` (which now pin the tap-target rules and this receipt's anchors) plus the worker/UI contract tests; a browser-layout regression can therefore still ship if the checked-in CSS drifts and CI stays green. The live tinystudio.io deployment was not measured here; a deployed page could differ (CDN cache, different asset versions). To be CI-proof this measurement would need a browser step added to CI (not done — out of scope).
+
+## Re-verification against current main and live (added 2026-08-11)
+
+Re-verified the finding against the current origin/main head (354e725,
+"docs(evidence): re-verify structured-data finding 975fdb784275 against
+current main and live", merged 2026-08-11) with the same headless-Chromium
+method, one fresh session, on a local static copy of `public/` and on the
+live deployment.
+
+### Result: one regression found and fixed
+
+The 2026-08-09 fix (PR #48) grew the footer links inside `shared.css`, but
+the home page loads only `index.css` (its own standalone stylesheet), whose
+mobile block had no `footer a` rule. PR #70 (2026-08-11) then added the
+"inish.in" link to the home-page footer, so current main shipped a 13px hit
+area for that link at 390x844 — the only element under the 44px bar on any
+page. This lane fixed it by mirroring the `shared.css` rule into
+`index.css`'s mobile block (`footer a{padding:16px 0}`) and extending the
+`scripts/check-site.mjs` tap-target guard for `index.css` so the same
+regression fails CI.
+
+### Fresh measurements (390x844)
+
+- Before the lane fix (head 354e725): every element ≥44px except home
+  `footer a` at **13px** (`h:13, w:60.8`). All other pages' footer links
+  were 45px, nav links 45px, nav CTA 47px, lead CTA 44px, logo 50px —
+  matching the 2026-08-09 receipt.
+- After the lane fix: **every interactive element on every served page
+  ≥44px**, including home `footer a` at **45px**. Minimum heights across
+  all seven pages: `.logo` 50, `.navlinks a` 45, `.navcta` 47, `form
+  button` 44, `.back` 45, `footer a` 44 (home 45), `.brand` 44,
+  `.agent-form button` 44, `.output-tabs button` 44, `.output-actions
+  button` 44, `input` 44, `.agent-footer a` 44, `.optional-panel summary`
+  65.2. Widths all ≥44 (smallest: 44px nav label).
+- Desktop neutrality: at 1280x800 the home footer link is still 13px
+  (unchanged; the rule lives only inside the `max-width:760px` block).
+- No overflow introduced: `scrollWidth == clientWidth == 390` on home at
+  390x844, and 1280 at 1280x800.
+
+### Source and suite checks on the head
+
+`npm run check` passes on the lane head with the extended guard (removing
+the new `index.css` needle makes it fail), and the full `npm test` suite
+passes (check, headings 6/6, sitemap 7/7, worker 53/53, ui 16/16, contract
+8/8).
+
+### Live measurement
+
+`https://tinystudio.io/`, `/audit`, `/agents`, `/pricing`, `/specimen` at
+390x844 (2026-08-11): logo 50px, nav links 45px, nav CTA 47px, lead CTA
+44px, inputs ≥47px, footer links 45px on /audit, /agents, /pricing and
+/specimen. The live home page is currently behind main (its footer predates
+PR #70, so it has no footer link at all); every live element measured is
+≥44px, and once current main deploys, the home footer link ships at 45px.
+
+Same bar as the 2026-08-09 fix: every page now keeps ≥44px touch targets
+inside the mobile blocks, this time including the home-page footer link,
+and the guard in `scripts/check-site.mjs` covers `index.css` so the
+regression cannot re-ship silently.

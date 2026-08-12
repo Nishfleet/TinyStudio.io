@@ -398,7 +398,11 @@ async function enforceAgentLimits(request, env, email, url) {
   }
 
   try {
-    const bucket = new Date().toISOString().slice(0, 10);
+    // Test-only clock override: production never binds AGENT_LIMITS_NOW, so
+    // runtime behaviour is unchanged when it is absent. The worker test suite
+    // uses it to roll the daily limit bucket across midnight deterministically
+    // (no sleeping).
+    const bucket = new Date(env.AGENT_LIMITS_NOW || Date.now()).toISOString().slice(0, 10);
     const ipHash = await hashIp(request, bucket);
 
     if (ipHash) {
@@ -1266,7 +1270,7 @@ function retiredAppResponse() {
   <body>
     <main>
       <h1>TinyStudio app retired.</h1>
-      <p>The old TinyStudio app has been retired. TinyStudio.io now runs the self-serve Agent Desk from the main domain.</p>
+      <p>The old TinyStudio app has been retired. TinyStudio.io now runs The Website Appraisal — the free leak audit of high-ticket service homepages, reviewed by a person — and the human-reviewed desk that closes what the audit finds.</p>
       <a href="https://tinystudio.io/">Go to TinyStudio.io</a>
     </main>
   </body>
@@ -1288,7 +1292,7 @@ function retiredApiResponse() {
       {
         ok: false,
         status: "retired",
-        message: "The old TinyStudio API has been retired. TinyStudio.io now runs the self-serve Agent Desk from the main domain.",
+        message: "The old TinyStudio API has been retired. TinyStudio.io now runs The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds.",
         publicSite: "https://tinystudio.io/"
       },
       {

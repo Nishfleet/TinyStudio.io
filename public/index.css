@@ -103,9 +103,12 @@
 
   /* ── checks ────────────────────────────────────── */
   .checks{margin-top:124px;padding-top:70px;border-top:1px solid var(--line)}
-  .lead{display:flex;justify-content:space-between;align-items:flex-end;gap:70px}
+  /* scoped to .checks: the homepage lead form shares the .lead class, and an
+     unscoped gap/space-between/flex-end treatment leaked onto the form,
+     squeezing the domain+email inputs to ~100px at tablet widths */
+  .checks .lead{display:flex;justify-content:space-between;align-items:flex-end;gap:70px}
   .checks h2{font-family:'Fraunces',serif;font-weight:200;font-size:47px;letter-spacing:-.028em;max-width:12ch;line-height:1.08}
-  .lead p{max-width:38ch;font-size:15.5px;line-height:1.75;color:var(--muted)}
+  .checks .lead p{max-width:38ch;font-size:15.5px;line-height:1.75;color:var(--muted)}
   .checkgrid{margin-top:56px;display:grid;grid-template-columns:repeat(4,1fr)}
   .check{padding-right:34px;border-right:1px solid var(--hair)}
   .check:last-child{border-right:0;padding-right:0}
@@ -169,13 +172,16 @@
   .navlinks a:hover{color:var(--ink)}
   .navcta{border:1px solid var(--line);border-radius:999px;padding:9px 17px;color:var(--ink)!important}
   .navcta:hover{border-color:var(--brass);background:rgba(255,253,248,.7)}
-  /* two-field lead form — website + email */
+  /* two-field lead form — website + email, still one line on desktop */
   form.two{max-width:720px;padding:7px 7px 7px 0;overflow:hidden}
   form.two input{flex:1 1 0;min-width:0;padding:12px 18px 12px 24px}
   form.two input:first-of-type{border-right:1px solid var(--line)}
   form.two button{flex:0 0 auto}
-  @media (max-width:760px){
-    form.two{flex-direction:column;align-items:stretch;border-radius:20px;padding:8px;max-width:100%}
+  /* Stack below 900px: with the nowrap submit button, a one-line row below
+     tablet width squeezes the inputs to ~100px. The gap is explicit here —
+     it used to arrive via the .lead class leak (now scoped to .checks). */
+  @media (max-width:900px){
+    form.two{flex-direction:column;align-items:stretch;border-radius:20px;padding:8px;max-width:100%;gap:18px}
     form.two input{padding:14px 18px}
     form.two input:first-of-type{border-right:0;border-bottom:1px solid var(--line)}
     form.two button{width:100%}
@@ -224,10 +230,11 @@
   .wrap{padding:0 20px}
   nav{flex-wrap:wrap;row-gap:14px}
   .navlinks{flex-wrap:wrap;gap:10px 14px}
-  /* tap targets: every nav link keeps a >=44px hit area on touch */
+  /* tap targets: every nav/footer link keeps a >=44px hit area on touch */
   .logo{padding:11px 0}
   .navlinks a{padding:15px 0}
   .navcta{padding:15px 20px}
+  footer a{padding:16px 0}
   header{padding:56px 0 0}
   .meta{grid-template-columns:1fr;gap:18px}
   .meta div{border-right:0}
@@ -235,7 +242,7 @@
   .finding .stat{font-size:56px}
   .spec{grid-template-columns:1fr;gap:34px}
   .specbody h2{font-size:34px}
-  .lead{flex-direction:column;align-items:flex-start;gap:18px}
+  .checks .lead{flex-direction:column;align-items:flex-start;gap:18px}
   .checks h2{font-size:36px}
   .checkgrid{grid-template-columns:1fr;gap:26px}
   .check{padding-right:0;padding-bottom:26px;border-right:0;border-bottom:1px solid var(--hair)}
