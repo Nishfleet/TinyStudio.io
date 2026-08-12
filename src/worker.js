@@ -1208,9 +1208,16 @@ async function agentAuditResponse(request, env, url) {
 }
 
 async function healthResponse(env) {
+  // The current product (The Website Appraisal) depends on exactly one
+  // backend: the D1 `email_signups` table behind /api/signups. The retired
+  // self-serve Agent Desk's machinery (the AI binding and its own agent_runs /
+  // agent_usage_limits tables) is reported as legacy state, never as the
+  // current product's readiness: /health must not go red when the appraisal
+  // intake is healthy, nor green when the signup path is broken.
   const checks = {
-    ai: Boolean(env.AI),
     db: Boolean(env.DB),
+    signupsTable: false,
+    ai: Boolean(env.AI),
     agentRunsTable: false,
     usageLimitsTable: false
   };
@@ -1218,9 +1225,10 @@ async function healthResponse(env) {
   if (env.DB) {
     try {
       const tableResult = await env.DB.prepare(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('agent_runs', 'agent_usage_limits')"
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('email_signups', 'agent_runs', 'agent_usage_limits')"
       ).all();
       const tables = new Set((tableResult.results || []).map((row) => row.name));
+      checks.signupsTable = tables.has("email_signups");
       checks.agentRunsTable = tables.has("agent_runs");
       checks.usageLimitsTable = tables.has("agent_usage_limits");
     } catch (error) {
@@ -1228,14 +1236,14 @@ async function healthResponse(env) {
     }
   }
 
-  const ok = checks.ai && checks.db && checks.agentRunsTable && checks.usageLimitsTable;
+  // The current-product readiness verdict keys off the intake path only.
+  const ok = checks.db && checks.signupsTable;
 
   return jsonResponse(
     {
       ok,
       service: "tinystudio-io-public",
       surface: APPRAISAL_SURFACE,
-      ai: checks.ai ? "configured" : "missing",
       db: checks.db ? "configured" : "missing",
       checks,
       routes: ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", "api.tinystudio.io"]
