@@ -1127,6 +1127,22 @@ const retiredDeskDescription =
 if (!/\bretired\b/i.test(retiredDeskDescription)) {
   failures.push("Retired Agent Desk description must frame the surface as retired.");
 }
+// The legacy page must not claim the apex root as its canonical or og:url: the
+// homepage is a live page that owns the root, and a noindex page canonicalizing
+// to a live page tells Google the legacy page is a duplicate of the homepage —
+// handing the retired title/snippet back to tinystudio.io (the very
+// consolidation the de-indexing pass exists to stop). The canonical and og:url
+// must instead name the page's own served address, https://tinystudio.io/agent-desk.html.
+const retiredDeskCanonical =
+  retiredDesk.match(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/i)?.[0] ?? "";
+if (!/href\s*=\s*["']https:\/\/tinystudio\.io\/agent-desk\.html["']/i.test(retiredDeskCanonical)) {
+  failures.push("Retired Agent Desk canonical must name its own served address https://tinystudio.io/agent-desk.html, never the apex root (a noindex page canonicalizing to a live page re-consolidates the retired title onto the homepage).");
+}
+const retiredDeskOgUrl =
+  retiredDesk.match(/<meta\b[^>]*\bproperty="og:url"[^>]*>/i)?.[0] ?? "";
+if (!/content\s*=\s*["']https:\/\/tinystudio\.io\/agent-desk\.html["']/i.test(retiredDeskOgUrl)) {
+  failures.push("Retired Agent Desk og:url must name its own served address https://tinystudio.io/agent-desk.html, never the apex root (it would claim the live homepage as this page).");
+}
 
 // ---- Meta descriptions (dogfood) -------------------------------------------
 // The leak audit this site sells flags a homepage whose served HTML carries no
