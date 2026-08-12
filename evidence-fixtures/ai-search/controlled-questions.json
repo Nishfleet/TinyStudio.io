@@ -30,7 +30,7 @@
       "id": "q5-what-is-tinystudio-io",
       "name": "Whether tinystudio.io is named",
       "prompt": "What is tinystudio.io?",
-      "truth": "tinystudio.io is TinyStudio's own site: the leak audit, plus the Agent Desk behind it."
+      "truth": "tinystudio.io is TinyStudio's own site: the free leak audit of high-ticket service homepages, and the human-reviewed desk that closes what the audit finds."
     },
     {
       "id": "q6-client-work",
@@ -43,6 +43,12 @@
       "name": "What tinystudio.io charges",
       "prompt": "tinystudio.io pricing",
       "truth": "The audit is free; the desk runs at $2,500 a month on a three-month minimum (pricing.html)."
+    },
+    {
+      "id": "q8-conversion-audit",
+      "name": "Whether TinyStudio is a conversion audit service",
+      "prompt": "Is TinyStudio a conversion audit service?",
+      "truth": "TinyStudio is not a conversion audit service: it runs the free leak audit of the one page your revenue depends on, each fault named in order of what it costs you, with the fix beside each, and promises no conversion lift (index.html)."
     }
   ]
 }
