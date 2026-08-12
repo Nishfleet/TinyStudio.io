@@ -1136,3 +1136,158 @@ test("retired API host frames the current offer as The Website Appraisal, not th
   assert.match(body.message, /free leak audit of high-ticket service homepages/, "retired API host message must state the current offer truth");
   assert.doesNotMatch(body.message, /self-serve Agent Desk/, "retired API host message must not point at the retired Agent Desk as the current offer");
 });
+
+// --- Signup daily rate limits (daily_ip_limit / daily_email_limit) ---
+//
+// Production enforces two independent daily caps before any agent run:
+// MAX_AGENT_RUNS_PER_IP_PER_DAY (20) and SOFT_AGENT_RUNS_PER_EMAIL_PER_DAY
+// (5), both keyed by UTC day in agent_usage_limits.bucket_key. The shared
+// FakeDB above returns count 1 for every upsert, so neither cap could ever
+// trip in the suite; these tests drive real per-bucket counters and assert
+// the exact boundary, the two limits' independence, and the day rollover.
+
+class CountingStatement extends FakeStatement {
+  async first() {
+    this.db.calls.push({ method: "first", sql: this.sql, values: this.values });
+    if (this.sql.includes("INSERT INTO agent_usage_limits")) {
+      const bucketKey = this.values[0];
+      const count = (this.db.counts.get(bucketKey) || 0) + 1;
+      this.db.counts.set(bucketKey, count);
+      return { count };
+    }
+    return { count: 1 };
+  }
+}
+
+class CountingDB extends FakeDB {
+  constructor() {
+    super();
+    this.counts = new Map();
+  }
+
+  prepare(sql) {
+    return new CountingStatement(this, sql);
+  }
+}
+
+function runAgentLimit(db, ai, body, headers, env = {}) {
+  return worker.fetch(agentRequest(body, headers), { DB: db, AI: ai, ...env });
+}
+
+test("per-IP daily signup limit: 20 succeed, the 21st from the same IP returns 429 daily_ip_limit", async () => {
+  const db = new CountingDB();
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const ip = "203.0.113.77";
+
+  for (let i = 1; i <= 20; i += 1) {
+    const res = await runAgentLimit(
+      db,
+      ai,
+      validBody({ email: `ip-burst-${i}@tinystudio.io` }),
+      { "CF-Connecting-IP": ip }
+    );
+    assert.equal(res.status, 200, `request ${i} (the 20th is the exact per-IP boundary) must succeed`);
+  }
+
+  // Fresh email, same IP: the IP cap must fire on its own, not be masked by
+  // an email cap (each email above is distinct, so email counts never rise).
+  const blocked = await runAgentLimit(
+    db,
+    ai,
+    validBody({ email: "ip-burst-21@tinystudio.io" }),
+    { "CF-Connecting-IP": ip }
+  );
+  assert.equal(blocked.status, 429, "the 21st request from the same IP must be refused");
+  const body = await blocked.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "daily_ip_limit");
+  assert.match(blocked.headers.get("Content-Type") || "", /application\/json/);
+});
+
+test("per-email daily signup limit: 5 succeed, the 6th for the same email returns 429 daily_email_limit", async () => {
+  const db = new CountingDB();
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const email = "email-burst@tinystudio.io";
+
+  for (let i = 1; i <= 5; i += 1) {
+    const res = await runAgentLimit(
+      db,
+      ai,
+      validBody({ email }),
+      { "CF-Connecting-IP": `203.0.113.1${i}` }
+    );
+    assert.equal(res.status, 200, `request ${i} (the 5th is the exact per-email boundary) must succeed`);
+  }
+
+  // Fresh IP, same email: the email cap must fire on its own, not be masked
+  // by an IP cap (each IP above is distinct, so IP counts never rise).
+  const blocked = await runAgentLimit(
+    db,
+    ai,
+    validBody({ email }),
+    { "CF-Connecting-IP": "203.0.113.99" }
+  );
+  assert.equal(blocked.status, 429, "the 6th request for the same email must be refused");
+  const body = await blocked.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "daily_email_limit");
+  assert.match(blocked.headers.get("Content-Type") || "", /application\/json/);
+});
+
+test("daily email limit resets after the day rolls over (controlled clock, no sleeping)", async () => {
+  const db = new CountingDB();
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const email = "rollover-email@tinystudio.io";
+  const dayOne = "2026-08-12T10:00:00.000Z";
+  const dayTwo = "2026-08-13T02:00:00.000Z";
+
+  for (let i = 1; i <= 5; i += 1) {
+    const res = await runAgentLimit(db, ai, validBody({ email }), {}, { AGENT_LIMITS_NOW: dayOne });
+    assert.equal(res.status, 200, `request ${i} on day one must succeed`);
+  }
+
+  const blocked = await runAgentLimit(db, ai, validBody({ email }), {}, { AGENT_LIMITS_NOW: dayOne });
+  assert.equal(blocked.status, 429, "the 6th request on day one must be refused");
+  assert.equal((await blocked.json()).error, "daily_email_limit");
+
+  const allowed = await runAgentLimit(db, ai, validBody({ email }), {}, { AGENT_LIMITS_NOW: dayTwo });
+  assert.equal(allowed.status, 200, "the same email must be allowed again once the day rolls over");
+});
+
+test("daily IP limit resets after the day rolls over (controlled clock, no sleeping)", async () => {
+  const db = new CountingDB();
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const ip = "203.0.113.55";
+  const dayOne = "2026-08-12T10:00:00.000Z";
+  const dayTwo = "2026-08-13T02:00:00.000Z";
+
+  for (let i = 1; i <= 20; i += 1) {
+    const res = await runAgentLimit(
+      db,
+      ai,
+      validBody({ email: `ip-rollover-${i}@tinystudio.io` }),
+      { "CF-Connecting-IP": ip },
+      { AGENT_LIMITS_NOW: dayOne }
+    );
+    assert.equal(res.status, 200, `request ${i} on day one must succeed`);
+  }
+
+  const blocked = await runAgentLimit(
+    db,
+    ai,
+    validBody({ email: "ip-rollover-blocked@tinystudio.io" }),
+    { "CF-Connecting-IP": ip },
+    { AGENT_LIMITS_NOW: dayOne }
+  );
+  assert.equal(blocked.status, 429, "the 21st request on day one must be refused");
+  assert.equal((await blocked.json()).error, "daily_ip_limit");
+
+  const allowed = await runAgentLimit(
+    db,
+    ai,
+    validBody({ email: "ip-rollover-blocked@tinystudio.io" }),
+    { "CF-Connecting-IP": ip },
+    { AGENT_LIMITS_NOW: dayTwo }
+  );
+  assert.equal(allowed.status, 200, "the same IP must be allowed again once the day rolls over");
+});
