@@ -145,3 +145,55 @@ Same bar as the 2026-08-09 fix: every page now keeps ≥44px touch targets
 inside the mobile blocks, this time including the home-page footer link,
 and the guard in `scripts/check-site.mjs` covers `index.css` so the
 regression cannot re-ship silently.
+
+## Re-verification against current main and live, full-element sweep (2026-08-12)
+
+Re-verified the finding once more against the current origin/main head
+(18128e8, "fix(public): serve rel=icon on /brief-requested and guard
+favicon links in check-site.mjs", merged 2026-08-12) and the live
+deployment, one fresh headless-Chromium session, with a broader method
+than the 2026-08-09 and 2026-08-11 runs: instead of the thirteen fixed
+selectors, every interactive element on every page (`a, button, input,
+select, textarea, summary`) was measured at 390x844, on a local static
+copy of `public/` and on `https://tinystudio.io` itself.
+
+### Result: no regression; the finding stays closed
+
+- Every standalone (non-inline) target on every served page — home,
+  /audit, /agents, /pricing, /specimen, /brief-requested, /agent-desk —
+  is ≥44px in both height and width, on main and on live: logo 50,
+  nav links 45, nav CTA 47, lead-form button 44, form inputs 47–48,
+  footer links 44–45, `.back` 45, and all Agent Desk controls (brand 44,
+  submit 44, tabs 44, copy 44, inputs 44, footer link 44, disclosure
+  summary 65.2). This covers the changes that landed since the
+  2026-08-11 run: the homepage two-field form tablet fix (#96), the
+  persistent intake-field labels (#98), the conversion-audit FAQ rows
+  (#102, text only — no new interactive elements) and the favicon
+  link-tag changes (#85, #113).
+- The live deployment now matches main: a per-element diff of the two
+  measurement runs shows zero differences, and the home page now carries
+  the footer "inish.in" link at 45px (the 2026-08-11 run noted live home
+  was behind main).
+- The only elements under 44px anywhere are **inline text links inside
+  sentences** (`.xa1`/`.xp1`/`.xi19`: "See the terms →", "Read the
+  specimen →", and the citation links inside the audit page's AI-search
+  evidence `Sources:` lines, which audit.js injects into `<p class="micro">`
+  paragraphs). These are exempt from WCAG 2.5.8 Target Size (Minimum) and
+  2.5.5 Target Size (Enhanced) under both criteria' "Inline" exception
+  (target in a sentence or block of text), and they are typographic by
+  design, not discrete controls; the finding's 44px bar has always applied
+  to standalone targets. Growing them into 44px hit areas would balloon
+  paragraph line-height on touch devices for zero compliance gain, so they
+  are intentionally left as-is and are not part of the tap-target guard.
+- No overflow introduced: `scrollWidth == clientWidth == 390` on all
+  seven pages at 390x844, on main and on live.
+- `npm run check` passes on this lane head; the static guards in
+  `scripts/check-site.mjs` (shared.css, index.css, audit.css,
+  brief-requested.css, styles.css needles) all still pin the ≥44px rules
+  that this re-verification measures.
+
+Conclusion: the review item "Mobile tap targets fall under WCAG sizes on
+every page: primary CTAs are 42px tall and nav links ~15px" remains
+closed — the 42px lead CTA now measures 44px, nav links 45px, on both
+current main and the live deployment, with the tap-target rules pinned by
+CI source guards.
