@@ -176,3 +176,50 @@ state is past the stuck `eae1d87c`, the named PRs are deployed, live heading
 outlines and apple-touch icons match source, and `npm run check` / `npm test`
 pass on the current origin/main head. This lane (2026-08-11) re-confirmed all
 three and found nothing further to change.
+
+### Closeout re-verification (added 2026-08-12)
+
+Re-verified against the current origin/main head (`18128e8`, "fix(public):
+serve rel=icon on /brief-requested and guard favicon links in check-site.mjs
+(#113)") after thirteen further commits touched the repo since the 2026-08-11
+re-verification (`354e725`). The pipeline has kept shipping every merge, so
+the finding's named scope is re-confirmed today rather than re-filed. Three
+checks, using the receipt's own exact verification method:
+
+1. Release state is past the stuck SHA and the pipeline is fully caught up —
+   `release-state-tinystudio-io.json` pins `18128e87c4c52ea79703a46fd1f84a508937c71b`
+   at `2026-08-12T00:38:42`, which is byte-identical to the current origin/main
+   HEAD itself. `git merge-base --is-ancestor` confirms both named PRs are
+   inside the deployed release (`7be3d8f` #28 and `b004c11` #30 are ancestors
+   of the pinned sha) and that the stuck `eae1d87c` is strictly older. Unlike
+   the 2026-08-11 receipt (which noted a small docs-only lag), there is now
+   **zero** deployment lag: the deployed release equals origin/main HEAD.
+
+2. Live pages match source (fetched over HTTPS 2026-08-12, parsed heading
+   tags and head links):
+
+   - All six served pages serve exactly one leading `h1`, zero
+     `h4`/`h5`/`h6`, and gap-free descending outlines, identical to the
+     outlines locked in `scripts/test-heading-hierarchy.mjs` — home
+     `1-2-2-2-3-3-3-3-2-3-3-3-3-2-3-3-3-3-3-3-3-2-2-2-3-3-3-3-3-2`
+     (30 items, including the two FAQ `h3`s added by PR #102), `/audit`
+     `1-2-2-3-3-3-3-2-2-2-2`, `/pricing` `1-2-2-3-3-3-3-2-3-3-3-3-3-2-2`,
+     `/agents` `1-2-2-2-2-2-2-2-2-2-2-2`, `/specimen` `1-2-2-2-2-3-2`,
+     `/brief-requested` `1-2-2-2`.
+   - Each of the five appraisal pages serves
+     `<link rel="apple-touch-icon" href="/apple-touch-icon.png">` in its
+     head (`/`, `/audit`, `/pricing`, `/agents`, `/specimen`), and
+     `https://tinystudio.io/apple-touch-icon.png` returns `200 image/png`.
+
+3. Source checks on this head: `npm run check` passes ("TinyStudio.io
+   checks passed.") and the full `npm test` passes (check + heading-
+   hierarchy 6, sitemap 7, agent-worker 55, agent-UI 16 and product-contract
+   8 — 92 tests, 0 failures) on `18128e8`.
+
+Finding "Ship origin/main past the stuck fleet-release SHA — merged PRs #28
+(heading hierarchy) and #30 (apple-touch-icon)" remains closed: the release
+state pins exactly the current origin/main HEAD (zero lag, pipeline actively
+shipping), the named PRs are deployed and live-verified here, live heading
+outlines and apple-touch icons match source, and `npm run check` / `npm test`
+pass on the current origin/main head. This lane (2026-08-12) re-confirmed all
+three and found nothing further to change.
