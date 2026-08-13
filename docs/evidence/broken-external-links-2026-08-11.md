@@ -173,3 +173,67 @@ resolving 200. The App Store citation is served at the id-carrying form the
 finding requires, the dead bare-slug form is absent from both the served
 bundle and the fixture, and there is no deployment lag: the live page already
 serves the corrected bundle.
+
+### Re-verification (added 2026-08-12, lane 1)
+
+Re-verified against the current origin/main head (18128e8, "fix(public):
+serve rel=icon on /brief-requested and guard favicon links in check-site.mjs
+(#113)") after seven further commits touched the public surface since the
+closeout measurement at 8b42e0a: 0ad7481 (home-page footer tap target),
+6f85c61 (tablet-width intake form), 1e78ecf (CI copy-guard target page),
+2ae7504 (search-intent bridge for "conversion audit"), d4a2c30 (appraisal
+intake field labels and document titles), 9302611 (rel=icon favicon on every
+page), 18128e8 (rel=icon on /brief-requested and the favicon guard). None
+touched an AI-search evidence citation or the citation guard:
+`git log -p 8b42e0a..origin/main -- public/audit.html evidence-fixtures/ai-search/`
+is empty, and the "External citation links (dogfood 78fcaed682fa)" guard in
+`scripts/check-site.mjs` is byte-identical to the one the closeout measured.
+Three checks:
+
+1. Source checks on this head: `npm run check` passes ("TinyStudio.io checks
+   passed") — the guard still refuses any AI-search source URL on the App
+   Store family of hosts (`apps.apple.com`, `itunes.apple.com`) that lacks an
+   app id, and still refuses drift between the embedded bundle on the audit
+   page and the fixture — and the full `npm test` suite passes (check,
+   headings 6/6, sitemap, worker, ui, contract; 92 subtests, 0 failures).
+
+2. Fresh live measurement of the deployed site (2026-08-12, headless
+   Chromium, same method as the closeout receipt above: `domcontentloaded`
+   wait, then the rendered evidence table, every rendered `a[href]` with an
+   http(s) href collected, console/page errors captured): `GET
+   https://tinystudio.io/audit` → HTTP 200 with the CSP header, no console
+   errors, no page errors, and all 15 rendered external anchor links resolved
+   HTTP 200 with redirects followed (the same 12 unique URLs as the closeout:
+   fiberygoodness.com ×3, tagvenue.com ×2, apps.apple.com id-carrying form,
+   tinystudio.ch, getspaces.com, instagram.com, studiolaar.nl, tinystudio.tv,
+   tinystudiollc.com, tinystudio.ai ×2):
+
+   | # | link | status |
+   |---|---|---|
+   | 1 | https://www.fiberygoodness.com/whatistinystudio | 200 |
+   | 2 | https://apps.apple.com/us/app/tinystudio/id6448954288 | 200 |
+   | 3 | https://tinystudio.ch/ | 200 |
+   | 4 | https://www.fiberygoodness.com/ | 200 |
+   | 5 | https://www.tagvenue.com/ | 200 |
+   | 6 | https://www.getspaces.com/ | 200 |
+   | 7 | https://www.instagram.com/t.i.n.y.studio/ | 200 |
+   | 8 | https://www.tagvenue.com/ | 200 |
+   | 9 | https://www.studiolaar.nl/projects/tiny-studios | 200 |
+   | 10 | https://www.tinystudio.tv/ | 200 |
+   | 11 | https://www.fiberygoodness.com/ | 200 |
+   | 12 | https://www.tinystudiollc.com/ | 200 |
+   | 13 | https://tinystudio.ai/about-tinystudio/ | 200 |
+   | 14 | https://tinystudio.ai/ | 200 |
+   | 15 | https://www.fiberygoodness.com/ | 200 |
+
+3. Baseline, the exact shape the finding flagged: `GET
+   https://apps.apple.com/app/tinystudio` → **404** again today — still dead,
+   and still absent from both the served page and the fixture. The `.html`
+   address in the finding's title: `GET https://tinystudio.io/audit.html` →
+   **307** with `Location: /audit`; a Chromium navigation to it lands on
+   `https://tinystudio.io/audit` (request chain 307 → 200).
+
+Finding 78fcaed682fa ("Broken external links on /audit.html") remains closed
+on the code side (PR #33), in CI (`npm run check` guard), and against the
+deployed site; this lane (2026-08-12) re-confirmed all three against current
+main and live and found nothing further to change on the finding's page.
