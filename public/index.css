@@ -54,6 +54,11 @@
     box-shadow:0 6px 18px -8px rgba(25,20,16,.6);
     transition:transform var(--mid) var(--ease),box-shadow var(--mid) var(--ease)}
   form button:hover{transform:translateY(-1.5px)}
+  .signal{display:block;margin:18px auto 0;max-width:500px;padding:10px 18px;font-size:14px;line-height:1.6;
+    color:var(--sig);background:rgba(255,253,248,.74);border:1px solid rgba(176,74,46,.35);
+    border-radius:12px;text-align:center}
+  .signal[hidden]{display:none}
+  .signal:focus{outline:none}
   .micro{margin-top:16px;font-size:13.5px;color:var(--muted)}
   .meta{margin:54px auto 0;max-width:900px;display:grid;grid-template-columns:repeat(3,1fr);
     border-top:1px solid var(--hair);padding-top:22px}
