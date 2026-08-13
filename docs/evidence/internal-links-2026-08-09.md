@@ -94,12 +94,13 @@ request chain `[307] /audit.html` → `[200] /audit`, final URL
 
 ## Source checks on the current head
 
-Re-verified against the current origin/main head (8b42e0a, "docs(evidence):
-close out apple touch icon finding 98a7bf8e08fc against current main and live",
-merged 2026-08-11) after the page edits that landed since the first receipt
-(canonicals on the appraisal page, the homepage footer daily-reads link, the
-44px tap-target pass, the Agent Desk de-index, the AI-answer source pages) —
-none of which was allowed to regress the guarantee:
+Re-verified against the current origin/main head (18128e8, "fix(public):
+serve rel=icon on /brief-requested and guard favicon links in
+check-site.mjs", merged 2026-08-12) after the page edits that landed since
+the last receipt (the rel=icon favicon pass on every page, the
+/brief-requested favicon guard, the appraisal intake labels and document
+titles, the 'conversion audit' search-intent bridge, the retired app/api
+hosts rename) — none of which was allowed to regress the guarantee:
 
 1. `npm run check` passes: the "Internal page links (dogfood 996dffe45ef7)"
    guard finds no anchor targeting any `.html` page name on any of the five
@@ -107,13 +108,32 @@ none of which was allowed to regress the guarantee:
    URLs, structured data, internal links, sitemap) passes too.
 2. `npm test` passes: the source checks above plus the heading-hierarchy,
    sitemap, agent-worker, agent-UI and product-contract suites (16/16 UI
-   subtests, 90 tests total, all suites green).
+   subtests, 92 tests total, all suites green).
 
 ## Live re-verification 2026-08-11
 
 Re-ran the deployed-site measurement below in real Chromium (Playwright
 1.62.1, headless) against the live `https://tinystudio.io` — the current
 deployment of the current main:
+
+- All five pages still load 200 at their final clean URLs (`/`, `/audit`,
+  `/agents`, `/pricing`, `/specimen`) with zero console errors, zero page
+  errors, and no load-time redirects.
+- Every internal link on every page still probes `200` with no `Location`
+  header (`maxRedirects: 0`), including the home page the finding flagged:
+  home's anchors are `/`, `/audit`, `/agents`, `/pricing`, `/specimen` (plus
+  the same-page `#start` CTA). Zero redirecting internal links site-wide.
+- The five `.html` forms the pre-fix home linked at still 307-redirect to
+  their clean twins (`index.html` → `/`, `audit.html` → `/audit`,
+  `agents.html` → `/agents`, `pricing.html` → `/pricing`,
+  `specimen.html` → `/specimen`) — the exact shape the finding flagged, still
+  present only on unlinked addresses.
+
+## Live re-verification 2026-08-12
+
+Re-ran the deployed-site measurement below in real Chromium (Playwright
+1.62.1, headless) against the live `https://tinystudio.io` — the current
+deployment of the current main (18128e8):
 
 - All five pages still load 200 at their final clean URLs (`/`, `/audit`,
   `/agents`, `/pricing`, `/specimen`) with zero console errors, zero page
@@ -160,8 +180,8 @@ const pr = await context.request.get(abs, { maxRedirects: 0 });
 Nothing further to change: the code-side fix (PR #34) and CI enforcement (the
 "Internal page links (dogfood 996dffe45ef7)" guard in `scripts/check-site.mjs`)
 are merged in origin/main, `npm run check` and `npm test` pass on the current
-head (8b42e0a), and the deployed site serves zero redirecting internal links
+head (18128e8), and the deployed site serves zero redirecting internal links
 on all five public pages — including the home page the finding flagged — as
-re-measured in real Chromium on 2026-08-11. The receipt now records the
+re-measured in real Chromium on 2026-08-12. The receipt now records the
 closeout on the current head so the finding cannot be re-opened by tracker
 drift.
