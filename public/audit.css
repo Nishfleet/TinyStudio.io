@@ -39,3 +39,11 @@
   .row{flex-wrap:wrap;gap:2px 22px}
   footer{margin-top:72px}
 }
+
+/* in-content conversion CTA on the dark band — pill link, >=44px hit area.
+   Scoped to .band .cta so the study-stats band at the top of the page is
+   untouched. Mirrors the /specimen closing band. */
+.band .cta{display:inline-block;margin-top:26px;border:1px solid rgba(242,234,220,.4);border-radius:999px;
+  padding:16px 24px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+  color:#F2EADC;text-decoration:none;transition:border-color var(--mid) var(--ease),background var(--mid) var(--ease)}
+.band .cta:hover,.band .cta:focus-visible{border-color:var(--brass-lt);background:rgba(201,165,102,.14)}
