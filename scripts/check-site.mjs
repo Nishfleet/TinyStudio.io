@@ -1226,17 +1226,19 @@ for (const [pageName, pageHtml] of metaDescriptionPages) {
 // The leak audit this site sells flags a homepage whose served HTML carries no
 // apple touch icon, leaving iOS Safari to derive a home-screen icon from a
 // screenshot of the page (finding 98a7bf8e08fc, "Apple touch icon missing on
-// home"), so the site's own five public pages must not carry that fault either.
-// Each page keeps exactly one <link rel="apple-touch-icon"> inside its head,
-// pointing at the served /apple-touch-icon.png asset, and the asset itself must
-// stay a tracked, valid PNG so a dropped or rewritten file cannot silently
-// leave the pages pointing at nothing.
+// home"), so none of the site's served pages may carry that fault either.
+// Every served HTML page keeps exactly one <link rel="apple-touch-icon">
+// inside its head, pointing at the served /apple-touch-icon.png asset, and
+// the asset itself must stay a tracked, valid PNG so a dropped or rewritten
+// file cannot silently leave the pages pointing at nothing.
 const iconPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
-  ["specimen page", read("public/specimen.html")]
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")],
+  ["agent-desk page", read("public/agent-desk.html")]
 ];
 
 for (const [pageName, pageHtml] of iconPages) {
