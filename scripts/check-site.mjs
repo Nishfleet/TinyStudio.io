@@ -337,6 +337,28 @@ if (!retiredDesk.includes("role=\"tabpanel\"") || !retiredDesk.includes("aria-la
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
+// Desk page in-content request CTA regression (review item: the /agents desk
+// page ended at its closing urgency band with no in-content conversion afford
+// — the only request link was the nav CTA). The closing .band must keep the
+// "Request the appraisal" pill linking to the same request surface as the nav
+// CTA (/#start — the desk page carries no form of its own), and agents.css
+// must keep the >=44px pill styling. STATIC SOURCE GUARD (regex over the
+// served HTML/CSS), not a behavioral test: CI has no browser.
+const deskPage = read("public/agents.html");
+const deskBand = deskPage.match(/<div class="band">([\s\S]*?)<\/div>\s*<footer>/)?.[1] ?? "";
+if (!deskBand) {
+  failures.push("Desk page must keep its closing urgency band before the footer.");
+} else if (!/<a\b[^>]*class="cta"[^>]*href="\/#start"[^>]*>Request the appraisal<\/a>/.test(deskBand)) {
+  failures.push("Desk closing urgency band must carry a .cta link to /#start labelled \"Request the appraisal\".");
+}
+const agentsCss = read("public/agents.css");
+if (!agentsCss.includes(".band .cta")) {
+  failures.push("agents.css must style the band conversion CTA (.band .cta).");
+}
+if (!/\.band \.cta\{[^}]*padding:16px 24px/.test(agentsCss)) {
+  failures.push("Desk band CTA must keep a >=44px tap target (padding:16px 24px).");
+}
+
 // Mobile layout regression: at 390x844 the /audit page previously overflowed
 // horizontally (navlinks measured to x=569, the 53-of-89 stat to x=451).
 // The mobile treatment must live in audit.css behind the shared 760px
