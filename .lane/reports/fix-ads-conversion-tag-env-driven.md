@@ -54,5 +54,14 @@ Item: `[unreviewed-by-opus] The funnel's only Google Ads conversion measurement 
   for partial or malformed config (including an injection-shaped value).
 
 Note: this exact fix previously existed on branch `lane1/ads-tag-env-driven`
-(commits `b5c87c5`/`33eb558`) but was never merged into main and its PR is
-stale/closed. This lane re-applies the verified approach against current main.
+(commits `b5c87c5`/`33eb558`) and is still open as PR #136 — but that branch
+was repeatedly merged from main and never merged into main, so the dead
+placeholder stayed live. This lane re-applies the verified approach against
+current main.
+
+## Delivery
+
+- Branch: `fix/ads-conversion-tag-env-driven`
+- PR: https://github.com/nish3451/TinyStudio.io/pull/172 (opens against main;
+  supersedes the stale PR #136 carrying the same fix on a long-behind branch).
+
