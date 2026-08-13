@@ -35,7 +35,7 @@ const EXPECTED_OUTLINES = {
   "public/audit.html": [1, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2],
   "public/agents.html": [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
   "public/pricing.html": [1, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2],
-  "public/specimen.html": [1, 2, 2, 2, 2, 3, 2],
+  "public/specimen.html": [1, 2, 2, 2, 2, 3, 2, 2],
   "public/brief-requested.html": [1, 2, 2, 2]
 };
 
