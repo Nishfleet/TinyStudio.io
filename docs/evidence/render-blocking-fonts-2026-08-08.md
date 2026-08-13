@@ -221,3 +221,57 @@ b8f6046e942a ("Render-blocking resources on home") remains closed on the code
 side (PRs #20 and #23), in CI (`npm run check:render-blocking`), and against
 the deployed site; this lane (2026-08-10) re-confirmed all three on the
 current head and found nothing further to change.
+
+### Closeout re-verification (added 2026-08-11)
+
+Re-verified against the current origin/main head (9302611, "fix(public): serve
+rel=icon favicon on every page so browsers stop 404ing /favicon.ico", merged
+2026-08-11) after the commits that landed since the 2026-08-10 closeout —
+notably 9302611 (rel=icon favicon link), d4a2c30 (intake-field labels and
+document titles), 37ddaed (wrangler toolchain upgrade, no public assets),
+2ae7504 (search-intent bridge), 1e78ecf and 5ab84ea (retired-Agent-Desk
+worker/check-site corrections), 6f85c61 and 0ad7481 (CSS layout/tap-target
+fixes), 1cc7a4e (canonicals and JSON-LD @ids), f9f0b0f (homepage footer link),
+plus the docs-only re-verification receipts. None of them introduced a
+render-blocking shape; the full test suite passes on this head (`npm test`,
+92 tests across heading hierarchy, sitemap, worker contract, UI contract and
+product contract, plus the static source guards — "TinyStudio.io checks
+passed"). Two fresh measurements:
+
+1. `npm run check:render-blocking` on the current working tree at 9302611
+   (real Chromium, production CSP, css2 intercepted and delayed 2500ms,
+   stubbed response): all six pages PASS — css2 non-blocking,
+   first-contentful-paint never waits for it (homepage 224ms, audit 132ms,
+   desk 216ms, pricing 176ms, specimen 160ms, brief-requested 160ms; the
+   css2 response arrives at 2500ms, i.e. ~2.3s after first paint), no
+   render-blocking resources other than the site's own same-origin
+   stylesheets, promoted sheet applied.
+
+2. Live re-measurement of the deployed pages in real Chromium (unthrottled),
+   served with the production CSP header emitted by the worker (verified via
+   `curl -sI https://tinystudio.io/`):
+
+| Page | css2 renderBlockingStatus | FCP (ms) | css2 responseEnd (ms) | Render-blocking resources | Fonts load (Karla / Fraunces) | Promoted sheet applied |
+|---|---|---|---|---|---|---|
+| index.html (home) | non-blocking | 388 | 473 | same-origin index.css only | yes / yes | yes |
+| audit.html | non-blocking | 216 | 82 | same-origin shared.css, audit.css | yes / yes | yes |
+| agents.html | non-blocking | 188 | 69 | same-origin shared.css, agents.css | yes / yes | yes |
+| pricing.html | non-blocking | 212 | 46 | same-origin shared.css, pricing.css | yes / yes | yes |
+| specimen.html | non-blocking | 172 | 61 | same-origin specimen.css, shared.css | yes / yes | yes |
+| brief-requested.html | non-blocking | 212 | 56 | same-origin shared.css, brief-requested.css | yes / yes | yes |
+
+On the unthrottled live run the preloaded css2 (a non-blocking style preload,
+fetched at preload priority from the first byte) can finish before
+first-contentful-paint lands on the homepage (388ms FCP vs 473ms css2 end) —
+the same ordering the 2026-08-09 and 2026-08-10 runs showed (692 vs 491 and
+1036 vs 631 on home). That is timing, not blocking: the deterministic
+delayed-css2 run above paints ~2.3s before the css2 response arrives, so
+first paint cannot be waiting on it.
+
+Same result as every earlier pass: no render-blocking scripts, no
+render-blocking external resources, first paint never waits for the font
+stylesheet, fonts still load and apply under the production CSP. Finding
+b8f6046e942a ("Render-blocking resources on home") remains closed on the code
+side (PRs #20 and #23), in CI (`npm run check:render-blocking`), and against
+the deployed site; this lane (2026-08-11) re-confirmed all three on the
+current head and found nothing further to change.
