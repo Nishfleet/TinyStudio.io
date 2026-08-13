@@ -294,3 +294,74 @@ verified true on this head (c934538, current origin/main):
 The item is satisfied: origin/main is past b004c11, the merged PR #32
 structured data is served live on all five appraisal-facing public pages,
 and nothing further on this item remains to ship.
+
+### Closeout re-verification (added 2026-08-12)
+
+Re-verified against the current origin/main head (18128e8, "fix(public):
+serve rel=icon on /brief-requested and guard favicon links in
+check-site.mjs (#113)") after 18 commits landed since the 2026-08-11
+ship-verification above (81fc379, PR #93). Nine of those commits touched
+the public surface — 0ad7481 (footer tap target), 6f85c61 (homepage intake
+form tablet squeeze), 2ae7504 (search-intent bridge for "conversion audit"),
+d4a2c30 (appraisal intake labels + document-title cleanup), 37ddaed
+(wrangler toolchain upgrade), 9302611 and 18128e8 (rel=icon favicon links),
+1e78ecf and 5ab84ea (worker/CI pointers off the retired Agent Desk) — but
+none of them changed a structured-data block: per-commit `git show <sha> --
+public/` contains no `ld+json`/`@graph`/`@id`/`@type`/`application/ld`
+addition or removal in any of the 18, so the blocks the finding flagged are
+untouched since the last closeout. Three checks:
+
+1. Source checks on this head: `npm run check` passes — the "Structured
+   data (dogfood 975fdb784275)" guard in `scripts/check-site.mjs` requires
+   exactly one `application/ld+json` block in the head of each of the five
+   pages, a valid schema.org `@graph` with unique `@id` values, exactly one
+   `Organization` node (stable `@id` `https://tinystudio.io/#organization`,
+   name `TinyStudio`, url `https://tinystudio.io/`, served logo,
+   homepage-meta description), exactly one `WebSite` node (stable `@id`
+   `https://tinystudio.io/#website`, publisher pointing at the
+   `Organization`), and exactly one `WebPage` node bound to the page's own
+   metadata (name equal to the entity-decoded `og:title`, description equal
+   to the meta description, own `.html`-form or clean-URL `@id`/url,
+   `isPartOf` the `WebSite`, `about` the `Organization`) — and the full
+   `npm test` suite passes (headings 6/6, sitemap 7/7, worker 55, ui 16,
+   contract 8). The worker suite grew from 53 to 55 since the last
+   closeout (retired-Agent-Desk host tests); neither new test touches
+   structured data.
+
+2. Fresh live measurement of the deployed site (2026-08-12, headless
+   Chromium, same method as the receipts above: `domcontentloaded` wait,
+   blocks counted in `document.head` and the full document, each block
+   parsed and checked against the same contract as the CI guard, console
+   and page errors captured): every page returns 200 with the CSP header,
+   serves exactly one `application/ld+json` block in its head and one
+   across the whole document whose graph carries exactly one
+   `Organization`, one `WebSite` and one `WebPage` node with unique `@id`
+   values (organization and site nodes matching the stable entities,
+   `WebPage` bound to the page's own metadata, the pricing page's `&amp;`
+   entity decoded before the `og:title` comparison exactly as the CI guard
+   does), and logs no console or page errors. Additionally, `curl`
+   diffs of all five live pages against the `public/*.html` files on this
+   head show zero differences, so the served bytes are the head files
+   verbatim with no deployment lag.
+
+   | Page | HTTP | CSP header | ld+json blocks in head | blocks in full doc | graph nodes | WebPage @id | console errors |
+   |---|---|---|---|---|---|---|---|
+   | index.html (home, `/`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/#webpage` | none |
+   | audit.html (`/audit`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/audit#webpage` | none |
+   | agents.html (`/agents`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/agents.html#webpage` | none |
+   | pricing.html (`/pricing`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/pricing.html#webpage` | none |
+   | specimen.html (`/specimen`) | 200 | yes | 1 | 1 | Organization, WebSite, WebPage | `https://tinystudio.io/specimen.html#webpage` | none |
+
+   Homepage structured data served live is byte-identical to the block the
+   closeout receipt quoted above (parsed from the served home page on this
+   date and diffed: zero differences).
+
+3. GitHub Actions CI and secret-scan both report success on 18128e8 (the
+   current origin/main head).
+
+Finding 975fdb784275 ("Structured data opportunity on home") remains closed
+on the code side (PR #32), in CI (`npm run check` guard), and against the
+deployed site; this lane (2026-08-12) re-confirmed all three against current
+main and live, found no commit in the 18-commit window that touched a
+structured-data block, and found nothing further to change on the finding's
+page.
