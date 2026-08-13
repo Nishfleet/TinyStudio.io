@@ -170,3 +170,54 @@ Finding e6e153bdadd0 ("Heading hierarchy needs cleanup on home") remains
 closed on the code side (PR #28), in CI (`test:headings`), and against the
 deployed site; this lane (2026-08-11) re-confirmed all three against current
 main and found nothing further to change.
+
+### Closeout re-verification (added 2026-08-12)
+
+Re-verified against the current origin/main head (18128e8, "fix(public):
+serve rel=icon on /brief-requested and guard favicon links in check-site.mjs
+(#113)") after nine further commits touched the repo since the 2026-08-11
+re-verification (1cc7a4e) — 5ab84ea (retired app/api hosts naming), 6f85c61
+(homepage intake form tablet squeeze), 0ad7481 (44px footer tap target),
+1e78ecf (CI copy guards), 2ae7504 (conversion-audit search-intent bridge),
+d4a2c30 (intake labels and document titles), 37ddaed (wrangler deps; no
+public surface), 9302611 (rel=icon favicon), 18128e8 (rel=icon guard on
+/brief-requested). Per-commit `git show <sha> -- public/` diffs: of all nine,
+only 2ae7504 changed any heading tag — it added two `h3` FAQ rows
+("Is TinyStudio a conversion audit service" under the identity block's h2,
+"Is this a conversion audit?" under the "Before you ask" h2) — a
+hierarchy-preserving change that keeps each new `h3` under an existing `h2`
+and that extended the locked homepage outline 28 → 30 items in the same
+commit (7 threes in the identity run, 5 in the FAQ run), so the regression
+lock tracks the current outline exactly. Three checks:
+
+1. Source checks on this head: `npm run test:headings` passes 6/6 — the
+   locked outlines match the current source of all six served pages,
+   including the 30-item homepage outline — `npm run check` passes, and the
+   full `npm test` suite passes (exit 0, all suites green).
+
+2. Fresh live measurement of the deployed site (2026-08-12, headless
+   Chromium, same method as the receipts above): every page returns 200 with
+   the CSP header, serves exactly one leading `h1`, descends without skipped
+   levels, and logs no page errors. Measured outlines are identical to the
+   locked outlines in `scripts/test-heading-hierarchy.mjs`:
+
+   | Page | heading outline | heading issues |
+   |---|---|---|
+   | index.html (home, `/`) | `1-2-2-2-3-3-3-3-2-3-3-3-3-2-3-3-3-3-3-3-3-2-2-2-3-3-3-3-3-2` | none |
+   | audit.html (`/audit`) | `1-2-2-3-3-3-3-2-2-2-2` | none |
+   | agents.html (`/agents`) | `1-2-2-2-2-2-2-2-2-2-2-2` | none |
+   | pricing.html (`/pricing`) | `1-2-2-3-3-3-3-2-3-3-3-3-3-2-2` | none |
+   | specimen.html (`/specimen`) | `1-2-2-2-2-3-2` | none |
+   | brief-requested.html (`/brief-requested`) | `1-2-2-2` | none (same unrelated GTM/CSP console note as prior receipts) |
+
+3. Deployment note (difference from the 2026-08-11 receipt): the live
+   homepage outline now includes the two 2ae7504 FAQ h3s, so the deployment
+   has caught up to current main — the 2026-08-11 deployment lag is gone and
+   no lag remains on any of the six served pages.
+
+Finding e6e153bdadd0 ("Heading hierarchy needs cleanup on home") remains
+closed on the code side (PR #28), in CI (`test:headings`), and against the
+deployed site; this lane (2026-08-12) re-confirmed all three against current
+main — including the two new FAQ headings added since the last re-verification,
+which descend correctly under their parent h2s — and found nothing further to
+change.
