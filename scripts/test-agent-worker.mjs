@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
 import worker from "../src/worker.js";
 
@@ -1457,4 +1459,260 @@ test("storage failure: agent audit returns 503 storage_unavailable when the emai
   assert.equal(body.error, "storage_unavailable");
   assert.equal(ai.calls.length, 0, "no model call may happen when the signup write failed");
   assert.equal(body.model, undefined, "no success payload may claim a model");
+});
+
+// --- real D1 schema: the migrations must build the schema the worker SQL runs against ---
+//
+// The FakeDB tests above prove the worker's *behavior* with a fake storage
+// layer, so they cannot detect when a migration edit (valid SQL or not)
+// drifts the production schema away from what src/worker.js actually issues.
+// These tests apply every real migration file to a fresh in-memory
+// node:sqlite database, run the exact signup/agent statements from
+// src/worker.js against that schema, reapply the migrations the way D1 does
+// (name-tracked, idempotent), and pin the resulting column/index contract.
+// Any valid-SQL column drift in a migration — renamed, added, or removed
+// columns; changed types or defaults; dropped indexes — fails the suite.
+
+const MIGRATION_FILES = [
+  "0001_email_signups.sql",
+  "0002_agent_runs.sql",
+  "0003_agent_usage_limits.sql",
+  "0004_signup_website.sql"
+];
+
+// D1 records each applied migration by file name in a d1_migrations table and
+// skips files already recorded, so re-running `wrangler d1 migrations apply`
+// is a no-op. Mirror those semantics so idempotent reapply is proven against
+// the real runner behavior, not a fake.
+function applyD1Migrations(db) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS d1_migrations (
+      id INTEGER PRIMARY KEY,
+      name TEXT UNIQUE,
+      applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  const applied = new Set(
+    db.prepare("SELECT name FROM d1_migrations").all().map((row) => row.name)
+  );
+  let appliedNow = 0;
+  for (const file of MIGRATION_FILES) {
+    if (applied.has(file)) continue;
+    db.exec(readFileSync(new URL(`../migrations/${file}`, import.meta.url), "utf8"));
+    db.prepare("INSERT INTO d1_migrations (name) VALUES (?)").run(file);
+    appliedNow += 1;
+  }
+  return appliedNow;
+}
+
+// Column contract the worker SQL depends on, exactly as the four migration
+// files build it (PRAGMA table_info row order = CREATE TABLE column order).
+const EXPECTED_COLUMNS = {
+  email_signups: [
+    { name: "id", type: "INTEGER", notnull: 0, pk: 1, dflt_value: null },
+    { name: "email", type: "TEXT", notnull: 1, pk: 0, dflt_value: null },
+    { name: "source", type: "TEXT", notnull: 1, pk: 0, dflt_value: "'cryptic-landing-page'" },
+    { name: "page_path", type: "TEXT", notnull: 1, pk: 0, dflt_value: "'/'" },
+    { name: "referer", type: "TEXT", notnull: 0, pk: 0, dflt_value: null },
+    { name: "user_agent", type: "TEXT", notnull: 0, pk: 0, dflt_value: null },
+    { name: "created_at", type: "TEXT", notnull: 1, pk: 0, dflt_value: null },
+    { name: "updated_at", type: "TEXT", notnull: 1, pk: 0, dflt_value: null },
+    { name: "website", type: "TEXT", notnull: 0, pk: 0, dflt_value: null }
+  ],
+  agent_runs: [
+    { name: "id", type: "TEXT", notnull: 0, pk: 1, dflt_value: null },
+    { name: "email", type: "TEXT", notnull: 1, pk: 0, dflt_value: null },
+    { name: "source", type: "TEXT", notnull: 1, pk: 0, dflt_value: "'agent-self-serve'" },
+    { name: "page_path", type: "TEXT", notnull: 1, pk: 0, dflt_value: "'/'" },
+    { name: "ip_hash", type: "TEXT", notnull: 0, pk: 0, dflt_value: null },
+    { name: "user_agent", type: "TEXT", notnull: 0, pk: 0, dflt_value: null },
+    { name: "created_at", type: "TEXT", notnull: 1, pk: 0, dflt_value: null }
+  ],
+  agent_usage_limits: [
+    { name: "bucket_key", type: "TEXT", notnull: 0, pk: 1, dflt_value: null },
+    { name: "count", type: "INTEGER", notnull: 1, pk: 0, dflt_value: "0" },
+    { name: "first_seen_at", type: "TEXT", notnull: 1, pk: 0, dflt_value: null },
+    { name: "updated_at", type: "TEXT", notnull: 1, pk: 0, dflt_value: null }
+  ]
+};
+
+const EXPECTED_INDEXES = {
+  email_signups: [{ name: "idx_email_signups_updated_at", columns: ["updated_at"] }],
+  agent_runs: [
+    { name: "idx_agent_runs_email_created_at", columns: ["email", "created_at"] },
+    { name: "idx_agent_runs_ip_hash_created_at", columns: ["ip_hash", "created_at"] }
+  ],
+  agent_usage_limits: [{ name: "idx_agent_usage_limits_updated_at", columns: ["updated_at"] }]
+};
+
+function schemaColumnList(db, table) {
+  return db
+    .prepare(`PRAGMA table_info(${table})`)
+    .all()
+    .map((column) => ({
+      name: column.name,
+      type: column.type,
+      notnull: column.notnull,
+      pk: column.pk,
+      dflt_value: column.dflt_value
+    }));
+}
+
+function schemaIndexList(db, table) {
+  return db
+    .prepare(`PRAGMA index_list(${table})`)
+    .all()
+    .filter((index) => !index.name.startsWith("sqlite_autoindex_"))
+    .map((index) => ({
+      name: index.name,
+      columns: db.prepare(`PRAGMA index_info(${index.name})`).all().map((column) => column.name)
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function schemaFingerprint(db) {
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+    .all()
+    .map((row) => row.name);
+  const fingerprint = {};
+  for (const table of tables) {
+    fingerprint[table] = {
+      columns: schemaColumnList(db, table),
+      indexes: schemaIndexList(db, table)
+    };
+  }
+  return fingerprint;
+}
+
+// The drift sentinel: any valid-SQL change to the migrations that alters the
+// column or index contract above turns the schema test red, even when the
+// worker's own SQL would still run.
+function assertSchemaDriftFree(db) {
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+    .all()
+    .map((row) => row.name);
+  assert.deepEqual(tables, ["agent_runs", "agent_usage_limits", "d1_migrations", "email_signups"]);
+  for (const table of Object.keys(EXPECTED_COLUMNS)) {
+    assert.deepEqual(
+      schemaColumnList(db, table),
+      EXPECTED_COLUMNS[table],
+      `column contract for ${table} must match the real migrations`
+    );
+    assert.deepEqual(
+      schemaIndexList(db, table),
+      EXPECTED_INDEXES[table],
+      `index contract for ${table} must match the real migrations`
+    );
+  }
+}
+
+// The exact statements src/worker.js issues against D1 — saveEmailSignup,
+// incrementUsageCounter, the agent_runs insert, and the health check — copied
+// verbatim so a schema drift that would break production SQL fails here first.
+const WORKER_SIGNUP_SQL = `
+  INSERT INTO email_signups (email, source, page_path, referer, user_agent, created_at, updated_at, website)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(email) DO UPDATE SET
+    source = excluded.source,
+    website = COALESCE(excluded.website, email_signups.website),
+    page_path = excluded.page_path,
+    referer = excluded.referer,
+    user_agent = excluded.user_agent,
+    updated_at = excluded.updated_at`;
+
+const WORKER_USAGE_COUNTER_SQL = `
+  INSERT INTO agent_usage_limits (bucket_key, count, first_seen_at, updated_at)
+  VALUES (?, 1, ?, ?)
+  ON CONFLICT(bucket_key) DO UPDATE SET
+    count = count + 1,
+    updated_at = excluded.updated_at
+  RETURNING count`;
+
+const WORKER_AGENT_RUNS_SQL = `
+  INSERT INTO agent_runs (id, email, source, page_path, ip_hash, user_agent, created_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+const WORKER_HEALTH_TABLES_SQL =
+  "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('agent_runs', 'agent_usage_limits')";
+
+test("real D1 migrations apply to a fresh node:sqlite database and build the exact production schema", () => {
+  const db = new DatabaseSync(":memory:");
+  assert.equal(applyD1Migrations(db), 4, "all four migration files must apply once on a fresh database");
+  assertSchemaDriftFree(db);
+  db.close();
+});
+
+test("reapplying the real D1 migrations is idempotent and never rewrites the schema", () => {
+  const db = new DatabaseSync(":memory:");
+  assert.equal(applyD1Migrations(db), 4, "first apply runs all four migrations");
+  const before = schemaFingerprint(db);
+  assert.equal(applyD1Migrations(db), 0, "a reapply must skip every already-recorded migration");
+  assert.deepEqual(schemaFingerprint(db), before, "a reapply must leave the schema byte-identical");
+  assert.deepEqual(
+    db.prepare("SELECT name FROM d1_migrations ORDER BY id").all().map((row) => row.name),
+    MIGRATION_FILES,
+    "the tracking table must record each migration exactly once, in order"
+  );
+  db.close();
+});
+
+test("the exact worker signup SQL runs on the migrated schema with its upsert semantics", () => {
+  const db = new DatabaseSync(":memory:");
+  applyD1Migrations(db);
+  const now = "2026-08-13T12:00:00.000Z";
+
+  db.prepare(WORKER_SIGNUP_SQL).run(
+    "audit-check+test@example.com", "agent-self-serve", "/", null, "tinystudio-worker-test", now, now, "https://example.com"
+  );
+  // Same email without a website: the worker's COALESCE must keep the first URL.
+  db.prepare(WORKER_SIGNUP_SQL).run(
+    "audit-check+test@example.com", "agent-self-serve", "/audit", null, "tinystudio-worker-test", now, now, null
+  );
+  // A later website on the same email: the worker's upsert must adopt it.
+  db.prepare(WORKER_SIGNUP_SQL).run(
+    "audit-check+test@example.com", "agent-self-serve", "/audit", null, "tinystudio-worker-test", now, now, "https://new.example.com"
+  );
+
+  const rows = db.prepare("SELECT email, source, page_path, referer, user_agent, created_at, updated_at, website FROM email_signups").all();
+  assert.equal(rows.length, 1, "the upsert must keep one row per email");
+  assert.equal(rows[0].email, "audit-check+test@example.com");
+  assert.equal(rows[0].website, "https://new.example.com");
+  assert.equal(rows[0].page_path, "/audit");
+  assert.equal(rows[0].source, "agent-self-serve");
+  assert.equal(rows[0].created_at, now);
+  assert.equal(rows[0].updated_at, now);
+  db.close();
+});
+
+test("the exact worker agent SQL runs on the migrated schema: usage counters increment and runs persist", () => {
+  const db = new DatabaseSync(":memory:");
+  applyD1Migrations(db);
+  const now = "2026-08-13T12:00:00.000Z";
+  const bucketKey = "ip:2026-08-13:5d3d0e9e1f2a3b4c5d6e7f8a9b0c1d2e";
+
+  const first = db.prepare(WORKER_USAGE_COUNTER_SQL).get(bucketKey, now, now);
+  assert.equal(Number(first.count), 1, "first hit in the bucket must start the counter at 1");
+  const second = db.prepare(WORKER_USAGE_COUNTER_SQL).get(bucketKey, now, now);
+  assert.equal(Number(second.count), 2, "second hit in the bucket must increment the counter");
+
+  db.prepare(WORKER_AGENT_RUNS_SQL).run(
+    "6f0d0a5c-9a2e-4b1f-8c3d-1e2f3a4b5c6d", "nish+agent-test@tinystudio.io", "agent-self-serve", "/", "5d3d0e9e1f2a3b4c5d6e7f8a9b0c1d2e", "tinystudio-worker-test", now
+  );
+  db.prepare(WORKER_AGENT_RUNS_SQL).run(
+    "7f1e1b6d-0b3f-4c2e-9d4e-2f3a4b5c6d7e", "nish+agent-test@tinystudio.io", "agent-self-serve", "/agents", "5d3d0e9e1f2a3b4c5d6e7f8a9b0c1d2e", "tinystudio-worker-test", now
+  );
+
+  const healthTables = db.prepare(WORKER_HEALTH_TABLES_SQL).all().map((row) => row.name).sort();
+  assert.deepEqual(healthTables, ["agent_runs", "agent_usage_limits"], "the worker health query must see both tables");
+
+  const usage = db.prepare("SELECT bucket_key, count FROM agent_usage_limits ORDER BY bucket_key").all()
+    .map((row) => ({ bucket_key: row.bucket_key, count: row.count }));
+  assert.deepEqual(usage, [{ bucket_key: bucketKey, count: 2 }]);
+  const runs = db.prepare("SELECT id, email, ip_hash, page_path FROM agent_runs ORDER BY id").all();
+  assert.equal(runs.length, 2, "each agent run must persist");
+  assert.equal(runs[0].email, "nish+agent-test@tinystudio.io");
+  assert.equal(runs[0].ip_hash, "5d3d0e9e1f2a3b4c5d6e7f8a9b0c1d2e");
+  db.close();
 });
