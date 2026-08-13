@@ -48,12 +48,26 @@ class FakeStatement {
     return this;
   }
 
+  // Storage-failure injection: the owning FakeDB may map a method ("run" or
+  // "first", i.e. a usage-counter read/write) to a SQL predicate. When the
+  // predicate matches, the statement rejects exactly like a real D1 call on a
+  // broken or missing table — and before the call is recorded, so a failed
+  // write never shows up as usage.
+  failIfInjected(method) {
+    const failure = this.db.failures?.[method];
+    if (failure && failure(this.sql)) {
+      throw new Error(`injected ${method} failure`);
+    }
+  }
+
   async first() {
+    this.failIfInjected("first");
     this.db.calls.push({ method: "first", sql: this.sql, values: this.values });
     return { count: 1 };
   }
 
   async run() {
+    this.failIfInjected("run");
     this.db.calls.push({ method: "run", sql: this.sql, values: this.values });
     return { success: true };
   }
@@ -65,8 +79,9 @@ class FakeStatement {
 }
 
 class FakeDB {
-  constructor() {
+  constructor(options = {}) {
     this.calls = [];
+    this.failures = options.failures || null;
   }
 
   prepare(sql) {
@@ -76,6 +91,18 @@ class FakeDB {
   joinedBinds() {
     return JSON.stringify(this.calls.map((call) => call.values));
   }
+}
+
+// A FakeDB whose statements reject when the SQL matches the configured
+// failure. runSql targets write paths (.run), firstSql targets the usage
+// counter upsert (.first on agent_usage_limits).
+function failingDB({ runSql, firstSql } = {}) {
+  return new FakeDB({
+    failures: {
+      run: runSql ? (sql) => sql.includes(runSql) : null,
+      first: firstSql ? (sql) => sql.includes(firstSql) : null
+    }
+  });
 }
 
 class FakeAI {
@@ -1318,4 +1345,116 @@ test("daily IP limit resets after the day rolls over (controlled clock, no sleep
     { AGENT_LIMITS_NOW: dayTwo }
   );
   assert.equal(allowed.status, 200, "the same IP must be allowed again once the day rolls over");
+});
+
+// --- Storage-failure honesty (storage_unavailable on missing or broken D1) ---
+//
+// The suite must fail closed when D1 is absent or a signup/usage write throws:
+// /api/signups must never return 201 (nor its "saved" thank-you redirect) and
+// /api/agent-audit must never claim success, run the model, or record usage,
+// when the storage path failed. These tests drive the FakeDB failure injection
+// (run/first rejection) and a DB-less env, and they must go red if the no-DB
+// guards are removed or write errors are swallowed.
+
+function signupRequest({ accept = "application/json" } = {}) {
+  return new Request("https://tinystudio.io/api/signups", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Origin": "https://tinystudio.io",
+      "Accept": accept,
+      "User-Agent": "tinystudio-worker-test"
+    },
+    body: new URLSearchParams({ website: "example.com", email: "storage-failure+test@example.com" }).toString()
+  });
+}
+
+test("storage failure: signup returns 503 storage_unavailable when D1 is absent (no success signal)", async () => {
+  const res = await worker.fetch(signupRequest(), {}); // no DB binding at all
+
+  assert.equal(res.status, 503);
+  assert.equal(res.headers.get("Location"), null, "no success redirect may be issued without storage");
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "storage_unavailable");
+});
+
+test("storage failure: signup returns 503 storage_unavailable when the D1 insert write throws (never 201, never the saved redirect)", async () => {
+  const env = { DB: failingDB({ runSql: "INSERT INTO email_signups" }) };
+
+  const jsonRes = await worker.fetch(signupRequest({ accept: "application/json" }), env);
+  assert.equal(jsonRes.status, 503, "a thrown signup write must never surface as a 201 success");
+  const body = await jsonRes.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "storage_unavailable");
+
+  // An HTML caller must not reach the "saved" thank-you page either: that
+  // redirect is the product's success/conversion signal.
+  const htmlRes = await worker.fetch(signupRequest({ accept: "text/html" }), env);
+  assert.equal(htmlRes.status, 503, "the saved redirect must not fire when the write failed");
+  assert.equal(htmlRes.headers.get("Location"), null);
+});
+
+test("storage failure: agent audit returns 503 storage_unavailable when D1 is absent and never runs the model", async () => {
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(agentRequest(validBody()), { AI: ai }); // no DB binding
+
+  assert.equal(res.status, 503);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "storage_unavailable");
+  assert.equal(ai.calls.length, 0, "no model call may happen without working storage");
+  assert.equal(body.model, undefined, "no success payload may claim a model");
+});
+
+test("storage failure: agent audit returns 503 storage_unavailable when the usage counter write throws and records no usage", async () => {
+  const db = failingDB({ firstSql: "INSERT INTO agent_usage_limits" });
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(agentRequest(validBody()), { DB: db, AI: ai });
+
+  assert.equal(res.status, 503);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "storage_unavailable");
+  assert.equal(ai.calls.length, 0, "the model must not run after a storage failure");
+  assert.equal(
+    db.calls.some((call) => call.method === "run" && call.sql.includes("INSERT INTO agent_runs")),
+    false,
+    "no agent run may be recorded when the usage counter failed"
+  );
+  assert.equal(
+    db.calls.some((call) => call.sql.includes("INSERT INTO agent_usage_limits")),
+    false,
+    "no usage count may be recorded when the counter write failed"
+  );
+});
+
+test("storage failure: agent audit returns 503 storage_unavailable when a usage write throws and never claims success or writes usage", async () => {
+  const db = failingDB({ runSql: "INSERT INTO agent_runs" });
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(agentRequest(validBody()), { DB: db, AI: ai });
+
+  assert.equal(res.status, 503);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "storage_unavailable");
+  assert.equal(ai.calls.length, 0, "the model must not run when the usage write failed");
+  assert.equal(
+    db.calls.some((call) => call.sql.includes("INSERT INTO agent_runs")),
+    false,
+    "the failed agent run must not be recorded as usage"
+  );
+});
+
+test("storage failure: agent audit returns 503 storage_unavailable when the email_signups write throws and never runs the model", async () => {
+  const db = failingDB({ runSql: "INSERT INTO email_signups" });
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(agentRequest(validBody()), { DB: db, AI: ai });
+
+  assert.equal(res.status, 503);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "storage_unavailable");
+  assert.equal(ai.calls.length, 0, "no model call may happen when the signup write failed");
+  assert.equal(body.model, undefined, "no success payload may claim a model");
 });
