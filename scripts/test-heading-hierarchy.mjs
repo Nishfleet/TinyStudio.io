@@ -32,7 +32,7 @@ const PAGES = [
 // skip (or drops the single h1) changes these and fails the test.
 const EXPECTED_OUTLINES = {
   "public/index.html": [1, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 3, 3, 3, 3, 3, 2],
-  "public/audit.html": [1, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2],
+  "public/audit.html": [1, 2, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2],
   "public/agents.html": [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
   "public/pricing.html": [1, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2],
   "public/specimen.html": [1, 2, 2, 2, 2, 3, 2],
