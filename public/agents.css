@@ -43,3 +43,11 @@
   .stack div:not(:first-child){padding-left:0}
   .stack div:last-child{border-bottom:0}
 }
+
+/* in-content conversion CTA on the closing urgency band — pill link, >=44px hit area.
+   Scoped to .band .cta so nothing else on the page is touched. Mirrors the
+   /specimen and /audit closing bands. */
+.band .cta{display:inline-block;margin-top:26px;border:1px solid rgba(242,234,220,.4);border-radius:999px;
+  padding:16px 24px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+  color:#F2EADC;text-decoration:none;transition:border-color var(--mid) var(--ease),background var(--mid) var(--ease)}
+.band .cta:hover,.band .cta:focus-visible{border-color:var(--brass-lt);background:rgba(201,165,102,.14)}
