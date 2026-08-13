@@ -160,6 +160,76 @@ Three checks:
    checks above ran against the same question registry the 2026-08-09 pass
    used.
 
+### Closeout re-verification (added 2026-08-12)
+
+Re-verified against the current origin/main head (18128e8, "fix(public): serve
+rel=icon on /brief-requested and guard favicon links in check-site.mjs (#113)")
+after twenty-six further commits touched main since the 2026-08-11
+re-verification (b04b225, head 8b42e0a). The only change to the declaration
+itself is an extension, not a regression: 2ae7504 (#102, "truthful search
+intent bridge for 'conversion audit'") added `q8-conversion-audit` to the
+controlled-question registry and mapped it to the homepage as its preferred
+source page in both `llms.txt` and `offer.md`, grew the audit-page embed's
+question rows to eight, and stated the truthful conversion-audit bridge in
+both Current Offer sections. The declaration now names eight controlled
+questions, up from seven; its own receipt is
+`docs/evidence/conversion-audit-search-intent-bridge-2026-08-11.md`. The other
+commits in the range touching the guard file or the public surface did not
+touch the Answer Readiness region: 1e78ecf (#106) refactors the copy-guard
+head to read the current homepage instead of the retired `/agent-desk` and
+moves the retired page's framing guards below it (verified: no diff lines in
+the `ANSWER_READINESS_HEADING` block, its question-coverage loop, its
+exactly-one-page rule, its served-page membership check, its price-ownership
+rule or its mirror check); d4a2c30 (#98) edits document titles; 9302611 (#85)
+and 18128e8 (#113) add favicon markup plus a favicon guard block; 6f85c61
+(#96) and 0ad7481 (#86) are CSS-only tap-target fixes; 37ddaed (#101) locks
+the wrangler toolchain. `scripts/test-agent-ui.mjs` and
+`evidence-fixtures/ai-search/evidence.json` are byte-identical to the
+2026-08-11 re-verification commit.
+
+Three checks:
+
+1. Source checks on this head: `npm run check` passes — the "AI Answer
+   Readiness (dogfood 4473a99a9bc9)" guard in `scripts/check-site.mjs`
+   requires both `llms.txt` and `offer.md` to carry the `## Answer
+   Readiness: Preferred Source Pages` section, maps every controlled
+   question in the fixture (now eight, including q8) to exactly one served
+   page (sitemap membership, either spelling), forces the price questions
+   (q2, q7) to `pricing.html`, and fails if `offer.md` mirrors a different
+   page — and the full `npm test` suite passes (check, headings, sitemap,
+   worker 55/55, UI 16/16 including the "every controlled question maps to
+   a preferred source page" subtest, contract 8/8; 92 tests total).
+   `git diff --check` is clean.
+
+2. Fresh live measurement of the deployed site (2026-08-12, HTTPS fetch
+   against `https://tinystudio.io`, the same deterministic checks the
+   source guard runs, applied to the served bytes):
+
+   | URL | HTTP | content-type | bytes | Answer Readiness section |
+   |---|---|---|---|---|
+   | `/llms.txt` | 200 | text/plain | 4458 | present |
+   | `/offer.md` | 200 | text/markdown | 3701 | present |
+   | `/sitemap.xml` | 200 | — | 537 (7 locs) | used for membership |
+
+   The live section carries all eight controlled questions, each mapped to
+   exactly one served page: q1 → `https://tinystudio.io/` (homepage), q2 →
+   `https://tinystudio.io/pricing.html`, q3 → `https://tinystudio.io/audit.html`,
+   q4 → `https://tinystudio.io/audit.html`, q5 →
+   `https://tinystudio.io/` (homepage), q6 → `https://tinystudio.io/audit.html`,
+   q7 → `https://tinystudio.io/pricing.html`, q8 →
+   `https://tinystudio.io/` (homepage). Both price questions point at
+   `pricing.html`, which owns the price; every mapped page is a served page
+   per the live sitemap; and `offer.md` mirrors the identical
+   question-to-page mapping. The served bytes are byte-identical to
+   `public/llms.txt` and `public/offer.md` on this head, so the deployed
+   pair and the guarded source cannot drift without changing the served
+   bytes themselves.
+
+3. The fixture is untouched by this range except for the deliberate q8
+   registry entry from 2ae7504: `evidence-fixtures/ai-search/evidence.json`
+   remains byte-identical to the 2026-08-11 re-verification, and the
+   checks above ran against the same question registry the guard reads.
+
 ## Limitation (unchanged)
 
 This is still a repository-side declaration plus a served-bytes measurement,
