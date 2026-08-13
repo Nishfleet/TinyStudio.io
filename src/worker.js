@@ -338,10 +338,6 @@ async function signupResponse(request, env, url) {
     return jsonResponse({ ok: false, error: "method_not_allowed" }, { status: 405 });
   }
 
-  if (!env.DB) {
-    return jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 });
-  }
-
   if (requestTooLarge(request)) {
     return jsonResponse({ ok: false, error: "request_too_large" }, { status: 413 });
   }
@@ -365,7 +361,12 @@ async function signupResponse(request, env, url) {
     return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
   }
 
-  await saveEmailSignup(request, env, url, email, APPRAISAL_SURFACE, website);
+  try {
+    await saveEmailSignup(request, env, url, email, APPRAISAL_SURFACE, website);
+  } catch (error) {
+    console.warn("tinystudio_signup_storage_failed", error.message || "storage failed");
+    return jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 });
+  }
 
   if (wantsHtmlRedirect(request)) {
     return htmlRedirect(url, "saved");
@@ -399,10 +400,6 @@ async function incrementUsageCounter(env, bucketKey) {
 }
 
 async function enforceAgentLimits(request, env, email, url) {
-  if (!env.DB) {
-    return { ok: false, response: jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 }) };
-  }
-
   try {
     // Test-only clock override: production never binds AGENT_LIMITS_NOW, so
     // runtime behaviour is unchanged when it is absent. The worker test suite
@@ -1125,7 +1122,12 @@ async function agentAuditResponse(request, env, url) {
   const limit = await enforceAgentLimits(request, env, input.email, url);
   if (!limit.ok) return limit.response;
 
-  await saveEmailSignup(request, env, url, input.email, "agent-self-serve");
+  try {
+    await saveEmailSignup(request, env, url, input.email, "agent-self-serve");
+  } catch (error) {
+    console.warn("tinystudio_agent_signup_storage_failed", error.message || "storage failed");
+    return jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 });
+  }
 
   const messages = [
     { role: "system", content: agentSystemPrompt() },
