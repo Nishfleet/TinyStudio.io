@@ -275,3 +275,54 @@ b8f6046e942a ("Render-blocking resources on home") remains closed on the code
 side (PRs #20 and #23), in CI (`npm run check:render-blocking`), and against
 the deployed site; this lane (2026-08-11) re-confirmed all three on the
 current head and found nothing further to change.
+
+### Closeout re-verification (added 2026-08-13)
+
+Re-verified against the current origin/main head (885a7a9, "fix(public): add
+in-content request CTA to the /audit proof page (#159)", merged 2026-08-13)
+after the commits that landed since the 2026-08-11 closeout — 278df7f
+(docs: re-verify this finding, no public assets), 7fc1b05 (worker
+storage-failure honesty: 503 storage_unavailable on missing/broken D1),
+5de5187 (in-content request CTA on the /agents desk page) and 885a7a9
+(in-content request CTA on the /audit proof page) — none of which touched the
+font loading shape. The full test suite passes on this head (`npm test`:
+static source guards — "TinyStudio.io checks passed" — plus heading hierarchy
+6, sitemap 7, worker 68, UI 16 and product contract 8; 105 tests, 0
+failures). Two fresh measurements:
+
+1. `npm run check:render-blocking` on the current working tree at 885a7a9
+   (real Chromium, production CSP, css2 intercepted and delayed 2500ms,
+   stubbed response): all six pages PASS — css2 non-blocking,
+   first-contentful-paint never waits for it (homepage 296ms, audit 132ms,
+   desk 104ms, pricing 200ms, specimen 396ms, brief-requested 252ms; the
+   css2 response arrives at 2500ms, i.e. ~2.1–2.4s after first paint), no
+   render-blocking resources other than the site's own same-origin
+   stylesheets, promoted sheet applied.
+
+2. Live re-measurement of the deployed pages in real Chromium (unthrottled),
+   served with the production CSP header emitted by the worker (verified via
+   `curl -sI https://tinystudio.io/`):
+
+| Page | css2 renderBlockingStatus | FCP (ms) | css2 responseEnd (ms) | Render-blocking resources | Fonts load (Karla / Fraunces) | Promoted sheet applied |
+|---|---|---|---|---|---|---|
+| index.html (home) | non-blocking | 728 | 544 | same-origin index.css only | yes / yes | yes |
+| audit.html | non-blocking | 552 | 517 | same-origin shared.css, audit.css | yes / yes | yes |
+| agents.html | non-blocking | 388 | 528 | same-origin shared.css, agents.css | yes / yes | yes |
+| pricing.html | non-blocking | 376 | 485 | same-origin pricing.css, shared.css | yes / yes | yes |
+| specimen.html | non-blocking | 308 | 470 | same-origin specimen.css, shared.css | yes / yes | yes |
+| brief-requested.html | non-blocking | 244 | 477 | same-origin shared.css, brief-requested.css | yes / yes | yes |
+
+On the unthrottled live run the preloaded css2 (a non-blocking style preload,
+fetched at preload priority from the first byte) can finish before
+first-contentful-paint lands on the homepage (728ms FCP vs 544ms css2 end) —
+the same ordering every earlier live run showed. That is timing, not
+blocking: the deterministic delayed-css2 run above paints ~2.1–2.4s before
+the css2 response arrives, so first paint cannot be waiting on it.
+
+Same result as every earlier pass: no render-blocking scripts, no
+render-blocking external resources, first paint never waits for the font
+stylesheet, fonts still load and apply under the production CSP. Finding
+b8f6046e942a ("Render-blocking resources on home") remains closed on the code
+side (PRs #20 and #23), in CI (`npm run check:render-blocking`), and against
+the deployed site; this lane (2026-08-13) re-confirmed all three on the
+current head and found nothing further to change.
