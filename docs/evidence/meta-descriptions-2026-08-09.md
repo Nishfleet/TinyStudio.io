@@ -163,3 +163,45 @@ Finding 18dd05c10709 ("Missing meta description on home") remains closed on the
 code side (PR #21), in CI (`npm run check`), and against the deployed site;
 this lane (2026-08-11) re-confirmed all three against current main and found
 nothing further to change.
+
+### Closeout re-verification (added 2026-08-12)
+
+Re-verified against the current origin/main head (18128e8, "fix(public): serve
+rel=icon on /brief-requested and guard favicon links in check-site.mjs (#113)")
+after further commits touched the served pages (rel=icon favicon links on every
+page #85, appraisal intake field labels and document titles #98, brief-requested
+rel=icon #113) — none of which was allowed to regress the guarantee. Three
+checks, using the receipt's own exact verification method:
+
+1. Source guard on the current working tree: `npm run check` PASS — the "Meta
+   descriptions (dogfood)" guard in `scripts/check-site.mjs` confirms each of
+   the five pages carries exactly one non-empty description tag in its head,
+   within a search-snippet length (≤ 160 chars), distinct per page, and free
+   of the forbidden promises. The full `npm test` also passes on this head
+   (check + heading-hierarchy + sitemap + agent-worker + agent-UI +
+   product-contract suites; 92 tests, 0 failures).
+
+2. Served-bytes check: `src/worker.js` serves the `public/` files verbatim
+   through the ASSETS binding (no transformation can strip the tag), and each
+   of the five public pages carries exactly one `meta name="description"` tag
+   in its head (index 150 chars, audit 157, agents 155, pricing 153,
+   specimen 145).
+
+3. Live fetch (2026-08-12): all five served pages return HTTP 200 and each
+   serves exactly one valid, non-empty, unique description — the home page
+   serves the string the finding demanded:
+
+   > TinyStudio: the free leak audit of high-ticket service homepages. Each fault named in order of what it costs you, with the fix beside it. Six a month.
+
+| Page | HTTP | description tags in head | non-empty | length | unique |
+|---|---|---|---|---|---|
+| tinystudio.io/ (home) | 200 | 1 | yes | 150 | yes |
+| /audit | 200 | 1 | yes | 157 | yes |
+| /agents | 200 | 1 | yes | 155 | yes |
+| /pricing | 200 | 1 | yes | 153 | yes |
+| /specimen | 200 | 1 | yes | 145 | yes |
+
+Finding 18dd05c10709 ("Missing meta description on home") remains closed on the
+code side (PR #21), in CI (`npm run check` / `npm test`), and against the
+deployed site; this lane (2026-08-12) re-confirmed all three against current
+main and live, and found nothing further to change.
