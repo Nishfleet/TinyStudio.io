@@ -135,7 +135,7 @@ const requiredPublicArtifacts = [
   "Client-side code does not call model providers",
   "No campaign publishing",
   "No ad spend changes",
-  "https://tinystudio.io/pricing.html"
+  "https://tinystudio.io/pricing"
 ];
 
 const forbiddenClaims = [
@@ -1046,14 +1046,15 @@ if (aiQuestions && aiEvidence) {
 // the preferred source page: the section must exist in BOTH llms.txt and
 // offer.md (the mirror rule), every controlled question must be mapped to
 // exactly one page the worker serves (sitemap membership), price questions
-// must map to pricing.html (pricing.html owns the price), and the two files
-// must carry the same question-to-page mapping.
+// must map to the clean /pricing (the pricing page owns the price), and the
+// two files must carry the same question-to-page mapping.
 const ANSWER_READINESS_HEADING = "## Answer Readiness: Preferred Source Pages";
 
 // The sitemap lists the indexable public surface at its clean extensionless
-// addresses; the worker also serves each page at its .html twin, which the
-// preferred-source mapping uses. Membership accepts either spelling (home
-// stays "/").
+// addresses; the worker also serves each page at its canonical .html twin.
+// The preferred-source mapping uses the clean form that serves 200, never the
+// .html form the deployed worker 307-redirects. Membership accepts either
+// spelling (home stays "/").
 const servedPageUrls = new Set(
   [...sitemap.matchAll(/<loc>(https:\/\/tinystudio\.io\/[^<]*)<\/loc>/g)]
     .map((match) => match[1])
@@ -1102,8 +1103,8 @@ if (aiQuestions && Array.isArray(aiQuestions.questions)) {
     }
     const isPriceQuestion =
       question.id === "q2-what-tinystudio-charges" || question.id === "q7-what-tinystudio-io-charges";
-    if (isPriceQuestion && preferred !== "https://tinystudio.io/pricing.html") {
-      failures.push(`Price question ${question.id} must map to pricing.html (pricing.html owns the price).`);
+    if (isPriceQuestion && preferred !== "https://tinystudio.io/pricing") {
+      failures.push(`Price question ${question.id} must map to the clean /pricing (the pricing page owns the price).`);
     }
     const offerLine = offerSection.split("\n").find((line) => line.includes(question.id));
     if (!offerLine || !offerLine.includes(preferred)) {
@@ -1182,14 +1183,14 @@ if (!llms.includes("https://tinystudio.io/offer.md")) {
 if (!offer.includes("https://tinystudio.io/llms.txt")) {
   failures.push("offer.md must link its machine-readable mirror: llms.txt.");
 }
-if (!llms.includes("https://tinystudio.io/audit.html")) {
+if (!llms.includes("https://tinystudio.io/audit")) {
   failures.push("llms.txt must point at the audit page that carries the AI-search evidence artifact.");
 }
 
 // The machine-readable pair states the current offer in the site's own words
-// and points at pricing.html for price and terms. It must not restate the
-// pricing page's specifics (dollar amounts, refund language) or revive the
-// retired Website Correction / founder-pilot / MSP-buyer framing.
+// and points at the clean /pricing for price and terms. It must not restate
+// the pricing page's specifics (dollar amounts, refund language) or revive
+// the retired Website Correction / founder-pilot / MSP-buyer framing.
 const staleOfferPhrases = [
   "Website Correction",
   "founder pilot",
@@ -1205,16 +1206,16 @@ for (const phrase of staleOfferPhrases) {
   }
 }
 if (/\$\s?\d/.test(llms)) {
-  failures.push("llms.txt must not restate a dollar amount; pricing.html owns the price.");
+  failures.push("llms.txt must not restate a dollar amount; the pricing page owns the price.");
 }
 if (/\$\s?\d/.test(offer)) {
-  failures.push("offer.md must not restate a dollar amount; pricing.html owns the price.");
+  failures.push("offer.md must not restate a dollar amount; the pricing page owns the price.");
 }
 if (/\brefund\w*\b/i.test(llms)) {
-  failures.push("llms.txt must not restate refund terms; pricing.html owns them.");
+  failures.push("llms.txt must not restate refund terms; the pricing page owns them.");
 }
 if (/\brefund\w*\b/i.test(offer)) {
-  failures.push("offer.md must not restate refund terms; pricing.html owns them.");
+  failures.push("offer.md must not restate refund terms; the pricing page owns them.");
 }
 
 if (!siteHome.includes('id="identity"')) {
