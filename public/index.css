@@ -83,20 +83,21 @@
     font-size:12px;line-height:1.6;color:#8C8171;max-width:56ch}
 
   /* ── annotated specimen ────────────────────────── */
-  .spec{margin-top:112px;display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:start}
+  .spec{margin-top:112px;display:grid;grid-template-columns:1.06fr .94fr;gap:56px;align-items:start;min-width:0}
   .browser{background:linear-gradient(176deg,#FFFDF8,#F7F1E6);border:1px solid var(--line);border-radius:10px;
     overflow:hidden;position:relative;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 40px 84px -46px rgba(25,20,16,.34);
-    transition:transform var(--slow) var(--ease),box-shadow var(--slow) var(--ease)}
+    transition:transform var(--slow) var(--ease),box-shadow var(--slow) var(--ease);min-width:0;max-width:100%}
   .browser:hover{transform:translateY(-6px)}
   .chrome{display:flex;gap:6px;padding:12px 15px;border-bottom:1px solid var(--hair);background:rgba(235,225,207,.5)}
   .dot{width:8px;height:8px;border-radius:50%;background:#D6C9B2}
   .mock{padding:30px 30px 42px;position:relative}
   .bar{background:#E4DACA;border-radius:3px}
   .flag{position:absolute;display:flex;align-items:center;gap:8px;font-family:'Karla',sans-serif;
-    font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--sig);white-space:nowrap}
+    font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--sig);white-space:normal;max-width:100%}
   .pin{width:17px;height:17px;border-radius:50%;border:1px solid var(--sig);display:flex;
     align-items:center;justify-content:center;font-size:9px;background:rgba(176,74,46,.09)}
   .lk{position:absolute;height:1px;background:var(--sig);opacity:.42}
+  .specbody{min-width:0}
   .specbody h2{font-family:'Fraunces',serif;font-weight:200;font-size:42px;letter-spacing:-.028em;line-height:1.1;max-width:14ch}
   .specbody>p{margin-top:18px;font-size:15.5px;line-height:1.75;color:var(--muted);max-width:44ch}
   .rows{margin-top:32px}
@@ -259,9 +260,18 @@
   .stop{padding-right:0}
   .stop .d{margin-top:0}
   .who{flex-direction:column;align-items:flex-start;gap:16px;padding:30px 26px}
+  .who .sc{white-space:normal}
   .offer{flex-direction:column;gap:32px}
   .price{flex-shrink:1;text-align:left}
   .price .big{font-size:52px}
+  /* below 340px the two-column spec rows (label + nowrap value) cannot both
+     fit on one line; let the value wrap under the label instead of pushing
+     the document sideways */
+  .row{flex-wrap:wrap;row-gap:6px}
+  /* below 340px the annotated specimen is one column: the absolutely
+     positioned flags would push past the card edge, so anchor them to the
+     card's right padding edge and let their text wrap inside */
+  .mock .flag{left:auto;right:30px;max-width:calc(100% - 60px)}
   .faq h2{font-size:34px}
   .q{grid-template-columns:1fr;gap:14px}
   footer{flex-direction:column;align-items:flex-start;gap:10px}
