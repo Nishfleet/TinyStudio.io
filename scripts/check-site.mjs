@@ -1446,6 +1446,53 @@ if (!worker.includes('"/favicon.svg"')) {
   failures.push("Worker must serve /favicon.svg from the public asset allow-list.");
 }
 
+// ---- Cloudflare Web Analytics beacon (dogfood 455ee8966b) -----------------
+// The leak audit's auto-injected Cloudflare Web Analytics beacon 404s on every
+// page load (diagnosis 2026-08-09, "the site's only analytics"). The root
+// cause is dashboard-level: the zone's automatic Web Analytics setup injects
+// a snippet whose 32-hex site token is rejected by Cloudflare's ingestion
+// endpoint, and the zone's same-origin /cdn-cgi/rum endpoint is not
+// provisioned, so the beacon's POST to /cdn-cgi/rum? is answered 404 by
+// Cloudflare's edge before the Worker is ever reached. No code in this repo
+// can restore the analytics — that requires dashboard access or a Web
+// Analytics API token, neither of which is available to this worktree. The
+// re-verify receipt (docs/evidence/web-analytics-beacon-404-reverify-2026-08-14.md)
+// documents that the symptom no longer occurs because the auto-injection is
+// no longer active.
+//
+// This guard closes the loop on the source side: no served HTML page may
+// re-introduce the broken beacon script tag (the only mechanism in this repo
+// that could put the 404 back), while the CSP must still permit the manual
+// JS-snippet path so a future dashboard-restore or hand-added snippet
+// continues to work without further security-header churn.
+const beaconPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")],
+  ["agent-desk page", read("public/agent-desk.html")]
+];
+
+for (const [pageName, pageHtml] of beaconPages) {
+  const cfBeaconTags = [...pageHtml.matchAll(/<script\b[^>]*\bdata-cf-beacon\b[^>]*>/gi)];
+  if (cfBeaconTags.length > 0) {
+    failures.push(`Cloudflare Web Analytics beacon tag must not appear in the served body of ${pageName} (found ${cfBeaconTags.length} <script data-cf-beacon> tag(s); the zone's auto-injected snippet 404s because the underlying /cdn-cgi/rum endpoint is unprovisioned and the only known site token is revoked — see docs/evidence/web-analytics-beacon-404-reverify-2026-08-14.md).`);
+  }
+  const beaconScriptRefs = [...pageHtml.matchAll(/<script\b[^>]*\bsrc="[^"]*beacon\.min\.js[^"]*"[^>]*>/gi)];
+  if (beaconScriptRefs.length > 0) {
+    failures.push(`Cloudflare Web Analytics beacon.min.js script must not be referenced from the served body of ${pageName} (found ${beaconScriptRefs.length} reference(s); the broken 2026-08-09 injection path is documented in docs/evidence/web-analytics-beacon-404-reverify-2026-08-14.md).`);
+  }
+}
+
+if (!worker.includes("https://static.cloudflareinsights.com")) {
+  failures.push("Worker CSP must keep https://static.cloudflareinsights.com in script-src so the manual JS-snippet path keeps working when dashboard access is restored.");
+}
+if (!worker.includes("https://cloudflareinsights.com")) {
+  failures.push("Worker CSP must keep https://cloudflareinsights.com in connect-src so the manual JS-snippet path keeps working when dashboard access is restored.");
+}
+
 // ---- Social share tags (dogfood d87d715be3d0) -----------------------------
 // The leak audit this site sells flags a homepage whose served HTML cannot
 // tell a social platform what to show when the page is shared — the share
