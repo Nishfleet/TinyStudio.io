@@ -281,3 +281,95 @@ every field in the table can still be filled truthfully from live first-party
 surfaces, nothing needs to move to the "Never on the profile" list, and no
 reject condition is triggered. The handoff is ready for Nish's manual
 submission unchanged.
+
+## Re-verification (added 2026-08-14, lane 1)
+
+Re-verified against the current origin/main head (e9fc96a, "docs(evidence):
+re-verify tap-target finding on current main and live (2026-08-14) (#183)")
+and the live site on 2026-08-14. Since the last re-verify (f503387, which
+measured 18128e8), sixty-two commits landed; the ones that touched public
+surfaces are 5de5187 (in-content request CTA on /agents), 885a7a9 (in-content
+request CTA on /audit), 8606b0c and ed62202 (AI-search evidence re-run with
+the q5 ground truth aligned to the current offer, not the retired Agent
+Desk), dc1542a (apple-touch-icon on /brief-requested and the seven-page
+guard), 3efeb82 (signup rejection signal on the homepage), e5bfb08 (buyer
+named in the first-viewport hero), b81281f (in-content conversion CTA on
+/specimen), 60d045c (env-driven Google Ads conversion tag), and afb5d49
+(/agents hero h1 wrap). `git diff 18128e8..origin/main -- public/llms.txt
+public/offer.md public/pricing.html` shows **no change** to any identity,
+offer, contact, price, or boundary string this profile uses; the only public
+file diffs are in `public/audit.html` (the AI-search evidence embed re-run
+dated 2026-08-09 and an in-content CTA band whose note repeats the
+no-guarantees rule) and `public/index.html` (buyer naming in the hero sub
+and the signup rejection signal). Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) are byte-identical to the
+   source files on this head (curl diff: zero differences) and still carry,
+   verbatim: the offer ("The Website Appraisal — the free leak audit of
+   high-ticket service homepages — and the human-reviewed desk that closes
+   what the audit finds"), "reviewed by a person, not autonomous software",
+   "month one corrects the costliest fault; months two and three build the
+   loop", "Six appraisals a month, done by hand", "run by Nish, who signs
+   every audit", "The site states no base city or office address", "clients
+   are never named", "Contact: hello@tinystudio.io", and the price-and-terms
+   pointer to `https://tinystudio.io/pricing.html`.
+2. Live `https://tinystudio.io/pricing.html` (served via the Worker's
+   redirect to the clean `/pricing`, HTTP 200) still states exactly the price
+   the handoff relies on — "the appraisal is free, the desk is $2,500 a month
+   on a three-month minimum" (four occurrences in the served page) — and
+   still contains no "hourly rate", "project size", or "minimum project"
+   figure anywhere, so those profile fields stay blank.
+3. Live `https://tinystudio.io/audit.html` (clean `/audit`, HTTP 200) still
+   answers q3 "Where is TinyStudio based?" with "The site does not state a
+   base city or office address" and q6 "Does TinyStudio publish client work?"
+   with "no logos, no case studies, no testimonials, no 'as seen at'";
+   live `https://tinystudio.io/` still carries the "Where TinyStudio is
+   based" disclosure. The location and clients fields stay empty. All five
+   live surfaces (`/`, `/audit`, `/pricing`, `llms.txt`, `offer.md`) diffed
+   byte-identical against the source on this head, so there is no deployment
+   lag between the checked source and the served bytes.
+4. The official Clutch policy page
+   (`https://help.clutch.co/en/knowledge/get-listed-on-clutch`, re-fetched
+   2026-08-14) still documents: "Create a free company profile at
+   clutch.co/get-listed", offerings "Basic, Verified, or Advertiser", sign-in
+   "With a LinkedIn, Google Account, or Company Email Address", the same
+   profile fields this handoff maps (Company name, Tagline, Number of
+   employees, Minimum project size and average hourly rate, Website URL,
+   Location(s), Contact information, Overview of your company, Service
+   focus), and the same review-and-publish flow: "Once you have submitted
+   your profile, it will be sent to our team for review and publishing." No
+   paid placement is required for the Basic profile, so no reject condition
+   is triggered.
+5. No Clutch receipt exists in the product state (no Clutch profile URL or
+   rejection response anywhere in the repo on this head); the receipt block
+   below remains unfilled and the human submission remains the open action.
+   The external search baseline was not re-run this lane (public search
+   endpoints have blocked scripted queries from the VPS in previous lanes),
+   so the 2026-08-09 baseline stands with its own caveat: it is a baseline,
+   not proof of non-existence. If a profile has been published under a
+   different name form, the "What this document does not claim" section
+   above applies — compare it against llms.txt before changing anything.
+6. Repository checks on this head pass: `npm run check` ("TinyStudio.io
+   checks passed") and the full `npm test` suite (117 tests across 6 suites
+   — headings, sitemap, worker, ui, contract, viewport — all green, exit 0).
+   The only reported item is a pre-existing, out-of-scope note that `/`
+   overflows at 240px (reported, does not gate the exit code, unrelated to
+   this profile).
+
+Two truthfulness-relevant additions since the last re-verify, both
+reinforcing rather than weakening the handoff: the AI-search evidence re-run
+(8606b0c, ed62202) re-tested the controlled questions on 2026-08-09 and
+aligned q5's ground truth to the current offer instead of the retired Agent
+Desk — consistent with the "Never on the profile" rule against presenting
+the retired Agent Desk as the current product; and the /audit CTA band
+(885a7a9) added an explicit "No revenue, ranking, ROAS, conversion,
+booked-call or sales-volume guarantees. Only the work." note — consistent
+with the profile rule against outcome guarantees. Neither changes any value
+in the table above.
+
+Same result as the 2026-08-09 preparation and the 2026-08-11 and 2026-08-12
+re-verifications: every field in the table can still be filled truthfully
+from live first-party surfaces, nothing needs to move to the "Never on the
+profile" list, and no reject condition is triggered. The handoff is ready
+for Nish's manual submission unchanged.
