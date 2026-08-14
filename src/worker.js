@@ -1387,6 +1387,34 @@ export default {
     const url = new URL(request.url);
     const host = url.hostname.toLowerCase();
 
+    // ---- Canonical host redirect (dogfood: Google still presents the retired
+    // self-serve "TinyStudio Agent Desk" title/snippet for tinystudio.io) ----
+    // wrangler.jsonc routes www.tinystudio.io/* at this worker, but nothing
+    // ever sent that host anywhere: it answered 200 with a byte-identical copy
+    // of the public site, on a second hostname and over plain http. Google
+    // therefore holds www.tinystudio.io as its own site, with its own site
+    // name, and that entity still carries the retired "TinyStudio Agent Desk"
+    // name from when the self-serve desk owned the root — which is why the
+    // retired product name keeps surfacing for this site even though the apex
+    // host's own title, description and site name are long since correct.
+    // robots.txt, sitemap.xml and every canonical and og:url on the site name
+    // https://tinystudio.io as the single address, so the duplicate host is
+    // sent there permanently and drops out of the index. A page-level
+    // canonical is only a hint; a 301 is the directive that retires the
+    // duplicate site entity along with its stale name.
+    if (host === "www.tinystudio.io") {
+      const canonical = new URL(url);
+      canonical.protocol = "https:";
+      canonical.hostname = "tinystudio.io";
+      canonical.port = "";
+      return withSecurityHeaders(
+        new Response(null, {
+          status: 301,
+          headers: { Location: canonical.toString() }
+        })
+      );
+    }
+
     if (host === "app.tinystudio.io") {
       return retiredAppResponse();
     }
