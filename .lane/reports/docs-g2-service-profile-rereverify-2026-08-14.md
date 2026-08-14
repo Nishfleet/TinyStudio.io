@@ -2,7 +2,7 @@
 
 Lane: tinystudio-io lane 1
 Branch: `docs/g2-service-profile-rereverify-2026-08-14`
-PR: https://github.com/nish3451/TinyStudio.io/pull/NEW (see closeout)
+PR: https://github.com/nish3451/TinyStudio.io/pull/185
 Item: a19ade7a78 — "Prepare a truthful manual G2 service profile for the Website Appraisal" [research desk 2026-08-09]
 
 ## Outcome
@@ -33,4 +33,4 @@ Handoff re-verified unchanged against current `origin/main` (e9fc96a) and the li
 
 ## Closeout
 
-PR opened at https://github.com/nish3451/TinyStudio.io/pull/ (filled in after open). Handoff ready for Nish's manual submission unchanged.
+PR opened at https://github.com/nish3451/TinyStudio.io/pull/185. Handoff ready for Nish's manual submission unchanged.
