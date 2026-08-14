@@ -225,7 +225,7 @@ async function loadAuditScript() {
 
 test("AI-search fixture runs carry the right structure for their states", () => {
   const states = [...new Set(AI_EVIDENCE.runs.map((run) => run.state))].sort();
-  assert.deepEqual(states, ["not-tested", "wrong"]);
+  assert.deepEqual(states, ["absent", "not-tested", "wrong"]);
 
   const questionIds = new Set(AI_QUESTIONS.questions.map((question) => question.id));
   const engineIds = new Set(AI_EVIDENCE.engines.map((engine) => engine.id));
