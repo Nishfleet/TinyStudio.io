@@ -7,7 +7,13 @@ on:
 
 jobs:
   verify:
-    runs-on: [self-hosted, linux, x64, vps-verify]
+    # Spread verify runs across the two VPS runner instances so a burst of
+    # PRs drains in parallel instead of serializing on one runner. The
+    # per-instance label matches the netcup-rs2000-tinystudio-verifyN runner.
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [[self-hosted, linux, x64, vps-verify, tinystudio-io-verify1], [self-hosted, linux, x64, vps-verify, tinystudio-io-verify2]]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
