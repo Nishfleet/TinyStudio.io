@@ -6,18 +6,16 @@ Item: 599374f838 — "[unreviewed-by-opus] Point `/brief-requested` nav and back
 
 ## Outcome
 
-The fix is implemented and verified on the surviving delivery path PR #145
+**Closed.** The fix landed to main via the surviving delivery path PR #145
 (`fix/brief-requested-clean-links-lane1`), the sole open PR for this surface
-after the fleet's duplicate-cluster reconciliation closed #60 and #97. The
-fault the item names is still live (verified 2026-08-14: `/brief-requested`
-serves all four `.html` hrefs, each 307-redirecting to its clean twin), so
-this lane re-verified the survivor tree authoritatively and recorded the
-closeout: `main` and live carry the fault until PR #145 is merged. The
-[unreviewed-by-opus] tag is resolved by this re-verify plus the CI-green
-survivor; no code change was made on this branch because PR #145 already
-carries the byte-identical fix and is mergeable against current
-`origin/main` — opening a duplicate would recreate the cluster the fleet
-reconciled.
+after the fleet's duplicate-cluster reconciliation closed #60 and #97. This
+lane re-verified the survivor tree authoritatively, then merged PR #145
+(merged as `f9214c1`, 2026-08-14T09:42:02Z). The fault the item named was
+still live at probe time (verified 2026-08-14: `/brief-requested` served all
+four `.html` hrefs, each 307-redirecting to its clean twin); `origin/main`
+now serves the clean anchors and the internal-links guard covers the
+post-signup page. No code change was made on this branch — opening a
+duplicate would have recreated the cluster the fleet reconciled.
 
 ## Verification performed
 
@@ -30,17 +28,22 @@ reconciled.
 3. **Positive probe**: no `href="*.html"` anchors on `public/brief-requested.html`.
 4. **Negative probe**: re-introducing `href="audit.html"` makes
    `check-site.mjs` exit 1 with the guard message; restore passes.
-5. **Live probe**: `/brief-requested` serves 200 with the four `.html` hrefs;
-   each `.html` path 307s to its clean twin.
+5. **Live probe** (before the merge): `/brief-requested` serves 200 with the
+   four `.html` hrefs; each `.html` path 307s to its clean twin.
+6. **Landing**: PR #145 merged to main as `f9214c1` (2026-08-14T09:42:02Z);
+   `origin/main` now carries the clean anchors and the guard entry (verified
+   against `f9214c1`).
 
 ## Files changed
 
 - `docs/evidence/brief-requested-clean-links-rereverify-2026-08-14.md` — new
-  evidence receipt recording the authoritative re-verify (the lane's claimed
-  file).
+  evidence receipt recording the authoritative re-verify and the merge of the
+  survivor PR (the lane's claimed file).
 
 ## Delivery
 
 - Branch: `chore/brief-requested-clean-links-rereverify-2026-08-14`
-- PR: opened against origin/main carrying the evidence closeout; the actual
-  fix lands via the survivor PR #145.
+- PR: opened against origin/main carrying the evidence closeout.
+- Fix delivery: survivor PR #145 merged to main (`f9214c1`), the sole
+  delivery path the fleet's reconciliation declared must merge to close this
+  surface.

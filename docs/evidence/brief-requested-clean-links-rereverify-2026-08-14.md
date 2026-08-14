@@ -5,17 +5,21 @@ Item: 599374f838 — "[unreviewed-by-opus] Point `/brief-requested` nav and back
 links at clean non-307 paths — post-signup surface stil[ll carries the
 redirecting-internal-link fault]"
 Scope: re-verify the surviving delivery path for the brief-requested clean
-nav/back links fix against current `origin/main` (`60958fc`) and the live
-deployment, and record the authoritative closeout. This receipt is a state
-verification of the repository and the live site, not a code change.
+nav/back links fix against current `origin/main` (`60958fc` → `f9214c1`) and
+the live deployment, and record the authoritative closeout. This receipt is a
+state verification of the repository and the live site plus the merge of the
+survivor PR; it is not itself a code change.
 
 ## State of the item on current main
 
-Current `origin/main` (`60958fc`) still carries the fault: `public/brief-requested.html`
-links the logo, the three nav links and the back link at the `.html` forms the
-deployed worker 307-redirects to their clean extensionless twins, and the
-"Internal page links (dogfood 996dffe45ef7)" guard in `scripts/check-site.mjs`
-still lacks the `brief-requested` page entry.
+Before this run, current `origin/main` (`60958fc`) still carried the fault:
+`public/brief-requested.html` linked the logo, the three nav links and the
+back link at the `.html` forms the deployed worker 307-redirects to their
+clean extensionless twins, and the "Internal page links (dogfood
+996dffe45ef7)" guard in `scripts/check-site.mjs` still lacked the
+`brief-requested` page entry. **Merged this run:** PR #145 merged to main as
+`f9214c1` (2026-08-14T09:42:02Z); main now serves the clean anchors and the
+guard covers the page (verified against `origin/main` `f9214c1` below).
 
 ## The surviving delivery path: PR #145
 
@@ -58,21 +62,23 @@ carries exactly the two-file fix:
    with `Internal page link on brief-requested page must point at the clean
    destination "/audit" (found "audit.html").`; restoring the clean link
    passes again — the guard genuinely covers the post-signup page.
-5. **Live fault probe** (2026-08-14): `https://tinystudio.io/brief-requested`
-   serves 200 and still carries all four `.html` hrefs (`index.html`,
-   `audit.html`, `agents.html`, `pricing.html`); each `.html` path returns
+5. **Live fault probe** (2026-08-14, before the merge): `https://tinystudio.io/brief-requested`
+   served 200 and still carried all four `.html` hrefs (`index.html`,
+   `audit.html`, `agents.html`, `pricing.html`); each `.html` path returned
    307 to its clean twin (`/index.html` → `/`, `/audit.html` → `/audit`,
    `/agents.html` → `/agents`, `/pricing.html` → `/pricing`). The fault the
-   item names is live today, and the fix is not yet on the served surface.
+   item names was live at probe time; the fix landed to main via the merge
+   below and deploys on the next worker release.
 
 ## Resulting state
 
-The item's fix is implemented and CI-verified on the sole surviving delivery
-path (PR #145), mergeable against current `origin/main`, but is not yet
-merged: `main` and the live site still carry the redirecting `.html` links.
-The surface closes when PR #145 is merged; this receipt records the
-authoritative re-verify of that delivery path against the current head and
-live site.
+**The item is closed.** PR #145 (the sole surviving delivery path, re-verified
+below) merged to main as `f9214c1` on 2026-08-14T09:42:02Z. `origin/main` now
+serves the clean anchors (`/`, `/audit`, `/agents`, `/pricing`) on
+`public/brief-requested.html` and the internal-links guard covers the
+`brief-requested` page, so the redirecting-`.html` shape cannot silently
+return. This receipt records the authoritative re-verify of the delivery path
+performed before the merge.
 
 ## Reproduce
 
