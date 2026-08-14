@@ -43,4 +43,5 @@ authoritative closeout receipt.
 ## Delivery
 
 - Branch: `chore/duplicate-pr-clusters-residual-closeout-2026-08-14`
-- PR: opened against origin/main carrying the evidence closeout.
+- PR: **#196** opened against origin/main carrying the evidence closeout
+  (commit `32e7d11`, 2026-08-14).
