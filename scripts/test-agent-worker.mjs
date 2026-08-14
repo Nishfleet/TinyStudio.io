@@ -1174,6 +1174,64 @@ test("worker does not serve unlisted asset-like paths outside the public allow-l
   assert.equal(res.status, 404);
 });
 
+// --- Canonical host redirect (dogfood: the retired "TinyStudio Agent Desk"
+// title/snippet kept surfacing for tinystudio.io) ---
+//
+// www.tinystudio.io is routed at this worker by wrangler.jsonc and used to
+// answer 200 with a duplicate of the public site, so Google held it as its own
+// site with its own, stale site name. It must now redirect permanently to the
+// apex host that robots.txt, sitemap.xml and every canonical already name.
+
+test("www host redirects permanently to the canonical apex host", async () => {
+  const res = await worker.fetch(new Request("https://www.tinystudio.io/"), {});
+  assert.equal(res.status, 301, "the duplicate www host must answer a permanent redirect, not 200");
+  assert.equal(res.headers.get("Location"), "https://tinystudio.io/");
+});
+
+test("www host redirect preserves path and query, and upgrades plain http", async () => {
+  const res = await worker.fetch(
+    new Request("http://www.tinystudio.io/pricing?utm_source=x&utm_medium=y"),
+    {}
+  );
+  assert.equal(res.status, 301);
+  assert.equal(
+    res.headers.get("Location"),
+    "https://tinystudio.io/pricing?utm_source=x&utm_medium=y",
+    "the redirect must keep the visitor's destination and campaign parameters intact"
+  );
+});
+
+test("www host never serves a second copy of the public site", async () => {
+  const env = {
+    ASSETS: { fetch: async () => new Response("<html>duplicate site</html>", { status: 200 }) }
+  };
+  for (const target of [
+    "https://www.tinystudio.io/",
+    "https://www.tinystudio.io/audit",
+    "https://www.tinystudio.io/agents",
+    "https://www.tinystudio.io/agent-desk"
+  ]) {
+    const res = await worker.fetch(new Request(target), env);
+    assert.equal(res.status, 301, `www must not serve ${target}`);
+    const body = await res.text();
+    assert.doesNotMatch(body, /duplicate site/, "www must not return public site HTML");
+  }
+});
+
+test("canonical host redirect leaves the apex and the retired hosts alone", async () => {
+  const env = {
+    ASSETS: { fetch: async () => new Response("<html>apex site</html>", { status: 200 }) }
+  };
+  const apex = await worker.fetch(new Request("https://tinystudio.io/"), env);
+  assert.notEqual(apex.status, 301, "the apex host must keep serving the site, not redirect");
+
+  const app = await worker.fetch(new Request("https://app.tinystudio.io/"), {});
+  assert.equal(app.status, 410, "the retired app host keeps its own retired response");
+
+  const api = await worker.fetch(new Request("https://api.tinystudio.io/"), {});
+  assert.equal(api.status, 410, "the retired API host keeps its own retired response");
+});
+
 test("retired app host frames the current offer as The Website Appraisal, not the Agent Desk", async () => {
   const res = await worker.fetch(new Request("https://app.tinystudio.io/"), {});
   assert.equal(res.status, 410);
