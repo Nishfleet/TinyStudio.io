@@ -522,7 +522,7 @@ const OFFER_FACTS = [
   "Client-side code does not call model providers",
   "No campaign publishing",
   "No ad spend changes",
-  "https://tinystudio.io/pricing.html"
+  "https://tinystudio.io/pricing"
 ];
 
 test("homepage disambiguation block answers every controlled question", () => {
@@ -578,7 +578,7 @@ test("identity disambiguation facts are mirrored by llms.txt and offer.md", () =
   assert.match(LLMS_TXT, /^## Identity$/m, "llms.txt must carry the machine-readable Identity section");
   assert.ok(LLMS_TXT.includes("https://tinystudio.io/offer.md"), "llms.txt must link offer.md as its mirror");
   assert.ok(OFFER_MD.includes("https://tinystudio.io/llms.txt"), "offer.md must link llms.txt as its mirror");
-  assert.ok(LLMS_TXT.includes("https://tinystudio.io/audit.html"), "llms.txt must point at the audit page's evidence artifact");
+  assert.ok(LLMS_TXT.includes("https://tinystudio.io/audit"), "llms.txt must point at the audit page's evidence artifact");
 });
 
 test("every controlled question maps to a preferred source page, mirrored by llms.txt and offer.md", () => {
@@ -587,7 +587,7 @@ test("every controlled question maps to a preferred source page, mirrored by llm
   // retired Agent Desk, and the pricing answer came back "Missing: pricing".
   // The machine-readable pair must declare, per controlled question, the
   // preferred source page an engine should read first — exactly one served
-  // page per question, pricing.html for price questions, and the same
+  // page per question, the clean /pricing for price questions, and the same
   // mapping in both files.
   const ANSWER_READINESS_HEADING = "## Answer Readiness: Preferred Source Pages";
   for (const [name, text] of [
@@ -604,10 +604,10 @@ test("every controlled question maps to a preferred source page, mirrored by llm
   };
   const servedPages = [
     "https://tinystudio.io/",
-    "https://tinystudio.io/audit.html",
-    "https://tinystudio.io/agents.html",
-    "https://tinystudio.io/pricing.html",
-    "https://tinystudio.io/specimen.html"
+    "https://tinystudio.io/audit",
+    "https://tinystudio.io/agents",
+    "https://tinystudio.io/pricing",
+    "https://tinystudio.io/specimen"
   ];
   const llmsSection = sectionOf(LLMS_TXT);
   const offerSection = sectionOf(OFFER_MD);
@@ -621,7 +621,7 @@ test("every controlled question maps to a preferred source page, mirrored by llm
     const isPriceQuestion =
       question.id === "q2-what-tinystudio-charges" || question.id === "q7-what-tinystudio-io-charges";
     if (isPriceQuestion) {
-      assert.equal(preferred, "https://tinystudio.io/pricing.html", `price question ${question.id} must map to pricing.html`);
+      assert.equal(preferred, "https://tinystudio.io/pricing", `price question ${question.id} must map to the clean /pricing`);
     }
     const offerLine = offerSection.split("\n").find((line) => line.includes(question.id));
     assert.ok(offerLine?.includes(preferred), `offer.md must mirror the preferred source page for ${question.id}`);
@@ -639,15 +639,16 @@ test("offer facts are mirrored by llms.txt and offer.md", () => {
   }
 });
 
-test("llms.txt and offer.md point at pricing.html and never restate price or refund terms", () => {
+test("llms.txt and offer.md point at the clean /pricing and never restate price or refund terms", () => {
   // The pricing page owns price, refund and guarantee terms; the machine-
-  // readable pair points at it instead of restating dollar amounts, refund
-  // language, or the retired Website Correction / founder-pilot framing.
+  // readable pair points at its clean /pricing address instead of restating
+  // dollar amounts, refund language, or the retired Website Correction /
+  // founder-pilot framing.
   for (const [name, text] of [
     ["llms.txt", LLMS_TXT],
     ["offer.md", OFFER_MD]
   ]) {
-    assert.ok(text.includes("https://tinystudio.io/pricing.html"), `${name} must point at pricing.html`);
+    assert.ok(text.includes("https://tinystudio.io/pricing"), `${name} must point at the clean /pricing`);
     assert.doesNotMatch(text, /\$\s?\d/, `${name} must not restate a dollar amount`);
     assert.doesNotMatch(text, /\brefund\w*\b/i, `${name} must not restate refund terms`);
     assert.doesNotMatch(text, /Website Correction/i, `${name} must not revive the retired offer framing`);
