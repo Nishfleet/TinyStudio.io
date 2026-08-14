@@ -29,7 +29,7 @@ The appraisal is a written report on one page of your choosing — each fault na
 
 Six appraisals a month, done by hand. When the sixth is taken, the intake closes until the next.
 
-A "conversion audit" search intent is answered truthfully: the appraisal is the leak audit of the money page — each fault named in order of what it costs you, with the fix beside it — and TinyStudio is not sold as a conversion audit service, so no conversion lift is promised.
+A "conversion audit" search intent is answered truthfully: the appraisal is the leak audit of the money page — each fault named in order of what it costs you, with the fix beside it — and TinyStudio is not sold as a conversion audit service, so no conversion lift is promised. Nor is the appraisal a domain-value estimate: no domain is priced and no resale value is estimated — the report names what each fault costs you and puts no value on the site itself.
 
 ## Buyer
 
