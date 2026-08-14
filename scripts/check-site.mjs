@@ -1253,6 +1253,41 @@ const retiredDeskDescription =
 if (!/\bretired\b/i.test(retiredDeskDescription)) {
   failures.push("Retired Agent Desk description must frame the surface as retired.");
 }
+// The legacy page must not claim the apex root as its canonical: while the
+// page was served at the root, its canonical and og:url pointed at
+// https://tinystudio.io/, which is exactly how the retired title consolidated
+// onto the homepage (the q5 evidence above). A noindex page canonicalizing to
+// a live page tells Google it is a duplicate of that page. The legacy page
+// now declares its own canonical .html twin — https://tinystudio.io/agent-desk.html,
+// the address the worker serves (PUBLIC_ASSET_PATHS) and the form every other
+// owned page canonicals to — so neither a search engine nor a scraper can
+// fold the retired surface's identity into the homepage again.
+const retiredDeskLiveHead = retiredDeskHead.replace(/<!--[\s\S]*?-->/g, "");
+const retiredDeskCanonicalLinks = [
+  ...retiredDeskLiveHead.matchAll(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi)
+].map((match) => match[0]);
+const retiredDeskCanonicalHref =
+  retiredDeskCanonicalLinks[0]?.match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+if (retiredDeskCanonicalLinks.length !== 1) {
+  failures.push(
+    `Retired Agent Desk page must carry exactly one canonical link in its head (found ${retiredDeskCanonicalLinks.length}).`
+  );
+} else if (retiredDeskCanonicalHref.trim() !== "https://tinystudio.io/agent-desk.html") {
+  failures.push(
+    `Retired Agent Desk canonical must point at its own address https://tinystudio.io/agent-desk.html, not the apex root (found ${JSON.stringify(retiredDeskCanonicalHref)}).`
+  );
+}
+const retiredDeskOgUrl =
+  retiredDeskLiveHead.match(/<meta\b[^>]*\bproperty\s*=\s*["']og:url["'][^>]*>/i)?.[0] ?? "";
+const retiredDeskOgUrlContent =
+  retiredDeskOgUrl.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+if (!retiredDeskOgUrlContent) {
+  failures.push("Retired Agent Desk page must keep an og:url meta in its head.");
+} else if (retiredDeskOgUrlContent.trim() !== "https://tinystudio.io/agent-desk.html") {
+  failures.push(
+    `Retired Agent Desk og:url must be its own address https://tinystudio.io/agent-desk.html, not the apex root (found ${JSON.stringify(retiredDeskOgUrlContent)}).`
+  );
+}
 
 // ---- Meta descriptions (dogfood) -------------------------------------------
 // The leak audit this site sells flags a homepage whose served HTML carries no
