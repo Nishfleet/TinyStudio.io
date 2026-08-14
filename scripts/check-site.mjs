@@ -411,6 +411,32 @@ if (!auditMobile) {
   requireMobileRule("let proof rows wrap instead of overflowing", /\.row\{[^}]*flex-wrap:wrap/);
 }
 
+// Audit page in-content request CTA regression (review item: the /audit proof
+// page ended at the closing urgency band with no in-content conversion afford
+// — the only request link was the nav CTA; fixed by PR #159). The closing
+// .band must keep the "Request the appraisal" pill linking to the page's own
+// #start form, and the no-guarantees note that scopes it. audit.css must keep
+// the scoped .band .cta pill styling with a >=44px hit area, and the mobile
+// media query must stack the band. STATIC SOURCE GUARD (regex over the served
+// HTML/CSS), not a behavioral test: CI has no browser.
+const auditClosingBand = siteAudit.match(/<div class="band">([\s\S]*?)<\/div>\s*<section id="confidential">/)?.[1] ?? "";
+if (!auditClosingBand) {
+  failures.push("Audit page must keep an in-content conversion CTA band between the proof and the footer.");
+} else {
+  if (!/<a\b[^>]*class="cta"[^>]*href="#start"[^>]*>Request the appraisal<\/a>/.test(auditClosingBand)) {
+    failures.push("Audit conversion band must carry a .cta link to #start labelled \"Request the appraisal\".");
+  }
+  if (!/No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees\. Only the work\./.test(auditClosingBand)) {
+    failures.push("Audit conversion band must keep the no-guarantees note.");
+  }
+}
+if (!auditCss.includes(".band .cta")) {
+  failures.push("audit.css must style the band conversion CTA (.band .cta).");
+}
+if (!/\.band \.cta\{[^}]*padding:16px 24px/.test(auditCss)) {
+  failures.push("Audit band CTA must keep a >=44px tap target (padding:16px 24px).");
+}
+
 // The behavioral layout proof (real Chromium measurement, local static copy)
 // is checked in so the static guards above stay distinguishable from it.
 // Existence and section anchors only — this does not re-verify measurements.
