@@ -217,3 +217,71 @@ and when.
 - Nothing here predicts publication, visibility, traffic, leads, or revenue.
 - This lane read GoodFirms' public pages with a real browser session
   (2026-08-15); no account was created and nothing was submitted.
+
+## Re-verification (added 2026-08-15, lane 1 close-out)
+
+Re-verified against the current origin/main head (1151ddd, "docs(service):
+prepare truthful manual GoodFirms profile handoff for the Website Appraisal
+(#219)") and the live site on 2026-08-15. This lane re-fired on the same
+backlog item (07d7a4fb59) after the first-capture handoff had already landed:
+the preparation was merged as PR #219 (commit 1151ddd), so this lane records
+a close-out re-verify rather than a second preparation. Every first-party
+claim the profile table and the "Never on the profile" list depend on was
+checked against the live surfaces it cites, and the GoodFirms official-page
+evidence the handoff quotes was cross-checked against Wayback Machine
+snapshots of the same URLs (the live pages block scripted fetches with HTTP
+403 from the VPS, so the direct re-fetch this lane ran in a browser session
+on 2026-08-15 stands, corroborated by archived copies). Fresh checks:
+
+1. Live `https://tinystudio.io/`, `/audit.html`, `/pricing.html`,
+   `/agents.html`, `/specimen.html`, `llms.txt`, and `offer.md` all return
+   HTTP 200 and are byte-identical to the committed source on this head
+   (curl diff: zero differences) — no deployment lag between the checked
+   source and the served bytes.
+2. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` still carry, verbatim: the offer ("The
+   Website Appraisal — the free leak audit of high-ticket service homepages
+   — and the human-reviewed desk that closes what the audit finds"),
+   "reviewed by a person, not autonomous software", "Six appraisals a month,
+   done by hand", "run by Nish, who signs every audit", "The site states no
+   base city or office address", "clients are never named", "Contact:
+   hello@tinystudio.io", and the price-and-terms pointer to
+   `https://tinystudio.io/pricing.html`.
+3. The no-invention fields still hold across every public surface: a full
+   scan of `public/*.html`, `llms.txt`, and `offer.md` on this head finds no
+   `tel:` link or phone string, no `founded`/`est.` year, and no TinyStudio
+   social-profile URLs (the only `instagram.com` / `linkedin.com` matches are
+   inside the embedded AI-search evidence JSON on `/audit`, cited as sources
+   for answers about unrelated businesses — not TinyStudio's own profiles).
+   So Year founded, Phone number, Social profiles, and Certification stay
+   blank, exactly as the table instructs.
+4. The official GoodFirms pages the handoff quotes were cross-checked against
+   Wayback Machine snapshots: `goodfirms.co/get-listed` (snapshot 2026-06-28,
+   "Get Listed on Goodfirms - Showcase Your Expertise"), the get-listed flow
+   help article (snapshot 2025-10-13, still "Simply head over to our Get
+   Listed page. Fill in your necessary company details. Choose the
+   appropriate Service Categories for your business (can't be edited later.)
+   Submit the form and await approval."), the free-listing help article
+   (snapshot 2025-08-14, still "Yes! Getting listed on GoodFirms is
+   absolutely free. Fill out the form from our Get Listed page and await
+   activation."), the approval-window article (snapshot 2025-08-14, still
+   "You can expect your business listing to be approved within 2-3 business
+   days after registration."), and the terms of use (snapshot 2026-07-23,
+   still "Use software, devices, robots, scripts, or other means to scrape,
+   crawl, or index any web page or other portion of our service."). The
+   handoff's policy quotes are consistent with the archived official pages.
+5. No GoodFirms receipt exists in the product state on this head (no profile
+   URL, pending-review state, or rejection response anywhere in the repo);
+   the receipt block below remains unfilled and the human manual submission
+   remains the open action. A current web search for `site:goodfirms.co
+   tinystudio.io TinyStudio` still returns no exact TinyStudio/tinystudio.io
+   profile — only unrelated agencies and directory pages — consistent with
+   the handoff's baseline caveat that GoodFirms may auto-list under a
+   different name form.
+6. Repository checks on this head pass: `npm run check` ("TinyStudio.io
+   checks passed") and the full `npm test` suite are green.
+
+Same result as the 2026-08-15 preparation: every field in the table can
+still be filled truthfully from live first-party surfaces, nothing needs to
+move to the "Never on the profile" list, and no reject condition is
+triggered. The handoff is ready for Nish's manual submission unchanged.
