@@ -297,6 +297,74 @@ Three checks:
    bundle still matches `evidence-fixtures/ai-search/evidence.json` and
    `controlled-questions.json` byte-for-byte.
 
+### Closeout re-verification (added 2026-08-15)
+
+Re-verified against the current origin/main head (50c6b39, "docs(evidence):
+re-verify redirecting internal links on home (996dffe45ef7) against current
+main and live (2026-08-15) (#225)") and the live deployment. Since the
+2026-08-14 re-verification (head d1af1c1), two commits touched the
+declaration's files: ffc1672 (#193) extended the Current Offer bridge
+statement in both files with the "no domain is priced and no resale value is
+estimated" sentence without touching the Answer Readiness section, and
+c447585 (#202) re-pointed the machine-readable pair's buyer URLs — and the
+Answer Readiness mappings themselves — from the 307-redirecting `.html`
+addresses to the clean extensionless addresses that serve 200
+(`/pricing.html` → `/pricing`, `/audit.html` → `/audit`), moving the
+check-site and agent-ui guard expectations to match. Neither commit changed
+the question set, the exactly-one-page rule, the price-ownership rule or the
+mirror; the mapping still names one served page per question and the price
+questions (q2, q7) still point at the pricing page (now `/pricing`).
+
+Three checks:
+
+1. Source checks on this head: `npm run check` passes — the "AI Answer
+   Readiness (dogfood 4473a99a9bc9)" guard in `scripts/check-site.mjs`
+   requires both `llms.txt` and `offer.md` to carry the `## Answer
+   Readiness: Preferred Source Pages` section, maps every controlled
+   question in the fixture (eight, including q8) to exactly one served page
+   (sitemap membership, either spelling, with the acceptable set now
+   including the clean `/pricing` and `/audit` addresses), forces the price
+   questions (q2, q7) to the pricing page, and fails if `offer.md` mirrors a
+   different page — and the full `npm test` suite passes (check, headings
+   6/6, sitemap 7/7, worker 80/80, UI 16/16 including the "every controlled
+   question maps to a preferred source page" subtest, contract 8/8, viewport
+   4/4; 121 tests, 0 failures), plus the narrow-viewport scripts pass for
+   all four owned routes. `git diff --check` is clean.
+
+2. Fresh live measurement of the deployed site (2026-08-15, HTTPS fetch
+   against `https://tinystudio.io`, the same deterministic checks the
+   source guard runs, applied to the served bytes):
+
+   | URL | HTTP | content-type | bytes | Answer Readiness section |
+   |---|---|---|---|---|
+   | `/llms.txt` | 200 | text/plain | 4607 | present |
+   | `/offer.md` | 200 | text/markdown | 3855 | present |
+   | `/sitemap.xml` | 200 | — | 537 (7 locs) | used for membership |
+
+   The live section carries all eight controlled questions, each mapped to
+   exactly one served page: q1 → `https://tinystudio.io/` (homepage), q2 →
+   `https://tinystudio.io/pricing`, q3 → `https://tinystudio.io/audit`,
+   q4 → `https://tinystudio.io/audit`, q5 →
+   `https://tinystudio.io/` (homepage), q6 → `https://tinystudio.io/audit`,
+   q7 → `https://tinystudio.io/pricing`, q8 →
+   `https://tinystudio.io/` (homepage). Both price questions point at the
+   pricing page, which owns the price; every mapped page is a served page
+   per the live sitemap (`/pricing` and `/audit` both serve 200 directly,
+   while the old `.html` twins 307-redirect to them); and `offer.md`
+   mirrors the identical question-to-page mapping. The served bytes are
+   byte-identical to `public/llms.txt` and `public/offer.md` on this head
+   (`diff` empty), so the deployed pair and the guarded source cannot drift
+   without changing the served bytes themselves.
+
+3. The pages the mapping names still answer their questions: the homepage
+   identity block carries one `data-ai-question` row per controlled
+   question (q1-q8, q2/q7 sharing the price row), the q5 row answers "This
+   site: the leak audit and the desk behind it", the q7 row states the
+   $2,500-a-month desk price, and no visible homepage copy frames the
+   retired Agent Desk as the offer. The audit page's embedded AI-search
+   bundle still matches `evidence-fixtures/ai-search/evidence.json` and
+   `controlled-questions.json` byte-for-byte.
+
 ## Limitation (unchanged)
 
 This is still a repository-side declaration plus a served-bytes measurement,
