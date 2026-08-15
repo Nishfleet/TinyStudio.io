@@ -2,7 +2,7 @@
 
 Lane: tinystudio-io lane 1
 Branch: `docs/clutch-manual-profile-rereverify-2026-08-15`
-PR: https://github.com/nish3451/TinyStudio.io/pull/<number>
+PR: https://github.com/nish3451/TinyStudio.io/pull/232
 Item: 362bd79013 — "Prepare a truthful manual Clutch profile for the human-reviewed Website Appraisal" [research desk 2026-08-09]
 
 ## Outcome
@@ -34,4 +34,4 @@ Handoff re-verified against current `origin/main` (cdfa877) and the live site on
 
 ## Closeout
 
-PR opened at https://github.com/nish3451/TinyStudio.io/pull/<number>. Handoff ready for Nish's manual submission unchanged.
+PR opened at https://github.com/nish3451/TinyStudio.io/pull/232. Handoff ready for Nish's manual submission unchanged.
