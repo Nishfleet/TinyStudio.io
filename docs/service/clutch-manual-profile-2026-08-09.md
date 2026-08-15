@@ -53,16 +53,16 @@ truthful; an invented one is not.
 | Company name | `TinyStudio` (exact product name; do not add "Inc", "LLC", "Studios", or a city). | Packet: "Use the exact product name TinyStudio"; llms.txt Identity |
 | Tagline | `The free leak audit of high-ticket service homepages, reviewed by a person.` | llms.txt line 3–5; offer.md line 3 |
 | Website URL | `https://tinystudio.io/` | llms.txt canonical URL |
-| Overview | `TinyStudio runs The Website Appraisal: a free leak audit of high-ticket service homepages, reviewed by a person, not autonomous software. The appraisal is a written report on one page of your choosing — each fault named, in order of what it costs you, with the fix beside each — and it is yours to keep. The human-reviewed desk closes what the audit finds: month one corrects the costliest fault; months two and three build the loop. Six appraisals a month, done by hand; when the sixth is taken, the intake closes. Run by Nish, who signs every audit. Clients are never named, and the site states no base city or office address. Price and terms: tinystudio.io/pricing.html.` | Each clause from llms.txt Current Offer / Identity, offer.md, audit.html identity paragraph |
+| Overview | `TinyStudio runs The Website Appraisal: a free leak audit of high-ticket service homepages, reviewed by a person, not autonomous software. The appraisal is a written report on one page of your choosing — each fault named, in order of what it costs you, with the fix beside each — and it is yours to keep. The human-reviewed desk closes what the audit finds: month one corrects the costliest fault; months two and three build the loop. Six appraisals a month, done by hand; when the sixth is taken, the intake closes. Run by Nish, who signs every audit. Clients are never named, and the site states no base city or office address. Price and terms: tinystudio.io/pricing.` | Each clause from llms.txt Current Offer / Identity, offer.md, audit.html identity paragraph |
 | Service focus | Choose the category that truthfully names the service — the free leak audit of high-ticket service homepages and the desk that closes the leaks. Candidates in Clutch's taxonomy that fit without overclaiming: `SEO` or `Web Development` or `Digital Strategy` — prefer whichever category definition matches "website audit / website appraisal / website improvement". Do not pick a category whose definition implies guarantees, ad buying, or the retired Agent Desk product. | Constraint from packet: service focus must match the live offer |
 | Number of employees | `1` — the site's only team statement is "run by Nish, who signs every audit". If Nish knows the true figure differs, enter the true number instead. | llms.txt Identity; offer.md Identity |
-| Minimum project size / average hourly rate | Leave blank. No project-size or hourly-rate figure exists anywhere on the site; the only price statement is "the appraisal is free; the desk is $2,500 a month on a three-month minimum" (pricing.html). Do not invent an hourly rate or project size. If the form requires one, stop and report (reject condition, below). | pricing.html; llms.txt "Price and terms" |
+| Minimum project size / average hourly rate | Leave blank. No project-size or hourly-rate figure exists anywhere on the site; the only price statement is "the appraisal is free; the desk is $2,500 a month on a three-month minimum" (/pricing). Do not invent an hourly rate or project size. If the form requires one, stop and report (reject condition, below). | /pricing; llms.txt "Price and terms" |
 | Location(s) | Leave blank or choose the remote/no-location option if offered. The site states no base city or office address; never enter a city. If the form requires a city, stop and report (reject condition, below). | llms.txt Identity; audit.html q3 truth; index.html "Where TinyStudio is based" |
 | Contact information | `hello@tinystudio.io` | llms.txt Contact; offer.md Contact |
 | Clients / references / portfolio / case studies / reviews | Leave empty. Clients are never named and no client work is published — no logos, no case studies, no testimonials. Do not submit fabricated references, do not request reviews from invented clients, and do not add "as seen at". Real client reviews, when they exist, arrive through Clutch's own verified process. | audit.html q6 truth; llms.txt Buyer |
 
 The overview intentionally does not restate the desk price: llms.txt and offer.md
-point price and terms at `https://tinystudio.io/pricing.html` rather than restating
+point price and terms at `https://tinystudio.io/pricing` rather than restating
 dollar amounts, and this profile follows the same rule.
 
 ## Never on the profile
@@ -373,3 +373,92 @@ re-verifications: every field in the table can still be filled truthfully
 from live first-party surfaces, nothing needs to move to the "Never on the
 profile" list, and no reject condition is triggered. The handoff is ready
 for Nish's manual submission unchanged.
+
+## Re-verification (added 2026-08-15, lane 1)
+
+Re-verified against the current origin/main head (cdfa877, "docs(evidence):
+re-verify favicon rel=icon finding 017eb201fc against current main and live
+(2026-08-15) (#230)") and the live site on 2026-08-15. Since the last
+re-verify (5eefa80, which measured 18128e8), eleven commits landed; the ones
+that touched public surfaces are 2d8599a (hero mock and flags kept inside the
+viewport below 320px), c447585 (llms.txt and offer.md buyer URLs pointed at
+the clean non-307 paths), and ffc1672 (domain-valuation distinction added to
+the conversion-audit intent bridge). `git diff 5eefa80..origin/main --
+public/llms.txt public/offer.md public/pricing.html public/audit.html
+public/index.html` shows no change to any identity, offer, contact, price, or
+boundary string this profile uses; the diffs are the buyer-URL cleanup
+(audit.html → /audit, pricing.html → /pricing) in the llms.txt/offer.md
+controlled-question and price-and-terms pointers, the new domain-valuation
+boundary paragraph in both files, the matching q8 answer edit on the
+homepage, and the below-320px CSS. Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) are byte-identical to the
+   source files on this head (curl diff: zero differences) and still carry,
+   verbatim: the offer ("The Website Appraisal — the free leak audit of
+   high-ticket service homepages — and the human-reviewed desk that closes
+   what the audit finds"), "reviewed by a person, not autonomous software",
+   "month one corrects the costliest fault; months two and three build the
+   loop", "Six appraisals a month, done by hand", "run by Nish, who signs
+   every audit", "The site states no base city or office address", "clients
+   are never named", "Contact: hello@tinystudio.io", and the price-and-terms
+   pointer to `https://tinystudio.io/pricing`.
+2. Live `https://tinystudio.io/pricing` (clean URL; `pricing.html` now
+   301s/redirects to it, HTTP 200) still states exactly the price the
+   handoff relies on — "the appraisal is free, the desk is $2,500 a month
+   on a three-month minimum" (four occurrences in the served page) — and
+   still contains no "hourly rate", "minimum project", or "project size"
+   figure anywhere, so those profile fields stay blank. The overview field
+   in the table above was updated this lane from "Price and terms:
+   tinystudio.io/pricing.html" to "tinystudio.io/pricing" to match the
+   site's own canonical price-and-terms pointer.
+3. Live `https://tinystudio.io/audit` (clean URL; HTTP 200) still answers
+   q3 "Where is TinyStudio based?" with "The site does not state a base
+   city or office address for TinyStudio" and q6 "Does TinyStudio publish
+   client work?" with "no logos, no case studies, no testimonials, no 'as
+   seen at'"; live `https://tinystudio.io/` still carries the "Where
+   TinyStudio is based" disclosure. The location and clients fields stay
+   empty. All five live surfaces (`/`, `/audit`, `/pricing`, `llms.txt`,
+   `offer.md`) diffed byte-identical against the source on this head, so
+   there is no deployment lag between the checked source and the served
+   bytes.
+4. The official Clutch policy page
+   (`https://help.clutch.co/en/knowledge/get-listed-on-clutch`, re-fetched
+   2026-08-15) still documents: "Create a free company profile at
+   clutch.co/get-listed", offerings "Basic, Verified, or Advertiser", sign-in
+   "With a LinkedIn, Google Account, or Company Email Address", the same
+   profile fields this handoff maps (Company name, Tagline, Number of
+   employees, Minimum project size and average hourly rate, Website URL,
+   Location(s), Contact information, Overview of your company, Service
+   focus), and the same review-and-publish flow: "Once you have submitted
+   your profile, it will be sent to our team for review and publishing." No
+   paid placement is required for the Basic profile, so no reject condition
+   is triggered.
+5. No Clutch receipt exists in the product state (no Clutch profile URL or
+   rejection response anywhere in the repo on this head); the receipt block
+   below remains unfilled and the human submission remains the open action.
+   The external search baseline was not re-run this lane (public search
+   endpoints have blocked scripted queries from the VPS in previous lanes),
+   so the 2026-08-09 baseline stands with its own caveat: it is a baseline,
+   not proof of non-existence. If a profile has been published under a
+   different name form, the "What this document does not claim" section
+   above applies — compare it against llms.txt before changing anything.
+6. Repository checks on this head pass: `npm run check` ("TinyStudio.io
+   checks passed") and the full `npm test` suite (117 tests across 6 suites
+   — headings, sitemap, worker, ui, contract, viewport — all green, exit 0).
+
+One truthfulness-relevant addition since the last re-verify, reinforcing
+rather than weakening the handoff: the domain-valuation distinction
+(ffc1672, c447585) added "Nor is the appraisal a domain-value estimate: no
+domain is priced and no resale value is estimated" to llms.txt/offer.md and
+the matching "it puts no value on the site itself" answer to the homepage
+q8. That reinforces the "Never on the profile" rule against outcome
+guarantees and keeps the service-focus guidance honest — a Clutch category
+implying site valuation is not chosen. Neither change alters any value in
+the table above.
+
+Same result as the 2026-08-09 preparation and the 2026-08-11, 2026-08-12,
+and 2026-08-14 re-verifications: every field in the table can still be
+filled truthfully from live first-party surfaces, nothing needs to move to
+the "Never on the profile" list, and no reject condition is triggered. The
+handoff is ready for Nish's manual submission unchanged.
