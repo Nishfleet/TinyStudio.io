@@ -74,7 +74,7 @@
     <p class="signal" id="signal-invalid" role="alert" tabindex="-1" hidden>We could not save that request — the email address did not pass. Check it and try again.</p>
     <form class="lead two" id="start" action="/api/signups" method="post">
       <input type="text" name="website" required inputmode="url" autocomplete="url" placeholder="yourwebsite.com" aria-label="Your website domain" pattern="(https?://)?([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(:[0-9]+)?(/[^\s]*)?" title="Enter your domain, like example.com">
-      <input type="email" name="email" required placeholder="Your work email" aria-label="Your work email">
+      <input type="email" name="email" required autocomplete="email" placeholder="Your work email" aria-label="Your work email">
       <button>Show me where our site undersells us</button>
     </form>
     <p class="micro">Thirty seconds to ask. Findings inside five working days. No call at any point.</p>
