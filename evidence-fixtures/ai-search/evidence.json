@@ -1,6 +1,6 @@
 {
   "schema": "ai-search-evidence/v1",
-  "testedOn": "2026-08-09",
+  "testedOn": "2026-08-15",
   "business": {
     "name": "TinyStudio",
     "site": "https://tinystudio.io/",
@@ -44,60 +44,54 @@
       "questionId": "q1-what-tinystudio-does",
       "engine": "google",
       "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "TinyStudio is a free, AI-powered automatic subtitle generation app for Mac. It uses OpenAI's open-source Whisper model to transcribe and translate audio and video files locally into over 100 languages. ... Key Features: One-Click Subtitles: Quickly generates captions for video and audio files. Local AI Processing: Runs offline using hardware acceleration on Apple silicon chips (M1/M2/M3) without requiring an internet connection. Multilingual Support: Transcribes and translates speech in over 100 languages. Import & Export: Supports standard subtitle file workflows.",
+      "testedAt": "2026-08-15",
+      "captured": "Depending on the context, \"TinyStudio\" can refer to a mindful craft publication or an AI-powered software tool.",
       "sources": [
-        { "title": "TinyStudio - tinystudio.ai", "url": "https://tinystudio.ai/" },
-        { "title": "TinyStudio - App Store", "url": "https://apps.apple.com/us/app/tinystudio/id6448954288" },
-        { "title": "Fiberygoodness - Introducing tinyStudio", "url": "https://www.fiberygoodness.com/2018/09/introducing-tinystudio-its-a-book-its-a-new-magazine/" }
+        { "title": "About tinyStudio - Fiberygoodness", "url": "https://www.fiberygoodness.com/whatistinystudio/" },
+        { "title": "TinyStudio - App Store", "url": "https://apps.apple.com/us/app/tinystudio/id6448954288?mt=12" }
       ],
       "remediation": {
-        "text": "The answer was built from a different TinyStudio (a Mac subtitling app at tinystudio.ai, its App Store listing, and a fibre-arts magazine). No page on tinystudio.io contributed to it, so no page-specific fix is claimed."
+        "text": "The answer was built from different businesses (a fibre-arts magazine and a Mac subtitling app); no tinystudio.io page contributed to it, so no page-specific fix is claimed."
       }
     },
     {
       "questionId": "q2-what-tinystudio-charges",
       "engine": "google",
       "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "Because \"TinyStudio\" matches several different companies, software platforms, and physical spaces, what you pay depends entirely on which specific one you are looking for. ... 1. Tiny Studios (Dance Studio Software): Small Studio Tier: $0 per month; Starter Tier: $99 per month; Studio Tier: $199 per month; Studio Pro Tier: $399 per month. ... 2. The Tiny Studio LA (Recording Studio): Hourly Space Rental: Starts at $30 to $40 per hour ... Day Rate: Around $400 per day. ... 3. Keep It Tiny Studio (Zoning & Land Reports): Land Check: Free ... Build Decision Report: $199 per parcel ... 4. tinyStudio Creative Life (Digital Magazine): Monthly Subscription: $4.95 per month ...",
+      "testedAt": "2026-08-15",
+      "captured": "Because \"TinyStudio\" matches a few different well-known platforms, studios, and products, the cost depends on exactly what you are looking for: ... Tiny Studios (Dance Studio Management Software) ... Free Plan: $0 per month ... Starter Plan: $99 per month ... Studio Plan: $199 per month ... Studio Pro Plan: $399 per month ... tinyStudio Creative Life Magazine ... Print Subscription: $80 per year ... The Tiny Studio LA (California): Rental rates start from $40 per hour ... Tinystudio Marymount (Singapore): Space rental runs at a base price of $20.00 SGD per hour ...",
       "sources": [
-        { "title": "The Tiny Studio LA - SoundBetter", "url": "https://soundbetter.com/profiles/194371-the-tiny-studio-la" },
-        { "title": "The Tiny Studio LA - Peerspace", "url": "https://www.peerspace.com/pages/listings/5cd0c077fa938c000cb6dfb2" },
         { "title": "Tiny Studios - thetinystudios.com", "url": "https://www.thetinystudios.com/" },
-        { "title": "Keep It Tiny Studio - pricing", "url": "https://www.keepittinystudio.com/pricing" },
-        { "title": "Fiberygoodness - tinyStudio magazine", "url": "https://www.fiberygoodness.com/2023/05/tinystudio-magazine-back-in-print/" },
-        { "title": "tinystudio.io - The Website Appraisal - TinyStudio Agent Desk", "url": "http://www.tinystudio.io/audit.html" }
+        { "title": "The Tiny Studio LA - Tagvenue", "url": "https://www.tagvenue.com/us/venues/los-angeles/19576/the-tiny-studio-la" },
+        { "title": "tinyStudio Creative Life - Fiberygoodness", "url": "https://www.fiberygoodness.com/tinystudio/" }
       ],
       "remediation": {
-        "text": "The answer priced four different businesses, none of them tinystudio.io. The AI Overview also cited tinystudio.io's audit page, but the answer's content does not match what that page says (the free leak audit and the desk pricing), so no page-specific fix is claimed."
+        "text": "The answer priced several different businesses, none of them tinystudio.io. No page on tinystudio.io contributed to it, so no page-specific fix is claimed."
       }
     },
     {
       "questionId": "q3-where-tinystudio-is-based",
       "engine": "google",
       "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "Because \"TinyStudio\" (or Tiny Studio) can refer to several different creative companies and projects worldwide, its location depends on which specific business or practice you mean: ... Tiny Studio (Graphic Design): A graphic design practice co-founded by Nadine Hanisya and Ratta Bill, based in Jakarta, Indonesia and Paris, France. ... Tiny Studios (Video Production): A creative video production company located in London, United Kingdom. ... Tiny Studio (Video Production - Manchester): A female-led creative video production company based in Manchester, United Kingdom. ... The Tiny Studio LA (Recording/Event Space): A recording and rental studio located in North Hollywood, Los Angeles, California.",
+      "testedAt": "2026-08-15",
+      "captured": "Depending on which entity you mean, \"Tiny Studio\" (or TinyStudio) can refer to a few different creative practices: Tiny Studio (the graphic design practice by Nadine Hanisya and Ratta Bill) is based in Jakarta, Indonesia and Paris, France ... Tiny Studio (the creative video production company) is based in Manchester, United Kingdom ... Tiny Studio (the creator and photography space hire) is based in Bristol, United Kingdom.",
       "sources": [
         { "title": "Tiny Studio - Instagram", "url": "https://www.instagram.com/t.i.n.y.studio/" },
-        { "title": "The Tiny Studio LA - Tagvenue", "url": "https://www.tagvenue.com/us/venues/los-angeles/19576/the-tiny-studio-la" },
-        { "title": "Tiny Studios - Studio Laar", "url": "https://www.studiolaar.nl/projects/tiny-studios" }
+        { "title": "TinyStudio - App Store", "url": "https://apps.apple.com/us/app/tinystudio/id6448954288?mt=12" }
       ],
       "remediation": {
-        "text": "The answer listed four different studios in four cities, none of them tinystudio.io. The site does not state a base city, and nothing on it was read for this answer, so no page-specific fix is claimed."
+        "text": "The answer listed several other studios' cities, none of them tinystudio.io. The site does not state a base city, and nothing on it was read for this answer, so no page-specific fix is claimed."
       }
     },
     {
       "questionId": "q4-who-tinystudio-works-with",
       "engine": "google",
       "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "Tiny Studio works with brands, charities, businesses, and agencies-anyone with a message to communicate. Their past corporate and campaign clients include major names like British Cycling, the BBC, Shopify, and Bacofoil. ... If you meant a different organization named TinyStudio (such as the fiber arts publication tinyStudio Creative Life Magazine or the Mac subtitle utility TinyStudio), please let me know so I can give you the right details!",
+      "testedAt": "2026-08-15",
+      "captured": "Tiny Studio works with brands, charities, businesses, and agencies—essentially anyone with a message to communicate. Run by creative directors Sarah Hodgetts and Vicky Barlow, they have produced campaigns and video content for prominent clients such as Manchester City, British Cycling, the British Mountaineering Council, and Magnet Kitchens.",
       "sources": [
-        { "title": "Tiny Studio - tinystudio.tv", "url": "https://www.tinystudio.tv/" },
-        { "title": "Sarah Hodgetts - LinkedIn", "url": "https://uk.linkedin.com/in/sarahhodgetts" },
-        { "title": "Fiberygoodness - tinyStudio Issue 20", "url": "https://www.fiberygoodness.com/2023/08/tinystudio-issue-20-out-now/" }
+        { "title": "About - Tiny Studio", "url": "https://www.tinystudio.tv/about" },
+        { "title": "Sarah Hodgetts - LinkedIn", "url": "https://uk.linkedin.com/in/sarahhodgetts" }
       ],
       "remediation": {
         "text": "The answer was about a video production studio with a different domain (tinystudio.tv). No page on tinystudio.io was read, so no page-specific fix is claimed."
@@ -106,59 +100,67 @@
     {
       "questionId": "q5-what-is-tinystudio-io",
       "engine": "google",
-      "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "TinyStudio Agent Desk is a platform that uses AI agents to help businesses turn their marketing assets, audience data, offers, and sales funnels into practical lead-to-call execution plans. ... Core Features: Offer & Funnel Agents: Analyzes your product offerings and sales funnels to optimize strategy. Creative & Qualification Agents: Drafts marketing and outreach systems while leaving final approval of spend and publishing up to you. CRM & Tracking Agents: Integrates data context to map out the customer journey from initial lead to final call.",
+      "state": "found",
+      "testedAt": "2026-08-15",
+      "captured": "TinyStudio is a specialized platform offering free website leak audits for high-ticket service homepages, along with a managed agent desk service priced at $2,500 a month to help businesses close conversion gaps.",
       "sources": [
-        { "title": "tinystudio.io - TinyStudio Agent Desk", "url": "https://tinystudio.io/" },
-        { "title": "Fiberygoodness - Introducing tinyStudio", "url": "https://www.fiberygoodness.com/2018/09/introducing-tinystudio-its-a-book-its-a-new-magazine/" }
+        { "title": "TinyStudio — The Website Appraisal", "url": "https://tinystudio.io/" },
+        { "title": "Welcome to tinyStudio Creative Life Magazine!", "url": "https://www.fiberygoodness.com/tinystudio/" }
       ],
       "remediation": {
-        "text": "The answer named tinystudio.io, but its description is of the retired Agent Desk, while the cited page is the homepage, which presents the leak audit first. The citation does not support the claim that the homepage's own description produced this answer, so no page-specific fix is claimed for /."
+        "text": "The answer named tinystudio.io and its facts check out against the site: the free leak audit of high-ticket service homepages and the desk that closes what the audit finds. One cited source (the fibre-arts magazine) is a different business, but the answer's content is correct."
       }
     },
     {
       "questionId": "q6-client-work",
       "engine": "google",
       "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "Depending on which entity named TinyStudio you mean (as multiple creative businesses share the name), publishing client work varies: ... Tiny Studio LLC (marketing and design agency) lists past clients publicly on their About Us Page. ... tiny.studio (web and app developer) explicitly features public case studies and live project links on their Services Portfolio. ... Tiny Studio (the graphic design duo featured on It's Nice That) showcases conceptual client briefs and editorial projects across their public channels. ... tinyStudio Creative Life Magazine (the fiber arts publication) publishes community work, articles, and sponsor stories rather than commercial client design projects.",
+      "testedAt": "2026-08-15",
+      "captured": "If you mean tinyStudio Creative Life Magazine (the fiber arts publication by Fiberygoodness), yes, they regularly publish community member projects, artist profiles, and reader creations in their \"Community Makes\" and \"Things to Love\" spreads.",
       "sources": [
-        { "title": "Tiny Studio LLC", "url": "http://www.tinystudiollc.com/about-contact" },
-        { "title": "tiny.studio - Services", "url": "https://tinystudio.ro/en/servicii" },
-        { "title": "It's Nice That - Tiny Studio", "url": "https://www.itsnicethat.com/articles/tiny-studio-graphic-design-260722" },
-        { "title": "Fiberygoodness - tinyStudio Creative Life", "url": "https://www.fiberygoodness.com/2020/02/coming-up-with-tinystudio-creative-life-new-relationships/" },
-        { "title": "tinystudio.io - The Website Appraisal - TinyStudio Agent Desk", "url": "http://www.tinystudio.io/audit.html" }
+        { "title": "WoolWench TinyStudio Creative Life Magazine", "url": "https://www.facebook.com/TinyStudioMagazine/" },
+        { "title": "tinyStudio - Fiberygoodness", "url": "https://www.fiberygoodness.com/category/tinystudio/" }
       ],
       "remediation": {
-        "text": "The answer described other businesses that publish client work; TinyStudio's own position (clients are never named) was not what the answer drew on. The AI Overview also cited tinystudio.io's audit page, but the answer's content does not match what that page says, so no page-specific fix is claimed."
+        "text": "The answer was about a fibre-arts magazine, a different business. No page on tinystudio.io was read, so no page-specific fix is claimed."
       }
     },
     {
       "questionId": "q7-what-tinystudio-io-charges",
       "engine": "google",
-      "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "TinyStudio Agent Desk does not publicly list explicit pricing tiers or standard subscription costs on its homepage, functioning instead as an AI-driven lead-to-call planning desk. ... If you meant a different platform with a similar name like ContentStudio, MindStudio, or Tiny Studios, please let me know so I can provide the correct pricing details!",
+      "state": "found",
+      "testedAt": "2026-08-15",
+      "captured": "TinyStudio provides a free website leak audit for high-ticket service homepages. Their ongoing service—the agent desk that implements fixes to close those leaks—costs $2,500 per month with a three-month minimum commitment.",
       "sources": [
-        { "title": "tinystudio.io - TinyStudio Agent Desk", "url": "https://tinystudio.io/" },
-        { "title": "tinystudio.io - The Website Appraisal - TinyStudio Agent Desk", "url": "http://www.tinystudio.io/audit.html" },
-        { "title": "tinystudio.io - The Website Appraisal - specimen", "url": "http://www.tinystudio.io/specimen.html" }
+        { "title": "TinyStudio — The Website Appraisal", "url": "https://tinystudio.io/" },
+        { "title": "Pricing | WYSIWYG HTML Editor", "url": "https://www.tiny.cloud/pricing/" }
       ],
       "remediation": {
-        "text": "The answer named tinystudio.io and cited its pages, but described the retired Agent Desk and claimed the site lists no pricing, contradicting the live pricing page. The citations do not support the answer's content, so no page-specific fix is claimed."
+        "text": "The answer named tinystudio.io and its pricing facts check out against the site (free audit; $2,500/month desk on a three-month minimum). One cited source (TinyMCE) is a different business, but the answer's content is correct."
+      }
+    },
+    {
+      "questionId": "q8-conversion-audit",
+      "engine": "google",
+      "state": "wrong",
+      "testedAt": "2026-08-15",
+      "captured": "Yes, TinyStudio provides a free \"leak audit\" specifically for high-ticket service homepages (such as clinics, surgeons, and specialty practices) to identify where potential customers drop off, followed by a paid retainer service to fix those conversion issues.",
+      "sources": [
+        { "title": "Baymard - What Is a Conversion Audit?", "url": "https://baymard.com/learn/conversion-audit" }
+      ],
+      "remediation": {
+        "text": "The answer's substantive facts (free leak audit of high-ticket service homepages; paid retainer to fix) match the site, but it opens with a direct 'Yes' to the question 'Is TinyStudio a conversion audit service?', which the controlled question's truth denies. The answer contradicts the ground truth, so the run is honestly recorded wrong."
       }
     },
     {
       "questionId": "q1-what-tinystudio-does",
       "engine": "bing",
       "state": "wrong",
-      "testedAt": "2026-08-09",
-      "captured": "TinyStudio is a versatile tool that serves multiple purposes, particularly in the fields of electronics and software development. ... Electronics Development: TinyStudio is an open-source IDE for makers, allowing users to write Arduino sketches, upload code, and see the wiring next to the code. ... Subtitle Generation: TinyStudio is an AI-powered automatic subtitle generation Mac app that works with OpenAI's Whisper model. ... Performance: TinyStudio leverages M1/M2 chips for fast and efficient performance, making it suitable for various applications. ... TinyStudio's multifunctionality makes it a valuable tool for both makers and developers.",
+      "testedAt": "2026-08-15",
+      "captured": "TinyStudio is a versatile tool that serves multiple purposes, particularly in the fields of electronics and video AI. Here's a brief overview of what TinyStudio can do: Electronics: TinyStudio is an open-source IDE for makers, allowing users to write Arduino sketches, upload code, and design circuits all in one place ... Video AI: TinyStudio is a Mac application that leverages OpenAI's Whisper technology for automatic subtitle generation ...",
       "sources": [
         { "title": "GitHub - Mister-Industries/tinyStudio", "url": "https://github.com/Mister-Industries/tinyStudio" },
-        { "title": "tinystudio.co - TinyStudio", "url": "https://tinystudio.co/blogs/journal/what-is-tiny-studio" },
-        { "title": "About TinyStudio - tinystudio.ai", "url": "https://tinystudio.ai/about-tinystudio/" },
+        { "title": "tinystudio.co - What is Tiny Studio", "url": "https://tinystudio.co/blogs/journal/what-is-tiny-studio" },
         { "title": "tinystudio.ai", "url": "https://tinystudio.ai/" }
       ],
       "remediation": {
@@ -166,16 +168,62 @@
       }
     },
     {
+      "questionId": "q5-what-is-tinystudio-io",
+      "engine": "bing",
+      "state": "absent",
+      "testedAt": "2026-08-15",
+      "captured": "No AI-generated answer; organic results only. The tinystudio.io listing still carries the retired 'TinyStudio Agent Desk' title and description ('Self-serve AI agents for high-ticket pipeline setup: offer, funnel, creative, qualification, follow-up, CRM, tracking, and decision plans.').",
+      "remediation": {
+        "text": "The absent run records what came back instead of an answer. The stale organic title is an index-lag observation, not a page-specific remediation claim, because the run produced no answer to check against the site."
+      }
+    },
+    {
+      "questionId": "q7-what-tinystudio-io-charges",
+      "engine": "bing",
+      "state": "absent",
+      "testedAt": "2026-08-15",
+      "captured": "No AI-generated answer; organic results only. The tinystudio.io listing still carries the retired 'TinyStudio Agent Desk' title; no tinystudio.io pricing was surfaced by the engine.",
+      "remediation": {
+        "text": "The absent run records what came back instead of an answer. The stale organic title is an index-lag observation, not a page-specific remediation claim, because the run produced no answer to check against the site."
+      }
+    },
+    {
       "questionId": "q1-what-tinystudio-does",
       "engine": "duckduckgo",
       "state": "wrong",
-      "testedAt": "2026-08-09",
+      "testedAt": "2026-08-15",
       "captured": "TinyStudio is a platform that offers resources and inspiration for fiber and yarn artists, including a digital magazine, tutorials, and personal stories from artists to enhance creativity and simplify the fiber crafting experience.",
       "sources": [
-        { "title": "Fiberygoodness", "url": "https://www.fiberygoodness.com/" }
+        { "title": "Fiberygoodness - What is tinyStudio", "url": "https://www.fiberygoodness.com/whatistinystudio/" }
       ],
       "remediation": {
         "text": "The answer described a fibre-arts publication, a different business. No page on tinystudio.io was cited, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q2-what-tinystudio-charges",
+      "engine": "duckduckgo",
+      "state": "wrong",
+      "testedAt": "2026-08-15",
+      "captured": "TinyStudio is a free Mac application that allows users to generate subtitles for video and audio files without any cost.",
+      "sources": [
+        { "title": "TinyStudio - App Store", "url": "https://apps.apple.com/us/app/tinystudio/id6448954288?mt=12" }
+      ],
+      "remediation": {
+        "text": "The answer priced the Mac subtitling app (a different business), not tinystudio.io. No page on tinystudio.io was cited, so no page-specific fix is claimed."
+      }
+    },
+    {
+      "questionId": "q5-what-is-tinystudio-io",
+      "engine": "duckduckgo",
+      "state": "wrong",
+      "testedAt": "2026-08-15",
+      "captured": "TinyStudio.io is a free Mac application that generates subtitles for video and audio files using OpenAI's Whisper technology. It is designed for users without technical expertise, offering a user-friendly interface and fast performance.",
+      "sources": [
+        { "title": "TinyStudio - App Store", "url": "https://apps.apple.com/us/app/tinystudio/id6448954288?mt=12" }
+      ],
+      "remediation": {
+        "text": "The answer named tinystudio.io but described the Mac subtitle app (a different business) via the App Store citation. The organic tinystudio.io listing on the same page still carries the retired 'TinyStudio Agent Desk' title. The citation does not support the answer, so no page-specific fix is claimed."
       }
     },
     {
