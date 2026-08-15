@@ -71,5 +71,5 @@ remains the open action.
 ## Closeout
 
 PR opened at
-https://github.com/nish3451/TinyStudio.io/pull/<number>. Handoff ready for
-Nish's manual submission.
+https://github.com/nish3451/TinyStudio.io/pull/219. Handoff ready for Nish's
+manual submission.
