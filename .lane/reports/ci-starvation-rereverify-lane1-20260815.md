@@ -13,7 +13,7 @@ matrix routing its `tinystudio-io-verify1` legs to a label that no registered
 runner carries. PR #206 is closed (2026-08-14T22:36:18Z), its zombie legs are
 gone, and the queue is draining normally across both runners.
 
-## Live verification (2026-08-15 ~03:45Z, via GitHub API)
+## Live verification (2026-08-15 03:45Z–04:17Z, via GitHub API)
 
 - Runners registered and online:
   - `netcup-rs2000-tinystudio-verify1` — labels `self-hosted Linux X64 vps-verify tinystudio-io`
@@ -21,9 +21,15 @@ gone, and the queue is draining normally across both runners.
 - Both workflows on main route through the shared `vps-verify` label:
   - `.github/workflows/ci.yml` → `runs-on: [self-hosted, linux, x64, vps-verify]`
   - `.github/workflows/secret-scan.yml` → `runs-on: [self-hosted, linux, x64, vps-verify]`
-- Queue state: **zero queued runs**, zero in-progress runs at inspection
-  (~03:45Z). Runs on the 14 open PRs and main all completed SUCCESS.
-- Recent drain times (all well within normal bounds):
+- Queue state at first inspection (~03:45Z): **zero queued, zero in-progress**.
+- A concurrent 04:01Z wave (8 runs across PRs #91/#142/#194/#210/#211/#213/#218
+  and this branch) produced a transient backlog: 4 queued at peak, oldest wait
+  ~14m (04:01:12Z–04:15:28Z). It fully drained — zero queued by 04:15:28Z —
+  and PR #224's own `verify` (run 31863339003, on
+  `netcup-rs2000-tinystudio-verify1`) and `Gitleaks` (run 31863339025, picked
+  up at 04:10Z) both PASSED. Max queue wait observed: ~14 minutes, orders of
+  magnitude below the item's 2h03m.
+- Recent drain times:
   - main pushes 03:43:00Z → done 03:43:16Z / 03:44:35Z (~16s–95s)
   - PR branches 03:39:27Z → done 03:39:48Z / 03:41:07Z (~21s–100s)
   - 03:01Z batch of 8 PR runs → all done 03:04:10Z–03:10:12Z (≤ ~9m, two runners engaged)
@@ -34,10 +40,12 @@ gone, and the queue is draining normally across both runners.
 ## Conclusion
 
 The item's premise ("the CI queue has re-starved") no longer holds as of
-2026-08-15 03:45Z: queue depth is zero, both runners are online and sharing
-load through the shared `vps-verify` label, and the unregistered-label source
-(PR #206) is closed. Item closes as already resolved / no-op, consistent with
-PR #214 and PR #217.
+2026-08-15 04:17Z: the queue fully drains (max observed wait ~14m during a
+concurrent 8-run wave, vs the item's 2h03m), both runners are online and
+sharing load through the shared `vps-verify` label, and the unregistered-label
+source (PR #206) is closed. PR #224's own CI completed green end-to-end during
+the observation window. Item closes as already resolved / no-op, consistent
+with PR #214 and PR #217.
 
 ## Not done
 
