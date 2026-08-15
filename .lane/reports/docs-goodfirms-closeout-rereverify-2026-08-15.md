@@ -76,6 +76,6 @@ open action.
 
 ## Closeout
 
-PR opened at https://github.com/nish3451/TinyStudio.io/pull/NNN. Item
+PR opened at https://github.com/nish3451/TinyStudio.io/pull/220. Item
 07d7a4fb59 is already prepared (PR #219); handoff re-verified unchanged and
 ready for Nish's manual submission.
