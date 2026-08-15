@@ -197,3 +197,62 @@ every page: primary CTAs are 42px tall and nav links ~15px" remains
 closed — the 42px lead CTA now measures 44px, nav links 45px, on both
 current main and the live deployment, with the tap-target rules pinned by
 CI source guards.
+
+## Re-verification against current main and live (added 2026-08-15)
+
+Re-verified the finding once more against the current origin/main head
+(cdfa877, "docs(evidence): re-verify favicon rel=icon finding
+017eb201fc against current main and live", merged 2026-08-15) and the
+live deployment, one fresh headless-Chromium session (Playwright 1.62.1,
+390x844, deviceScaleFactor 1, isMobile), with the same full-element
+sweep method as the 2026-08-12 and 2026-08-14 runs: every interactive
+element (`a, button, input, select, textarea, summary`) measured at
+390x844 on a local static copy of `public/` and on `https://tinystudio.io`
+itself, with an explicit `document.fonts.load("16px Karla")` before
+measuring (the font-loading caveat recorded in the 2026-08-14 receipt).
+
+### Changes since the 2026-08-14 receipt (base 7ad776a)
+
+- `2d8599a` (#176, "keep the hero mock and its flags inside the viewport
+  below 320px"): index.css layout-only — `.spec`/`.browser` `min-width:0`,
+  flag text wrapping, sub-340px `.row`/`.who .sc` wrapping. No tap-target
+  rule changed.
+- `afb5d49` (#174, "wrap the /agents hero h1 at 280px"): shared.css
+  `.phead h1` `overflow-wrap:anywhere`. No tap-target rule changed.
+- `c447585` (#202) / `ffc1672` (#193): llms.txt / offer.md text and URL
+  changes only — no CSS touched.
+
+The guard in `scripts/check-site.mjs` still pins the ≥44px rules in all
+five stylesheets (shared, index, audit, brief-requested, styles), and
+`npm run check` passes on this head.
+
+### Result: no regression; the finding stays closed
+
+- Every standalone (non-inline) target on every served page — home,
+  /audit, /agents, /pricing, /specimen, /brief-requested, /agent-desk —
+  is ≥44px in both height and width, on main and on live: logo 50,
+  nav links 45, nav CTA 47, lead-form button 44, form inputs 47–48,
+  footer links 44–45, `.back` 45, the in-content `.cta` links added by
+  #155/#159/#162 (46px, already measured in the 2026-08-14 run), and
+  all Agent Desk controls (brand 44, submit 44, tabs 44, copy 44, inputs
+  44, footer link 44, disclosure summary 65.2). This covers the changes
+  that landed since the 2026-08-12 run — the #176 and #174 layout fixes
+  included — none of which touched a tap-target rule.
+- The live deployment matches main: a per-element diff of the two
+  measurement runs shows the same elements at the same sizes; the only
+  sub-44px elements on either are the WCAG-exempt inline text links
+  (`.xa1` audit Sources: citations, `.xi19`/`.xp1` "See the terms →",
+  "Read the specimen →", "See the desk →"), which remain intentionally
+  excluded from the 44px bar under the WCAG 2.5.8/2.5.5 "Inline"
+  exception, as recorded in the 2026-08-12 receipt.
+- No overflow introduced: `scrollWidth == clientWidth == 390` on all
+  seven pages at 390x844, on main and on live.
+- `npm run check` passes on this head, and the full `npm test` suite
+  passes (242 tests, 0 failures), including the narrow-viewport Chromium
+  regressions added by #174 and #176.
+
+Conclusion: the review item "Mobile tap targets fall under WCAG sizes on
+every page: primary CTAs are 42px tall and nav links ~15px" remains
+closed — the 42px lead CTA measures 44px, nav links 45px, on both
+current main (cdfa877) and the live deployment, with the tap-target
+rules pinned by CI source guards.
