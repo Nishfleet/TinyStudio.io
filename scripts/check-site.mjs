@@ -1266,7 +1266,12 @@ for (const [pageName, pageHtml] of ownedPages) {
 // The legacy page must therefore stay out of the index: its head keeps a
 // robots noindex, nofollow meta, and its title and description frame the
 // surface as retired, so neither the search index nor a scraper can re-present
-// the retired self-serve product as the current offer.
+// the retired self-serve product as the current offer. Its canonical and
+// og:url must name the legacy page itself — the clean /agent-desk address
+// that serves 200 — never the apex root: while the page declared the root as
+// its canonical, Google consolidated the retired title onto the homepage URL
+// (the q5/google capture), and a canonical that points at the root keeps
+// handing the retired name to the homepage's SERP entry.
 const retiredDeskHead = retiredDesk.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
 const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
 if (!robotsMeta.test(retiredDeskHead)) {
@@ -1279,6 +1284,29 @@ const retiredDeskDescription =
   retiredDeskHead.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0] ?? "";
 if (!/\bretired\b/i.test(retiredDeskDescription)) {
   failures.push("Retired Agent Desk description must frame the surface as retired.");
+}
+// The retired page must never claim the apex root. Exactly one canonical and
+// one og:url, both naming the clean /agent-desk address that serves 200.
+const retiredDeskLive = retiredDesk.replace(/<!--[\s\S]*?-->/g, "");
+const retiredDeskCanonical =
+  retiredDeskLive.match(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi) ?? [];
+if (retiredDeskCanonical.length !== 1) {
+  failures.push(`Retired Agent Desk canonical must appear exactly once (found ${retiredDeskCanonical.length}).`);
+} else {
+  const href = retiredDeskCanonical[0].match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  if (href.trim() !== "https://tinystudio.io/agent-desk") {
+    failures.push(`Retired Agent Desk canonical must point at https://tinystudio.io/agent-desk (found "${href}").`);
+  }
+}
+const retiredDeskOgUrl =
+  retiredDeskLive.match(/<meta\b[^>]*\bproperty\s*=\s*["']og:url["'][^>]*>/gi) ?? [];
+if (retiredDeskOgUrl.length !== 1) {
+  failures.push(`Retired Agent Desk og:url must appear exactly once (found ${retiredDeskOgUrl.length}).`);
+} else {
+  const content = retiredDeskOgUrl[0].match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  if (content.trim() !== "https://tinystudio.io/agent-desk") {
+    failures.push(`Retired Agent Desk og:url must point at https://tinystudio.io/agent-desk (found "${content}").`);
+  }
 }
 
 // ---- Meta descriptions (dogfood) -------------------------------------------
