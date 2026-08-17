@@ -1773,14 +1773,51 @@ const htmlPageTargets = {
   "audit.html": "/audit",
   "agents.html": "/agents",
   "pricing.html": "/pricing",
-  "specimen.html": "/specimen"
+  "specimen.html": "/specimen",
+  // The post-signup page is served at both forms too (verified 2026-08-17:
+  // /brief-requested.html 307s to /brief-requested), so nothing may link to
+  // its redirecting twin either.
+  "brief-requested.html": "/brief-requested"
 };
+
+// The fault is the DESTINATION, not the spelling. "audit.html",
+// "./audit.html", "/audit.html" and "https://tinystudio.io/audit.html" are the
+// same redirecting request on the network (each 307s to /audit), but the first
+// version of this guard compared the raw href against the bare filename only,
+// so three of those four spellings walked straight past it and the fault could
+// return without CI noticing. Normalize every same-origin anchor target to its
+// site-root-relative file name before the lookup. Off-site links, fragments
+// and non-navigational schemes (mailto:, tel:) are not page links and are
+// skipped.
+const siteHosts = new Set(["tinystudio.io", "www.tinystudio.io"]);
+
+function internalPageTarget(rawHref) {
+  const href = rawHref.trim();
+  if (!href || href.startsWith("#")) return "";
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^https?:/i.test(href)) return "";
+
+  let path = href.split("#")[0].split("?")[0];
+  if (!path) return "";
+
+  if (/^(?:https?:)?\/\//i.test(path)) {
+    let url;
+    try {
+      url = new URL(path.startsWith("//") ? `https:${path}` : path);
+    } catch {
+      return "";
+    }
+    if (!siteHosts.has(url.hostname.toLowerCase())) return "";
+    path = url.pathname;
+  }
+
+  return path.replace(/^(?:\.\.?\/)+/, "").replace(/^\/+/, "");
+}
 
 for (const [pageName, pageHtml] of internalLinkPages) {
   const anchors = [...pageHtml.matchAll(/<a\b[^>]*>/gi)].map((match) => match[0]);
   for (const anchor of anchors) {
-    const href = anchor.match(/\bhref="([^"]*)"/i)?.[1] ?? "";
-    const target = href.split("#")[0];
+    const href = anchor.match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+    const target = internalPageTarget(href);
     if (Object.prototype.hasOwnProperty.call(htmlPageTargets, target)) {
       failures.push(
         `Internal page link on ${pageName} must point at the clean destination ${JSON.stringify(htmlPageTargets[target])} (found ${JSON.stringify(href)}).`
