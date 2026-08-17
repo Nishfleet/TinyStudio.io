@@ -285,3 +285,81 @@ Same result as the 2026-08-15 preparation: every field in the table can
 still be filled truthfully from live first-party surfaces, nothing needs to
 move to the "Never on the profile" list, and no reject condition is
 triggered. The handoff is ready for Nish's manual submission unchanged.
+
+## Re-verification (2026-08-17, lane 1 close-out, second pass)
+
+Re-verified against the current `origin/main` head (`56c4e24`, "docs(evidence):
+re-verify retired TinyStudio Agent Desk title/snippet finding on current main
+and live (2026-08-17) (#236)") and the live site on 2026-08-17. This lane
+re-fired on the same backlog item (07d7a4fb59) after both prior runs had
+landed: the first-capture preparation merged as PR #219 (commit `1151ddd`) and
+the first close-out re-verify merged as PR #220 (commit `9944fec`). The
+preparation is still on `origin/main` and the handoff is unchanged in any
+first-party claim, so this lane records a second-pass close-out re-verify
+rather than a third preparation. Fresh checks:
+
+1. Live `https://tinystudio.io/`, `/audit.html`, `/pricing.html`,
+   `/agents.html`, `/specimen.html`, `llms.txt`, and `offer.md` all return
+   HTTP 200 (the four `*.html` pages redirect once with HTTP 307 → 200) and
+   are byte-identical to the committed source on `56c4e24` (curl diff: zero
+   differences) — no deployment lag between the checked source and the served
+   bytes.
+2. The intervening main commit since the 2026-08-15 re-verify is `56c4e24`
+   ("docs(evidence): re-verify retired TinyStudio Agent Desk title/snippet
+   finding on current main and live (2026-08-17) (#236)") — evidence-only,
+   no product contract change — and `git log origin/main --since="2026-08-15"
+   -- docs/service/goodfirms-manual-profile-2026-08-15.md public/llms.txt
+   public/offer.md public/index.html public/audit.html public/pricing.html
+   public/agents.html public/specimen.html` shows no commits to any
+   first-party surface the GoodFirms profile table depends on.
+3. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` still carry, verbatim: the offer ("The
+   Website Appraisal — the free leak audit of high-ticket service homepages
+   — and the human-reviewed desk that closes what the audit finds"),
+   "reviewed by a person, not autonomous software", "Six appraisals a month,
+   done by hand", "run by Nish, who signs every audit", "The site states no
+   base city or office address", "clients are never named", "Contact:
+   hello@tinystudio.io", and the price-and-terms pointer to
+   `https://tinystudio.io/pricing.html`.
+4. The no-invention fields still hold across every public surface: a full
+   scan of `public/*.html`, `public/llms.txt`, and `public/offer.md` on this
+   head finds no `tel:` link or phone string, no `founded`/`est.` year, and
+   no TinyStudio social-profile URLs (the `instagram.com` / `linkedin.com`
+   matches inside `/audit`'s AI-search evidence JSON are cited for unrelated
+   businesses — not TinyStudio's own profiles). So Year founded, Phone number,
+   Social profiles, and Certification stay blank, exactly as the table
+   instructs. No `certif`/`accred` string either.
+5. GoodFirms' official pages (`goodfirms.co/get-listed`, the four help
+   articles, the auto-listing/claim article, and the terms of use) could not
+   be re-fetched by script today: the live pages still present the
+   Cloudflare bot-challenge page ("Just a moment... Enable JavaScript and
+   cookies to continue") — HTTP 403, same as on 2026-08-15 — and the
+   Wayback Machine `web.archive.org/web/...` snapshots returned HTTP 503
+   (service unavailable) for all seven URLs during this lane's run. That
+   stands consistent with the bar in GoodFirms' terms of use ("Use software,
+   devices, robots, scripts, or other means to scrape, crawl, or index any
+   web page or other portion of our service."): no script bypasses the
+   challenge, and the handoff does not depend on a fresh re-fetch. The
+   2026-08-15 preparation's real-browser-session captures (and the 2026-08-15
+   close-out's Wayback cross-check) remain the operative source of the
+   quoted policy strings until a human refresh is run; the quoted strings
+   are stable across the 2025-2026 archive snapshots that prior lane runs
+   consulted.
+6. No GoodFirms receipt exists in the product state on this head (no profile
+   URL, pending-review state, or rejection response anywhere in the repo);
+   the receipt block below remains unfilled and the human manual submission
+   remains the open action. A current `site:`-style baseline still returns
+   no exact TinyStudio/tinystudio.io profile (no human web search run by
+   this lane; the 2026-08-15 web-search baseline stands, and the handoff's
+   auto-listing caveat still applies).
+7. Repository checks on this head pass: `node scripts/check-site.mjs`
+   prints "TinyStudio.io checks passed." and the full `node --test` suite is
+   green (117 tests, 6 suites, 0 fail). `npm` is not on the PATH on this
+   VPS at this turn, so the test script was invoked directly via
+   `node --test` against the per-script entry points, which is the same
+   chain `npm test` runs.
+
+Same result as both prior runs: every field in the table can still be filled
+truthfully from live first-party surfaces, nothing needs to move to the
+"Never on the profile" list, and no reject condition is triggered. The
+handoff is ready for Nish's manual submission unchanged.
