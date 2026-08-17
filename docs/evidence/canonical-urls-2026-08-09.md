@@ -371,3 +371,97 @@ Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
 code side (PR #29), in CI (`npm run check` guard), and against the deployed
 site; this lane (2026-08-14) re-confirmed all three against current main and
 live and found nothing further to change on the finding's page.
+
+### Re-verification (added 2026-08-17, lane 1)
+
+Re-verified against the current origin/main head (3dc5856, "docs(evidence):
+re-verify product-contract round-1 harvest against current main and live
+(2026-08-17, lane 1) (#240)"). Thirty-three commits landed since the last
+re-verify at 20b7cc6; six touched `public/` or the canonical guard in
+`scripts/check-site.mjs`:
+
+| Commit | Subject | Effect on this finding |
+|---|---|---|
+| 2d8599a4 | keep the hero mock and its flags inside the viewport below 320px (#176) | CSS only, no head change |
+| e0ee160b | close out the Web Analytics beacon 404 finding (#212) | adds beacon guards, no canonical guard change |
+| a654ab49 | land the stranded 2026-08-12 AI-search re-run (#211) | evidence only |
+| 0e7373fe | add `autocomplete="email"` to appraisal lead forms on / and /audit (#213) | body input attribute; `public/index.html` head untouched |
+| 798cd71a | stop the retired Agent Desk claiming the apex root as its canonical (#229) | **removes a second claimant of the home canonical — see below** |
+| 5ca6241a | serve /favicon.ico from the canonical SVG (#238) | worker asset route only, no head change |
+
+`git log -p 20b7cc6..3dc5856 -- public/index.html` contains exactly one hunk,
+the `autocomplete="email"` attribute on the lead form's email input; the
+home-page canonical line is byte-identical to the one every prior receipt
+measured. The "Canonical URLs (dogfood)" guard in `scripts/check-site.mjs` is
+unchanged in that range (the file's edits in range add unrelated
+retired-desk, favicon and beacon guards). Three checks:
+
+1. Source checks on this head: the full `npm test` chain passes on 3dc5856,
+   run script-by-script because no `npm` binary exists on this host (`node`
+   v22.23.1, `npm not found`) — `node scripts/check-site.mjs` →
+   "TinyStudio.io checks passed", headings 6/6, sitemap 7/7, worker 80/80,
+   ui 16/16, contract 8/8, first-viewport 4/4, narrow-pages 34/34 rows PASS,
+   narrow 11/11 rows PASS. The "Canonical URLs (dogfood)" guard still
+   requires exactly one non-commented `<link rel="canonical">` inside
+   `<head>` per page, a non-empty href pointing at the page's canonical
+   `https://tinystudio.io` address (home expected: `https://tinystudio.io/`),
+   and no URL duplicated across pages.
+
+2. Fresh live measurement of the deployed site (2026-08-17, headless
+   Chromium via Playwright 1.62.1, same method as the closeout receipt above:
+   `domcontentloaded` wait, canonical read from `document.head` and from the
+   full document, HTTP status and CSP header from the served response,
+   console and page errors captured). Every page returns 200 with the CSP
+   header, serves exactly one canonical link in its head and one across the
+   whole document, and logs no console or page errors:
+
+   | Page | HTTP | CSP header | canonical links in head | links in full doc | href | console errors |
+   |---|---|---|---|---|---|---|
+   | index.html (home, `/`) | 200 | yes | 1 | 1 | `https://tinystudio.io/` | none |
+   | audit.html (`/audit`) | 200 | yes | 1 | 1 | `https://tinystudio.io/audit` | none |
+   | agents.html (`/agents`) | 200 | yes | 1 | 1 | `https://tinystudio.io/agents.html` | none |
+   | pricing.html (`/pricing`) | 200 | yes | 1 | 1 | `https://tinystudio.io/pricing.html` | none |
+   | specimen.html (`/specimen`) | 200 | yes | 1 | 1 | `https://tinystudio.io/specimen.html` | none |
+   | agent-desk.html (`/agent-desk`, retired, noindex) | 200 | yes | 1 | 1 | `https://tinystudio.io/agent-desk` | none |
+
+   Six served pages, six distinct canonical hrefs. Homepage canonical served
+   live, unchanged from every prior receipt:
+
+   > `<link rel="canonical" href="https://tinystudio.io/">`
+
+   The `.html` forms still 307 to their clean twins as the guard assumes
+   (`/index.html` → `/`, `/audit.html` → `/audit`, `/agents.html` →
+   `/agents`, `/pricing.html` → `/pricing`, `/specimen.html` →
+   `/specimen`), and `https://www.tinystudio.io/` still 301s to the apex the
+   home canonical names.
+
+3. Deployment parity: the live deployment matches origin/main byte-for-byte
+   on all five public pages plus the retired desk — `curl -sL
+   https://tinystudio.io/{index,audit,agents,pricing,specimen}.html` and
+   `/agent-desk` (following the .html forms' 307 redirects to their clean
+   extensionless twins) diffed against the `public/*.html` files on this head
+   shows zero differences on every page, so no deployment lag and no drift
+   between the source guard and the served bytes.
+
+#### One thing did change for this finding since 2026-08-14
+
+At the 2026-08-14 receipt the home canonical was correct but not exclusive:
+the retired `public/agent-desk.html` declared
+`<link rel="canonical" href="https://tinystudio.io/">` and the matching
+`og:url` — a second served page claiming the home page's own address. The
+canonical guard never caught it because the guard's page list is the five
+public pages, and the retired surface is not one of them. PR #229 (798cd71a)
+repointed both at the clean `https://tinystudio.io/agent-desk` and extended
+the retired-desk section of `scripts/check-site.mjs` to require exactly one
+canonical and one og:url naming that address. Verified on this head:
+`git show 20b7cc6:public/agent-desk.html` carries the apex-root canonical,
+the file on 3dc5856 carries `/agent-desk`, and the live page serves
+`/agent-desk` with `robots: noindex, nofollow`. So as of today the home
+page's canonical is the only claim on `https://tinystudio.io/` anywhere in
+the served site — strictly better than the state the last receipt recorded,
+and nothing regressed.
+
+Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
+code side (PR #29), in CI (`npm run check` guard), and against the deployed
+site; this lane (2026-08-17) re-confirmed all three against current main and
+live and found nothing further to change on the finding's page.
