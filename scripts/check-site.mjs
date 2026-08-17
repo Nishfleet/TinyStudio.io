@@ -1448,6 +1448,24 @@ try {
 if (!worker.includes('"/favicon.svg"')) {
   failures.push("Worker must serve /favicon.svg from the public asset allow-list.");
 }
+// ---- /favicon.ico legacy fallback (item 017eb201fc) ------------------------
+// Browsers, search-engine crawlers, and screenshot services still hit
+// /favicon.ico even when every served page declares
+// <link rel="icon" href="/favicon.svg">. The asset bucket only contains
+// /favicon.svg, so without worker-level handling the request hits
+// isAssetLikePath and 404s. The worker must (a) allow-list /favicon.ico so
+// the legacy path reaches a handler, and (b) actually map the request to
+// the canonical /favicon.svg bytes — the only checkable guarantee in
+// source is that the worker allow-list contains both paths and a live
+// probe below confirms the served Content-Type and body. This guard
+// prevents an allow-list removal from silently re-404-ing the path that
+// search-engine link previews and bookmark imports still ask for.
+if (!worker.includes('"/favicon.ico"')) {
+  failures.push("Worker must allow-list /favicon.ico so the legacy fallback path reaches a handler instead of 404-ing via isAssetLikePath.");
+}
+if (!worker.includes('image/x-icon')) {
+  failures.push("Worker /favicon.ico handler must serve SVG bytes with Content-Type: image/x-icon so legacy browsers and crawlers accept the response.");
+}
 
 // ---- Cloudflare Web Analytics beacon (dogfood 455ee8966b) -----------------
 // The leak audit's auto-injected Cloudflare Web Analytics beacon 404s on every
