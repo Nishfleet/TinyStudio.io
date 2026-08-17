@@ -256,3 +256,107 @@ every page: primary CTAs are 42px tall and nav links ~15px" remains
 closed — the 42px lead CTA measures 44px, nav links 45px, on both
 current main (cdfa877) and the live deployment, with the tap-target
 rules pinned by CI source guards.
+
+## Re-verification against current main and live (added 2026-08-17)
+
+Re-verified the finding once more against the current origin/main head
+(5ca6241, "fix(public): serve /favicon.ico from the canonical SVG so
+legacy clients stop 404-ing", merged 2026-08-17) and the live
+deployment, one fresh headless-Chromium session (Playwright 1.62.1,
+390x844, deviceScaleFactor 1, isMobile, hasTouch), with the same
+full-element sweep method as the 2026-08-12, 2026-08-14 and 2026-08-15
+runs: every interactive element (`a, button, input, select, textarea,
+summary`) measured at 390x844 on a local static copy of `public/` and
+on `https://tinystudio.io` itself, with an explicit
+`document.fonts.load("16px Karla")` before measuring (the font-loading
+caveat recorded in the 2026-08-14 receipt).
+
+### Changes since the 2026-08-15 receipt (base cdfa877)
+
+Twelve commits landed on main since the 2026-08-15 re-verification; none
+touched the tap-target surface:
+
+- `5ca6241` (#238, favicon.ico) — `public/favicon.svg` + Worker routing
+  only; no CSS.
+- `83a5974` (#237, GoodFirms service doc), `56c4e24` (#236, retired Agent
+  Desk title/snippet doc), `b07ebc8` (#235, apple-touch-icon doc),
+  `7d3a8ae` (#234, render-blocking doc), `fdd5c20` (#233, Google Ads
+  conversion doc), `c5e46d3` (#232, Clutch doc) — `docs/evidence/` and
+  service handoff docs only.
+- `798cd71` (#229, /agent-desk canonical) — `public/agent-desk.html` link
+  rel="canonical" only.
+- `0e7373f` (#213, autocomplete="email") — `public/index.html` and
+  `public/audit.html` attribute additions on the two intake `<input
+  type="email">` fields; no CSS or sizing touched.
+- `a654ab4` (#211, AI-search re-run) — `docs/evidence/` only.
+- `e90b98f` (#45, Web Analytics beacon 404) — diagnostic doc only.
+- `e72e59b` (#67, persistent intake labels + "The Tiny Studio" titles) —
+  `public/index.html` and `public/audit.html` aria-label / document
+  title / `id="start"` anchor only; no CSS.
+
+`git diff origin/main..HEAD -- public/*.css` returns empty on the lane
+head: no stylesheet drift since the 2026-08-15 base. The guard in
+`scripts/check-site.mjs` still pins the ≥44px rules in all five
+stylesheets (shared, index, audit, brief-requested, styles), and
+`npm run check` passes on this head.
+
+### Result: no regression; the finding stays closed
+
+Full-element sweep at 390x844, one fresh Playwright session, local main
+and live:
+
+| Page | total | standalone | inline | sub44 standalone | min h × min w |
+|---|---|---|---|---|---|
+| `/` | 10 | 8 | 2 | 0 | 44 × 44 |
+| `/audit` | 33 | 10 | 23 | 0 | 44 × 44 |
+| `/agents` | 8 | 6 | 2 | 0 | 45 × 44 |
+| `/pricing` | 9 | 5 | 4 | 0 | 45 × 44 |
+| `/specimen` | 8 | 6 | 2 | 0 | 45 × 44 |
+| `/brief-requested` | 5 | 5 | 0 | 0 | 45 × 44 |
+| `/agent-desk` | 25 | 25 | 0 | 0 | 44 × 49 |
+
+Local main and the live `https://tinystudio.io` match element-for-element
+on every page (same Playwright session, same viewport, same script);
+zero standalone targets under 44px on any of the seven served pages.
+The home page minimum is 44x44 (form submit button, footer link,
+navlinks); nav links 45, nav CTA 47, inputs 47–48, footer links 45, all
+Agent Desk controls 44–65.2, in-content `.cta` links 46 — same as the
+2026-08-15 receipt.
+
+The only sub-44px elements anywhere are the WCAG-exempt inline text
+links (`.xa1` audit Sources: citations, `.xi19`/`.xp1` "See the terms
+→", "Read the specimen →", "See the desk →"), which remain intentionally
+excluded from the 44px bar under the WCAG 2.5.8/2.5.5 "Inline"
+exception (target inside a sentence or block of text), as recorded in
+the 2026-08-12 and 2026-08-15 receipts.
+
+No overflow introduced: `scrollWidth == clientWidth == 390` on all
+seven pages at 390x844, on main and on live (asserted in
+`scripts/test-narrow-viewport-pages.mjs`, which sweeps 240/260/280/300/
+320/360/390 and all five owned routes — 35/35 PASS on the lane head).
+
+### Source and suite checks on the lane head
+
+- `npm run check` passes on this lane head with the tap-target guard in
+  `scripts/check-site.mjs` (shared.css, index.css, audit.css,
+  brief-requested.css, styles.css needles, plus the pinned evidence
+  anchors "unfixed", "390x844", "44px", "not CI proof", "Exact
+  verification method").
+- Full `npm test` suite passes on this head: check, headings 6/6,
+  sitemap 7/7, worker 80/80, ui 16/16, contract 8/8, viewport 4/4,
+  narrow-pages and narrow suites (35/35 narrow-pages, 12/12 narrow).
+- `git diff --check` clean.
+
+### Live checks
+
+- All seven pages serve HTTP 200 at their clean URLs (`/`, `/audit`,
+  `/agents`, `/pricing`, `/specimen`, `/brief-requested`, `/agent-desk`).
+- Full-element measurement at 390x844 matches the local main run
+  element-for-element: every standalone target ≥44px, only the
+  WCAG-exempt inline links under 44px.
+
+Conclusion: the review item "Mobile tap targets fall under WCAG sizes on
+every page: primary CTAs are 42px tall and nav links ~15px" remains
+closed — the 42px lead CTA measures 44px, nav links 45px, on both
+current main (5ca6241) and the live deployment, with the tap-target
+rules pinned by CI source guards.
