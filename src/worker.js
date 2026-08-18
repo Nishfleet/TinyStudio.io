@@ -10,6 +10,17 @@ const SECURITY_HEADERS = {
     "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
 };
 
+// Page-scoped CSP for /brief-requested ONLY when the Google Ads conversion
+// tag is configured. gtag.js loads from googletagmanager.com and beacons to
+// Google's measurement endpoints; the global CSP above blocks both, which
+// made even a real conversion id dead on arrival. The allowances are scoped
+// to this one noindex page's response so every other page keeps the strict
+// CSP. Only reachable when GOOGLE_ADS_CONVERSION_ID / _LABEL are configured
+// (see googleAdsConversion below); when they are not, the page ships with
+// the strict CSP and no tag at all.
+const GOOGLE_ADS_CSP =
+  "default-src 'self'; img-src 'self' data: https://www.googleadservices.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://static.cloudflareinsights.com https://www.googletagmanager.com; connect-src 'self' https://cloudflareinsights.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.google-analytics.com https://stats.g.doubleclick.net; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
+
 const PUBLIC_ASSET_PATHS = new Set([
   "/",
   "/index.html",
@@ -48,6 +59,13 @@ const PUBLIC_ASSET_PATHS = new Set([
   "/styles.css",
   "/script.js",
   "/favicon.svg",
+  // Legacy /favicon.ico fallback. Browsers, search-engine crawlers, and
+  // screenshot services still hit /favicon.ico even when every page declares
+  // <link rel="icon">. /favicon.svg is the canonical asset; we serve its
+  // bytes at the .ico path below so the request stops 404-ing. Without this,
+  // public/favicon.ico is not in the asset bucket and isAssetLikePath would
+  // return asset_not_found for the path.
+  "/favicon.ico",
   "/apple-touch-icon.png",
   "/og-image.png",
   "/robots.txt",
@@ -100,10 +118,10 @@ const WEEKLY_METRIC_LABELS = [
   "Cash collected"
 ];
 
-function withSecurityHeaders(response) {
+function withSecurityHeaders(response, contentSecurityPolicy) {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(key, value);
+    headers.set(key, key === "Content-Security-Policy" && contentSecurityPolicy ? contentSecurityPolicy : value);
   }
   return new Response(response.body, {
     status: response.status,
@@ -1336,10 +1354,73 @@ function isHtmlNavigation(request) {
   return (request.method === "GET" || request.method === "HEAD") && accept.includes("text/html");
 }
 
+// ---- Google Ads conversion tag (funnel measurement) -----------------------
+// The funnel's only conversion measurement used to be dead by construction:
+// brief-requested.html shipped a hardcoded gtag loader with a placeholder
+// conversion id, and the production CSP blocked googletagmanager.com
+// entirely, so the event could never record. The tag is now generated at
+// request time from env values and only emitted on /brief-requested when
+// BOTH are configured and well-formed; a partial or malformed config emits
+// nothing rather than a dead tag. The strict patterns also mean the values
+// are safe to interpolate into the generated script.
+const GOOGLE_ADS_ID_PATTERN = /^AW-\d{6,15}$/;
+const GOOGLE_ADS_LABEL_PATTERN = /^[A-Za-z0-9_-]{10,50}$/;
+
+function googleAdsConversion(env) {
+  const id = String(env.GOOGLE_ADS_CONVERSION_ID || "").trim();
+  const label = String(env.GOOGLE_ADS_CONVERSION_LABEL || "").trim();
+  if (!GOOGLE_ADS_ID_PATTERN.test(id) || !GOOGLE_ADS_LABEL_PATTERN.test(label)) return null;
+  return { id, label };
+}
+
+function googleAdsLoader({ id }) {
+  return `<!-- Google Ads conversion: injected by the worker from env (fires once, on this noindex page only) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>`;
+}
+
+function googleAdsScript({ id, label }) {
+  return `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${id}');
+gtag('event', 'conversion', {
+  'send_to': '${id}/${label}'
+});
+`;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const host = url.hostname.toLowerCase();
+
+    // ---- Canonical host redirect (dogfood: Google still presents the retired
+    // self-serve "TinyStudio Agent Desk" title/snippet for tinystudio.io) ----
+    // wrangler.jsonc routes www.tinystudio.io/* at this worker, but nothing
+    // ever sent that host anywhere: it answered 200 with a byte-identical copy
+    // of the public site, on a second hostname and over plain http. Google
+    // therefore holds www.tinystudio.io as its own site, with its own site
+    // name, and that entity still carries the retired "TinyStudio Agent Desk"
+    // name from when the self-serve desk owned the root — which is why the
+    // retired product name keeps surfacing for this site even though the apex
+    // host's own title, description and site name are long since correct.
+    // robots.txt, sitemap.xml and every canonical and og:url on the site name
+    // https://tinystudio.io as the single address, so the duplicate host is
+    // sent there permanently and drops out of the index. A page-level
+    // canonical is only a hint; a 301 is the directive that retires the
+    // duplicate site entity along with its stale name.
+    if (host === "www.tinystudio.io") {
+      const canonical = new URL(url);
+      canonical.protocol = "https:";
+      canonical.hostname = "tinystudio.io";
+      canonical.port = "";
+      return withSecurityHeaders(
+        new Response(null, {
+          status: 301,
+          headers: { Location: canonical.toString() }
+        })
+      );
+    }
 
     if (host === "app.tinystudio.io") {
       return retiredAppResponse();
@@ -1361,7 +1442,70 @@ export default {
       return healthResponse(env);
     }
 
+    // Legacy /favicon.ico fallback. Browsers and crawlers still hit
+    // /favicon.ico even when every served page declares
+    // <link rel="icon" href="/favicon.svg">, and the asset bucket only
+    // contains /favicon.svg, so the generic allow-list branch below would
+    // 404 it. Fetch the SVG bytes and return them with the conservative
+    // image/x-icon content-type (browsers accept SVG bytes here). Modern
+    // browsers that already saw the <link rel="icon"> declaration will
+    // keep using /favicon.svg; this path only fires for legacy clients.
+    if (url.pathname === "/favicon.ico") {
+      const icoResponse = await env.ASSETS.fetch(
+        assetRequest(url, request, "/favicon.svg")
+      );
+      if (icoResponse.ok) {
+        const headers = new Headers(icoResponse.headers);
+        headers.set("Content-Type", "image/x-icon");
+        // Allow the legacy fallback to be cached separately from the
+        // canonical SVG. A year is fine — the asset is content-hashed by
+        // the served URL, not by query string.
+        headers.set(
+          "Cache-Control",
+          "public, max-age=31536000, immutable"
+        );
+        return withSecurityHeaders(
+          new Response(icoResponse.body, {
+            status: icoResponse.status,
+            statusText: icoResponse.statusText,
+            headers
+          })
+        );
+      }
+      return notFoundResponse("asset_not_found");
+    }
+
     if (PUBLIC_ASSET_PATHS.has(url.pathname)) {
+      const ads = googleAdsConversion(env);
+      const isBriefRequestedPage =
+        url.pathname === "/brief-requested" || url.pathname === "/brief-requested.html";
+      const isBriefRequestedScript = url.pathname === "/brief-requested.js";
+
+      if (ads && request.method === "GET" && (isBriefRequestedPage || isBriefRequestedScript)) {
+        if (isBriefRequestedScript) {
+          return withSecurityHeaders(
+            new Response(googleAdsScript(ads), {
+              headers: { "Content-Type": "text/javascript;charset=UTF-8" }
+            })
+          );
+        }
+        const assetResponse = await env.ASSETS.fetch(request);
+        if (assetResponse.ok) {
+          const html = await assetResponse.text();
+          const rewritten = html.includes("</head>")
+            ? html.replace("</head>", `${googleAdsLoader(ads)}\n</head>`)
+            : html;
+          return withSecurityHeaders(
+            new Response(rewritten, {
+              status: assetResponse.status,
+              statusText: assetResponse.statusText,
+              headers: { "Content-Type": "text/html; charset=utf-8" }
+            }),
+            GOOGLE_ADS_CSP
+          );
+        }
+      }
+
       const assetResponse = await env.ASSETS.fetch(request);
       return withSecurityHeaders(assetResponse);
     }

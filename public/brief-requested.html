@@ -14,13 +14,14 @@
 <link rel="stylesheet" href="shared.css">
 
 <!-- ── Google Ads conversion ──────────────────────────────────────────────
-     Replace AW-XXXXXXXXX and the send_to label with the real values from
-     Google Ads › Goals › Conversions › "Brief requested" › Tag setup.
-     Fires once, on page load. This page is the ONLY page that fires it, and
-     is noindex so it can never be reached organically.
+     The conversion tag is NOT hardcoded here: a placeholder tag is dead by
+     construction. The worker injects the gtag loader into this page's
+     response (and generates brief-requested.js) at request time when
+     GOOGLE_ADS_CONVERSION_ID and GOOGLE_ADS_CONVERSION_LABEL are configured
+     — see specs/003-wellness-clinic-launch/tracking-setup.md. Without them
+     nothing fires, so a dead tag can never ship. Fires once, on page load,
+     on this noindex page only.
 ────────────────────────────────────────────────────────────────────────── -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXXX"></script>
-
 
 
 <link rel="stylesheet" href="brief-requested.css">
@@ -28,11 +29,11 @@
 <body>
 <div class="wrap">
   <nav>
-    <a class="logo" href="index.html">Tiny<span>Studio</span></a>
+    <a class="logo" href="/">Tiny<span>Studio</span></a>
     <div class="navlinks">
-      <a href="audit.html">The appraisal</a>
-      <a href="agents.html">The desk</a>
-      <a href="pricing.html">Pricing</a>
+      <a href="/audit">The appraisal</a>
+      <a href="/agents">The desk</a>
+      <a href="/pricing">Pricing</a>
     </div>
   </nav>
 
@@ -53,7 +54,7 @@
       </div>
     </div>
 
-    <a class="back" href="index.html">Back to the site</a>
+    <a class="back" href="/">Back to the site</a>
   </div>
 
   <footer>
