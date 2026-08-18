@@ -59,6 +59,13 @@ const PUBLIC_ASSET_PATHS = new Set([
   "/styles.css",
   "/script.js",
   "/favicon.svg",
+  // Legacy /favicon.ico fallback. Browsers, search-engine crawlers, and
+  // screenshot services still hit /favicon.ico even when every page declares
+  // <link rel="icon">. /favicon.svg is the canonical asset; we serve its
+  // bytes at the .ico path below so the request stops 404-ing. Without this,
+  // public/favicon.ico is not in the asset bucket and isAssetLikePath would
+  // return asset_not_found for the path.
+  "/favicon.ico",
   "/apple-touch-icon.png",
   "/og-image.png",
   "/robots.txt",
@@ -1433,6 +1440,39 @@ export default {
 
     if (url.pathname === "/health") {
       return healthResponse(env);
+    }
+
+    // Legacy /favicon.ico fallback. Browsers and crawlers still hit
+    // /favicon.ico even when every served page declares
+    // <link rel="icon" href="/favicon.svg">, and the asset bucket only
+    // contains /favicon.svg, so the generic allow-list branch below would
+    // 404 it. Fetch the SVG bytes and return them with the conservative
+    // image/x-icon content-type (browsers accept SVG bytes here). Modern
+    // browsers that already saw the <link rel="icon"> declaration will
+    // keep using /favicon.svg; this path only fires for legacy clients.
+    if (url.pathname === "/favicon.ico") {
+      const icoResponse = await env.ASSETS.fetch(
+        assetRequest(url, request, "/favicon.svg")
+      );
+      if (icoResponse.ok) {
+        const headers = new Headers(icoResponse.headers);
+        headers.set("Content-Type", "image/x-icon");
+        // Allow the legacy fallback to be cached separately from the
+        // canonical SVG. A year is fine — the asset is content-hashed by
+        // the served URL, not by query string.
+        headers.set(
+          "Cache-Control",
+          "public, max-age=31536000, immutable"
+        );
+        return withSecurityHeaders(
+          new Response(icoResponse.body, {
+            status: icoResponse.status,
+            statusText: icoResponse.statusText,
+            headers
+          })
+        );
+      }
+      return notFoundResponse("asset_not_found");
     }
 
     if (PUBLIC_ASSET_PATHS.has(url.pathname)) {

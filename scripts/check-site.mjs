@@ -1266,7 +1266,12 @@ for (const [pageName, pageHtml] of ownedPages) {
 // The legacy page must therefore stay out of the index: its head keeps a
 // robots noindex, nofollow meta, and its title and description frame the
 // surface as retired, so neither the search index nor a scraper can re-present
-// the retired self-serve product as the current offer.
+// the retired self-serve product as the current offer. Its canonical and
+// og:url must name the legacy page itself — the clean /agent-desk address
+// that serves 200 — never the apex root: while the page declared the root as
+// its canonical, Google consolidated the retired title onto the homepage URL
+// (the q5/google capture), and a canonical that points at the root keeps
+// handing the retired name to the homepage's SERP entry.
 const retiredDeskHead = retiredDesk.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
 const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
 if (!robotsMeta.test(retiredDeskHead)) {
@@ -1279,6 +1284,29 @@ const retiredDeskDescription =
   retiredDeskHead.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0] ?? "";
 if (!/\bretired\b/i.test(retiredDeskDescription)) {
   failures.push("Retired Agent Desk description must frame the surface as retired.");
+}
+// The retired page must never claim the apex root. Exactly one canonical and
+// one og:url, both naming the clean /agent-desk address that serves 200.
+const retiredDeskLive = retiredDesk.replace(/<!--[\s\S]*?-->/g, "");
+const retiredDeskCanonical =
+  retiredDeskLive.match(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi) ?? [];
+if (retiredDeskCanonical.length !== 1) {
+  failures.push(`Retired Agent Desk canonical must appear exactly once (found ${retiredDeskCanonical.length}).`);
+} else {
+  const href = retiredDeskCanonical[0].match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  if (href.trim() !== "https://tinystudio.io/agent-desk") {
+    failures.push(`Retired Agent Desk canonical must point at https://tinystudio.io/agent-desk (found "${href}").`);
+  }
+}
+const retiredDeskOgUrl =
+  retiredDeskLive.match(/<meta\b[^>]*\bproperty\s*=\s*["']og:url["'][^>]*>/gi) ?? [];
+if (retiredDeskOgUrl.length !== 1) {
+  failures.push(`Retired Agent Desk og:url must appear exactly once (found ${retiredDeskOgUrl.length}).`);
+} else {
+  const content = retiredDeskOgUrl[0].match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  if (content.trim() !== "https://tinystudio.io/agent-desk") {
+    failures.push(`Retired Agent Desk og:url must point at https://tinystudio.io/agent-desk (found "${content}").`);
+  }
 }
 
 // ---- Meta descriptions (dogfood) -------------------------------------------
@@ -1417,6 +1445,24 @@ try {
 }
 if (!worker.includes('"/favicon.svg"')) {
   failures.push("Worker must serve /favicon.svg from the public asset allow-list.");
+}
+// ---- /favicon.ico legacy fallback (item 017eb201fc) ------------------------
+// Browsers, search-engine crawlers, and screenshot services still hit
+// /favicon.ico even when every served page declares
+// <link rel="icon" href="/favicon.svg">. The asset bucket only contains
+// /favicon.svg, so without worker-level handling the request hits
+// isAssetLikePath and 404s. The worker must (a) allow-list /favicon.ico so
+// the legacy path reaches a handler, and (b) actually map the request to
+// the canonical /favicon.svg bytes — the only checkable guarantee in
+// source is that the worker allow-list contains both paths and a live
+// probe below confirms the served Content-Type and body. This guard
+// prevents an allow-list removal from silently re-404-ing the path that
+// search-engine link previews and bookmark imports still ask for.
+if (!worker.includes('"/favicon.ico"')) {
+  failures.push("Worker must allow-list /favicon.ico so the legacy fallback path reaches a handler instead of 404-ing via isAssetLikePath.");
+}
+if (!worker.includes('image/x-icon')) {
+  failures.push("Worker /favicon.ico handler must serve SVG bytes with Content-Type: image/x-icon so legacy browsers and crawlers accept the response.");
 }
 
 // ---- Cloudflare Web Analytics beacon (dogfood 455ee8966b) -----------------
@@ -1727,14 +1773,51 @@ const htmlPageTargets = {
   "audit.html": "/audit",
   "agents.html": "/agents",
   "pricing.html": "/pricing",
-  "specimen.html": "/specimen"
+  "specimen.html": "/specimen",
+  // The post-signup page is served at both forms too (verified 2026-08-17:
+  // /brief-requested.html 307s to /brief-requested), so nothing may link to
+  // its redirecting twin either.
+  "brief-requested.html": "/brief-requested"
 };
+
+// The fault is the DESTINATION, not the spelling. "audit.html",
+// "./audit.html", "/audit.html" and "https://tinystudio.io/audit.html" are the
+// same redirecting request on the network (each 307s to /audit), but the first
+// version of this guard compared the raw href against the bare filename only,
+// so three of those four spellings walked straight past it and the fault could
+// return without CI noticing. Normalize every same-origin anchor target to its
+// site-root-relative file name before the lookup. Off-site links, fragments
+// and non-navigational schemes (mailto:, tel:) are not page links and are
+// skipped.
+const siteHosts = new Set(["tinystudio.io", "www.tinystudio.io"]);
+
+function internalPageTarget(rawHref) {
+  const href = rawHref.trim();
+  if (!href || href.startsWith("#")) return "";
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^https?:/i.test(href)) return "";
+
+  let path = href.split("#")[0].split("?")[0];
+  if (!path) return "";
+
+  if (/^(?:https?:)?\/\//i.test(path)) {
+    let url;
+    try {
+      url = new URL(path.startsWith("//") ? `https:${path}` : path);
+    } catch {
+      return "";
+    }
+    if (!siteHosts.has(url.hostname.toLowerCase())) return "";
+    path = url.pathname;
+  }
+
+  return path.replace(/^(?:\.\.?\/)+/, "").replace(/^\/+/, "");
+}
 
 for (const [pageName, pageHtml] of internalLinkPages) {
   const anchors = [...pageHtml.matchAll(/<a\b[^>]*>/gi)].map((match) => match[0]);
   for (const anchor of anchors) {
-    const href = anchor.match(/\bhref="([^"]*)"/i)?.[1] ?? "";
-    const target = href.split("#")[0];
+    const href = anchor.match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+    const target = internalPageTarget(href);
     if (Object.prototype.hasOwnProperty.call(htmlPageTargets, target)) {
       failures.push(
         `Internal page link on ${pageName} must point at the clean destination ${JSON.stringify(htmlPageTargets[target])} (found ${JSON.stringify(href)}).`
