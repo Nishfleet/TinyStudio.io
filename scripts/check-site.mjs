@@ -197,6 +197,29 @@ if (worker.includes("checks.ai && checks.db")) {
   failures.push("Worker /health verdict must not gate on the retired Agent Desk AI binding");
 }
 
+// Monthly intake cap (the "six a month" public promise). The site promises
+// "when the sixth is taken, the intake closes until the next" on five
+// surfaces; the signup handler must honor it: a calendar-month counter that
+// rejects the seventh signup with a truthful closed-intake response (JSON
+// error "intake_closed" for API clients, a self-contained 409 page for form
+// posts). These are STATIC SOURCE GUARDS, not behavioral tests — the
+// behavioral proof lives in test-agent-worker.mjs.
+if (!worker.includes("MAX_APPRAISALS_PER_MONTH")) {
+  failures.push("Worker must define MAX_APPRAISALS_PER_MONTH (the six-a-month cap).");
+}
+if (!worker.includes("signup:")) {
+  failures.push("Worker must key the monthly signup cap on a signup:YYYY-MM bucket.");
+}
+if (!worker.includes("\"intake_closed\"")) {
+  failures.push("Worker must expose the intake_closed error for API signup clients.");
+}
+if (!worker.includes("closedIntakeResponse()")) {
+  failures.push("Worker must serve the closed-intake page to browser form posts.");
+}
+if (!worker.includes("The six appraisals for this month are taken")) {
+  failures.push("Closed-intake page must state the six-a-month truth.");
+}
+
 for (const text of requiredPublicArtifacts) {
   // llms.txt and offer.md are mirrors of the same offer contract. A fact must
   // appear in BOTH (case-insensitively, since one file may head it while the

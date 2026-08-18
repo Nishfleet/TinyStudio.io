@@ -1848,3 +1848,118 @@ test("worker refuses to emit a Google Ads tag for a partial or malformed convers
     assert.equal(body, BRIEF_REQUESTED_HTML, "unconfigured page must pass through untouched");
   }
 });
+
+// --- Monthly "six a month" intake cap (backlog item 594) ---
+//
+// The site publicly promises "Six a month. When the sixth is taken, the
+// intake closes until the next." on five surfaces. These tests drive a
+// counting fake that returns the next count for each signup:YYYY-MM bucket
+// (mirroring the worker's incrementUsageCounter upsert) and assert the exact
+// boundary: the sixth signup is accepted, the seventh is told the truth
+// (JSON "intake_closed" for API clients, a self-contained 409 page for
+// browser form posts), nothing is stored on the closed seventh, and an
+// invalid email consumes no slot.
+
+// Scripted counter for the monthly signup cap: every INSERT into
+// agent_usage_limits returns the next count for its bucket key, mirroring
+// the worker's incrementUsageCounter upsert (RETURNING count).
+class CountingFakeDB extends FakeDB {
+  constructor() {
+    super();
+    this.counts = new Map();
+  }
+
+  prepare(sql) {
+    return new CountingFakeStatement(this, sql);
+  }
+}
+
+class CountingFakeStatement extends FakeStatement {
+  async first() {
+    this.db.calls.push({ method: "first", sql: this.sql, values: this.values });
+    if (this.sql.includes("agent_usage_limits") && this.values[0] && String(this.values[0]).startsWith("signup:")) {
+      const key = this.values[0];
+      const next = (this.db.counts.get(key) || 0) + 1;
+      this.db.counts.set(key, next);
+      return { count: next };
+    }
+    return { count: 1 };
+  }
+}
+
+function capSignupRequest(email, website, accept = "text/html") {
+  return new Request("https://tinystudio.io/api/signups", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Origin": "https://tinystudio.io",
+      "Accept": accept,
+      "User-Agent": "tinystudio-worker-test"
+    },
+    body: new URLSearchParams({ website, email }).toString()
+  });
+}
+
+test("signup handler accepts six signups in a calendar month, then closes the intake truthfully (JSON)", async () => {
+  const db = new CountingFakeDB();
+  const env = { DB: db, AI: new FakeAI("") };
+
+  for (let i = 1; i <= 6; i++) {
+    const res = await worker.fetch(capSignupRequest(`cap-json-${i}@example.com`, `example-${i}.com`, "application/json"), env);
+    assert.equal(res.status, 201, `signup ${i} of 6 must succeed`);
+  }
+
+  const seventh = await worker.fetch(capSignupRequest("cap-json-7@example.com", "example-7.com", "application/json"), env);
+  assert.equal(seventh.status, 409, "the seventh signup in the month must be rejected");
+  const body = await seventh.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.error, "intake_closed");
+  assert.match(body.message, /six appraisals for this month are taken/, "the closed signal must state the six-a-month truth");
+
+  // The cap counter must be a single calendar-month bucket.
+  const buckets = [...db.counts.keys()];
+  assert.equal(buckets.length, 1, "all signups in one month share one bucket");
+  assert.match(buckets[0], /^signup:\d{4}-\d{2}$/, "the bucket key must be signup:YYYY-MM");
+  assert.equal(db.counts.get(buckets[0]), 7, "the counter records all seven attempts so the intake stays closed");
+
+  // No seventh row is persisted: exactly six INSERTs into email_signups.
+  const signupInserts = db.calls.filter((call) => call.sql.includes("INSERT INTO email_signups"));
+  assert.equal(signupInserts.length, 6, "the closed seventh signup must not be stored");
+});
+
+test("signup handler serves the truthful closed-intake page to a browser form post after six signups", async () => {
+  const db = new CountingFakeDB();
+  const env = { DB: db, AI: new FakeAI("") };
+
+  for (let i = 1; i <= 6; i++) {
+    const res = await worker.fetch(capSignupRequest(`cap-html-${i}@example.com`, `example-${i}.com`), env);
+    assert.equal(res.status, 303, `browser signup ${i} of 6 must redirect to the thank-you page`);
+    assert.equal(new URL(res.headers.get("Location")).pathname, "/brief-requested");
+  }
+
+  const seventh = await worker.fetch(capSignupRequest("cap-html-7@example.com", "example-7.com"), env);
+  assert.equal(seventh.status, 409, "the seventh browser form post must not land on the thank-you page");
+  const html = await seventh.text();
+  assert.match(html, /The six appraisals for this month are taken/, "the closed page must state the six-a-month truth");
+  assert.match(html, /intake closes until the next/, "the closed page must echo the public promise wording");
+  assert.doesNotMatch(html, /request received/i, "the closed page must not impersonate the success page");
+
+  const signupInserts = db.calls.filter((call) => call.sql.includes("INSERT INTO email_signups"));
+  assert.equal(signupInserts.length, 6, "the closed seventh browser signup must not be stored");
+});
+
+test("signup handler does not consume a monthly slot for an invalid email", async () => {
+  const db = new CountingFakeDB();
+  const env = { DB: db, AI: new FakeAI("") };
+
+  const invalid = await worker.fetch(capSignupRequest("not-an-email", "example.com"), env);
+  assert.equal(invalid.status, 303, "invalid email still takes the existing invalid-signal redirect");
+  assert.equal(new URL(invalid.headers.get("Location")).search, "?signal=invalid");
+
+  const valid = await worker.fetch(capSignupRequest("cap-valid-1@example.com", "example.com", "application/json"), env);
+  assert.equal(valid.status, 201, "a valid signup after an invalid attempt must still be accepted");
+
+  const buckets = [...db.counts.keys()].filter((key) => key.startsWith("signup:"));
+  assert.equal(buckets.length, 1, "only the valid signup created a monthly bucket");
+  assert.equal(db.counts.get(buckets[0]), 1, "the invalid attempt must not consume a slot");
+});
