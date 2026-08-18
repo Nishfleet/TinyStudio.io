@@ -135,7 +135,7 @@ const requiredPublicArtifacts = [
   "Client-side code does not call model providers",
   "No campaign publishing",
   "No ad spend changes",
-  "https://tinystudio.io/pricing.html"
+  "https://tinystudio.io/pricing"
 ];
 
 const forbiddenClaims = [
@@ -293,8 +293,75 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
+// Signup rejection-signal guard (dogfood: failed-signup dead end). The worker
+// 303-redirects a rejected signup back to /?signal=invalid (the server email
+// regex is stricter than the browser's type=email check — e.g. "a@b" passes
+// client-side but not server-side), so the homepage must render that state:
+// a role=alert banner, hidden until index.js reads the signal, moves focus
+// into it, and strips the query so a refresh or a copied link does not
+// re-show the error. These are STATIC SOURCE GUARDS, not behavioral tests.
+const signalBanner = siteHome.match(/<p\b[^>]*id="signal-invalid"[^>]*>/i)?.[0] || "";
+if (!signalBanner) {
+  failures.push("Homepage must carry the id=\"signal-invalid\" signup rejection banner.");
+} else {
+  if (!/\brole="alert"/i.test(signalBanner)) {
+    failures.push("Signup rejection banner must expose role=\"alert\".");
+  }
+  if (!/\bhidden(?:\s|>|=)/i.test(signalBanner)) {
+    failures.push("Signup rejection banner must start hidden (revealed only by the signal handler).");
+  }
+}
+const homeScript = read("public/index.js");
+if (!homeScript.includes("signal-invalid")) {
+  failures.push("index.js must reference the signal-invalid banner.");
+}
+if (!/signal=([^&]+)/.test(homeScript)) {
+  failures.push("index.js must read the ?signal= query parameter.");
+}
+if (!homeScript.includes("replaceState")) {
+  failures.push("index.js must strip the signal query with history.replaceState after revealing the banner.");
+}
+const homeCss = read("public/index.css");
+if (!/\.signal\b/.test(homeCss)) {
+  failures.push("index.css must style the signup rejection banner (.signal).");
+}
+if (!/\.signal\[hidden\]\s*\{[^}]*display:\s*none/i.test(homeCss)) {
+  failures.push(".signal[hidden] must force display:none so the banner stays hidden until revealed.");
+}
+if (!worker.includes("htmlRedirect(url, \"invalid\")")) {
+  failures.push("Worker must keep 303-redirecting rejected signups to /?signal=invalid (the homepage banner renders it).");
+}
+
+
 if (!retiredDesk.includes("role=\"tabpanel\"") || !retiredDesk.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
+}
+
+// Pricing closing-callout regression (review item: the /pricing closing band
+// ended in a dead end — "The appraisal costs you an email" with no way to send
+// one — while every other served conversion surface carried a real intake
+// form). The band must keep the actual signup form: a form.lead inside the
+// .band posting website + email to /api/signups, both fields with a
+// persistent programmatic aria-label, and a submit button reading "Request
+// the appraisal". STATIC SOURCE GUARD (regex over pricing.html), matching the
+// repo's other source-string guards.
+const sitePricing = read("public/pricing.html");
+const pricingBand = sitePricing.match(/<div class="band">([\s\S]*?)<\/div>\s*<section id="confidential">/)?.[1] ?? "";
+const pricingForm = pricingBand.match(/<form\b[^>]*class="lead[^>]*"[^>]*>[\s\S]*?<\/form>/i)?.[0] ?? "";
+
+if (!pricingForm || !pricingForm.includes('action="/api/signups"') || !pricingForm.includes('method="post"')) {
+  failures.push("Pricing closing callout must carry the real signup form (form.lead posting website + email to /api/signups) so the appraisal ask is actionable in place.");
+}
+for (const input of pricingForm.matchAll(/<input\b[^>]*>/gi)) {
+  const tag = input[0];
+  if (!/\bname="(?:website|email)"/.test(tag)) continue;
+  const aria = tag.match(/\baria-label="([^"]*)"/)?.[1] ?? "";
+  if (!aria.trim()) {
+    failures.push(`Pricing intake input must carry a persistent programmatic aria-label (placeholder-only labels disappear as buyers type): ${tag}`);
+  }
+}
+if (!/Request the appraisal/i.test(pricingForm)) {
+  failures.push('Pricing closing callout submit button must read "Request the appraisal".');
 }
 
 // Desk page in-content request CTA regression (review item: the /agents desk
@@ -342,6 +409,32 @@ if (!auditMobile) {
   requireMobileRule("stack the band stat and copy into one column", /\.bandgrid\{[^}]*grid-template-columns:1fr/);
   requireMobileRule("stack the four checks into one column", /\.checks\{[^}]*grid-template-columns:1fr/);
   requireMobileRule("let proof rows wrap instead of overflowing", /\.row\{[^}]*flex-wrap:wrap/);
+}
+
+// Audit page in-content request CTA regression (review item: the /audit proof
+// page ended at the closing urgency band with no in-content conversion afford
+// — the only request link was the nav CTA; fixed by PR #159). The closing
+// .band must keep the "Request the appraisal" pill linking to the page's own
+// #start form, and the no-guarantees note that scopes it. audit.css must keep
+// the scoped .band .cta pill styling with a >=44px hit area, and the mobile
+// media query must stack the band. STATIC SOURCE GUARD (regex over the served
+// HTML/CSS), not a behavioral test: CI has no browser.
+const auditClosingBand = siteAudit.match(/<div class="band">([\s\S]*?)<\/div>\s*<section id="confidential">/)?.[1] ?? "";
+if (!auditClosingBand) {
+  failures.push("Audit page must keep an in-content conversion CTA band between the proof and the footer.");
+} else {
+  if (!/<a\b[^>]*class="cta"[^>]*href="#start"[^>]*>Request the appraisal<\/a>/.test(auditClosingBand)) {
+    failures.push("Audit conversion band must carry a .cta link to #start labelled \"Request the appraisal\".");
+  }
+  if (!/No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees\. Only the work\./.test(auditClosingBand)) {
+    failures.push("Audit conversion band must keep the no-guarantees note.");
+  }
+}
+if (!auditCss.includes(".band .cta")) {
+  failures.push("audit.css must style the band conversion CTA (.band .cta).");
+}
+if (!/\.band \.cta\{[^}]*padding:16px 24px/.test(auditCss)) {
+  failures.push("Audit band CTA must keep a >=44px tap target (padding:16px 24px).");
 }
 
 // The behavioral layout proof (real Chromium measurement, local static copy)
@@ -667,6 +760,43 @@ if (renderBlockingScript) {
   }
 }
 
+// ---- Google Ads conversion tag (funnel measurement) ------------------------
+// The funnel's only conversion measurement was dead by construction: the
+// brief-requested page hardcoded a gtag loader with the AW-XXXXXXXXX
+// placeholder, and the production CSP blocked googletagmanager.com entirely,
+// so the event could never record. The tag is now generated by the worker at
+// request time from GOOGLE_ADS_CONVERSION_ID / GOOGLE_ADS_CONVERSION_LABEL
+// and only emitted on /brief-requested when both are configured (see
+// specs/003-wellness-clinic-launch/tracking-setup.md). These STATIC SOURCE
+// GUARDS make the dead-by-construction shape impossible again: no placeholder
+// may exist in public/ or src/worker.js, no public file may hardcode the gtag
+// loader, the static brief-requested.js may not fire anything, and the worker
+// must keep the env-driven injection wired.
+const adsHtml = read("public/brief-requested.html");
+const adsScript = read("public/brief-requested.js");
+for (const placeholder of ["AW-XXXXXXXXX", "YYYYYYYYYYYYYYYYYYY"]) {
+  for (const [label, content] of [
+    ["public/brief-requested.html", adsHtml],
+    ["public/brief-requested.js", adsScript],
+    ["src/worker.js", worker]
+  ]) {
+    if (content.includes(placeholder)) {
+      failures.push(`Google Ads placeholder must never ship (dead conversion): ${placeholder} in ${label}.`);
+    }
+  }
+}
+if (adsHtml.includes("googletagmanager.com")) {
+  failures.push("public/brief-requested.html must not hardcode the Google Ads tag; the worker injects it from env at request time.");
+}
+if (adsScript.includes("gtag(") || adsScript.includes("dataLayer")) {
+  failures.push("public/brief-requested.js must not fire a conversion statically; the worker generates it from env when configured.");
+}
+for (const needle of ["GOOGLE_ADS_CONVERSION_ID", "GOOGLE_ADS_CONVERSION_LABEL", "gtag/js", "/brief-requested.js"]) {
+  if (!worker.includes(needle)) {
+    failures.push(`Worker must keep the env-driven Google Ads conversion wiring (${needle}).`);
+  }
+}
+
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
@@ -943,14 +1073,15 @@ if (aiQuestions && aiEvidence) {
 // the preferred source page: the section must exist in BOTH llms.txt and
 // offer.md (the mirror rule), every controlled question must be mapped to
 // exactly one page the worker serves (sitemap membership), price questions
-// must map to pricing.html (pricing.html owns the price), and the two files
-// must carry the same question-to-page mapping.
+// must map to the clean /pricing (the pricing page owns the price), and the
+// two files must carry the same question-to-page mapping.
 const ANSWER_READINESS_HEADING = "## Answer Readiness: Preferred Source Pages";
 
 // The sitemap lists the indexable public surface at its clean extensionless
-// addresses; the worker also serves each page at its .html twin, which the
-// preferred-source mapping uses. Membership accepts either spelling (home
-// stays "/").
+// addresses; the worker also serves each page at its canonical .html twin.
+// The preferred-source mapping uses the clean form that serves 200, never the
+// .html form the deployed worker 307-redirects. Membership accepts either
+// spelling (home stays "/").
 const servedPageUrls = new Set(
   [...sitemap.matchAll(/<loc>(https:\/\/tinystudio\.io\/[^<]*)<\/loc>/g)]
     .map((match) => match[1])
@@ -999,8 +1130,8 @@ if (aiQuestions && Array.isArray(aiQuestions.questions)) {
     }
     const isPriceQuestion =
       question.id === "q2-what-tinystudio-charges" || question.id === "q7-what-tinystudio-io-charges";
-    if (isPriceQuestion && preferred !== "https://tinystudio.io/pricing.html") {
-      failures.push(`Price question ${question.id} must map to pricing.html (pricing.html owns the price).`);
+    if (isPriceQuestion && preferred !== "https://tinystudio.io/pricing") {
+      failures.push(`Price question ${question.id} must map to the clean /pricing (the pricing page owns the price).`);
     }
     const offerLine = offerSection.split("\n").find((line) => line.includes(question.id));
     if (!offerLine || !offerLine.includes(preferred)) {
@@ -1079,14 +1210,14 @@ if (!llms.includes("https://tinystudio.io/offer.md")) {
 if (!offer.includes("https://tinystudio.io/llms.txt")) {
   failures.push("offer.md must link its machine-readable mirror: llms.txt.");
 }
-if (!llms.includes("https://tinystudio.io/audit.html")) {
+if (!llms.includes("https://tinystudio.io/audit")) {
   failures.push("llms.txt must point at the audit page that carries the AI-search evidence artifact.");
 }
 
 // The machine-readable pair states the current offer in the site's own words
-// and points at pricing.html for price and terms. It must not restate the
-// pricing page's specifics (dollar amounts, refund language) or revive the
-// retired Website Correction / founder-pilot / MSP-buyer framing.
+// and points at the clean /pricing for price and terms. It must not restate
+// the pricing page's specifics (dollar amounts, refund language) or revive
+// the retired Website Correction / founder-pilot / MSP-buyer framing.
 const staleOfferPhrases = [
   "Website Correction",
   "founder pilot",
@@ -1102,16 +1233,16 @@ for (const phrase of staleOfferPhrases) {
   }
 }
 if (/\$\s?\d/.test(llms)) {
-  failures.push("llms.txt must not restate a dollar amount; pricing.html owns the price.");
+  failures.push("llms.txt must not restate a dollar amount; the pricing page owns the price.");
 }
 if (/\$\s?\d/.test(offer)) {
-  failures.push("offer.md must not restate a dollar amount; pricing.html owns the price.");
+  failures.push("offer.md must not restate a dollar amount; the pricing page owns the price.");
 }
 if (/\brefund\w*\b/i.test(llms)) {
-  failures.push("llms.txt must not restate refund terms; pricing.html owns them.");
+  failures.push("llms.txt must not restate refund terms; the pricing page owns them.");
 }
 if (/\brefund\w*\b/i.test(offer)) {
-  failures.push("offer.md must not restate refund terms; pricing.html owns them.");
+  failures.push("offer.md must not restate refund terms; the pricing page owns them.");
 }
 
 if (!siteHome.includes('id="identity"')) {
@@ -1162,7 +1293,12 @@ for (const [pageName, pageHtml] of ownedPages) {
 // The legacy page must therefore stay out of the index: its head keeps a
 // robots noindex, nofollow meta, and its title and description frame the
 // surface as retired, so neither the search index nor a scraper can re-present
-// the retired self-serve product as the current offer.
+// the retired self-serve product as the current offer. Its canonical and
+// og:url must name the legacy page itself — the clean /agent-desk address
+// that serves 200 — never the apex root: while the page declared the root as
+// its canonical, Google consolidated the retired title onto the homepage URL
+// (the q5/google capture), and a canonical that points at the root keeps
+// handing the retired name to the homepage's SERP entry.
 const retiredDeskHead = retiredDesk.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
 const robotsMeta = /<meta\b(?=[^>]*\bname="robots")(?=[^>]*\bcontent="noindex,\s*nofollow")[^>]*>/i;
 if (!robotsMeta.test(retiredDeskHead)) {
@@ -1175,6 +1311,29 @@ const retiredDeskDescription =
   retiredDeskHead.match(/<meta\b[^>]*\bname="description"[^>]*>/i)?.[0] ?? "";
 if (!/\bretired\b/i.test(retiredDeskDescription)) {
   failures.push("Retired Agent Desk description must frame the surface as retired.");
+}
+// The retired page must never claim the apex root. Exactly one canonical and
+// one og:url, both naming the clean /agent-desk address that serves 200.
+const retiredDeskLive = retiredDesk.replace(/<!--[\s\S]*?-->/g, "");
+const retiredDeskCanonical =
+  retiredDeskLive.match(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi) ?? [];
+if (retiredDeskCanonical.length !== 1) {
+  failures.push(`Retired Agent Desk canonical must appear exactly once (found ${retiredDeskCanonical.length}).`);
+} else {
+  const href = retiredDeskCanonical[0].match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  if (href.trim() !== "https://tinystudio.io/agent-desk") {
+    failures.push(`Retired Agent Desk canonical must point at https://tinystudio.io/agent-desk (found "${href}").`);
+  }
+}
+const retiredDeskOgUrl =
+  retiredDeskLive.match(/<meta\b[^>]*\bproperty\s*=\s*["']og:url["'][^>]*>/gi) ?? [];
+if (retiredDeskOgUrl.length !== 1) {
+  failures.push(`Retired Agent Desk og:url must appear exactly once (found ${retiredDeskOgUrl.length}).`);
+} else {
+  const content = retiredDeskOgUrl[0].match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  if (content.trim() !== "https://tinystudio.io/agent-desk") {
+    failures.push(`Retired Agent Desk og:url must point at https://tinystudio.io/agent-desk (found "${content}").`);
+  }
 }
 
 // ---- Meta descriptions (dogfood) -------------------------------------------
@@ -1313,6 +1472,71 @@ try {
 }
 if (!worker.includes('"/favicon.svg"')) {
   failures.push("Worker must serve /favicon.svg from the public asset allow-list.");
+}
+// ---- /favicon.ico legacy fallback (item 017eb201fc) ------------------------
+// Browsers, search-engine crawlers, and screenshot services still hit
+// /favicon.ico even when every served page declares
+// <link rel="icon" href="/favicon.svg">. The asset bucket only contains
+// /favicon.svg, so without worker-level handling the request hits
+// isAssetLikePath and 404s. The worker must (a) allow-list /favicon.ico so
+// the legacy path reaches a handler, and (b) actually map the request to
+// the canonical /favicon.svg bytes — the only checkable guarantee in
+// source is that the worker allow-list contains both paths and a live
+// probe below confirms the served Content-Type and body. This guard
+// prevents an allow-list removal from silently re-404-ing the path that
+// search-engine link previews and bookmark imports still ask for.
+if (!worker.includes('"/favicon.ico"')) {
+  failures.push("Worker must allow-list /favicon.ico so the legacy fallback path reaches a handler instead of 404-ing via isAssetLikePath.");
+}
+if (!worker.includes('image/x-icon')) {
+  failures.push("Worker /favicon.ico handler must serve SVG bytes with Content-Type: image/x-icon so legacy browsers and crawlers accept the response.");
+}
+
+// ---- Cloudflare Web Analytics beacon (dogfood 455ee8966b) -----------------
+// The leak audit's auto-injected Cloudflare Web Analytics beacon 404s on every
+// page load (diagnosis 2026-08-09, "the site's only analytics"). The root
+// cause is dashboard-level: the zone's automatic Web Analytics setup injects
+// a snippet whose 32-hex site token is rejected by Cloudflare's ingestion
+// endpoint, and the zone's same-origin /cdn-cgi/rum endpoint is not
+// provisioned, so the beacon's POST to /cdn-cgi/rum? is answered 404 by
+// Cloudflare's edge before the Worker is ever reached. No code in this repo
+// can restore the analytics — that requires dashboard access or a Web
+// Analytics API token, neither of which is available to this worktree. The
+// re-verify receipt (docs/evidence/web-analytics-beacon-404-reverify-2026-08-14.md)
+// documents that the symptom no longer occurs because the auto-injection is
+// no longer active.
+//
+// This guard closes the loop on the source side: no served HTML page may
+// re-introduce the broken beacon script tag (the only mechanism in this repo
+// that could put the 404 back), while the CSP must still permit the manual
+// JS-snippet path so a future dashboard-restore or hand-added snippet
+// continues to work without further security-header churn.
+const beaconPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")],
+  ["agent-desk page", read("public/agent-desk.html")]
+];
+
+for (const [pageName, pageHtml] of beaconPages) {
+  const cfBeaconTags = [...pageHtml.matchAll(/<script\b[^>]*\bdata-cf-beacon\b[^>]*>/gi)];
+  if (cfBeaconTags.length > 0) {
+    failures.push(`Cloudflare Web Analytics beacon tag must not appear in the served body of ${pageName} (found ${cfBeaconTags.length} <script data-cf-beacon> tag(s); the zone's auto-injected snippet 404s because the underlying /cdn-cgi/rum endpoint is unprovisioned and the only known site token is revoked — see docs/evidence/web-analytics-beacon-404-reverify-2026-08-14.md).`);
+  }
+  const beaconScriptRefs = [...pageHtml.matchAll(/<script\b[^>]*\bsrc="[^"]*beacon\.min\.js[^"]*"[^>]*>/gi)];
+  if (beaconScriptRefs.length > 0) {
+    failures.push(`Cloudflare Web Analytics beacon.min.js script must not be referenced from the served body of ${pageName} (found ${beaconScriptRefs.length} reference(s); the broken 2026-08-09 injection path is documented in docs/evidence/web-analytics-beacon-404-reverify-2026-08-14.md).`);
+  }
+}
+
+if (!worker.includes("https://static.cloudflareinsights.com")) {
+  failures.push("Worker CSP must keep https://static.cloudflareinsights.com in script-src so the manual JS-snippet path keeps working when dashboard access is restored.");
+}
+if (!worker.includes("https://cloudflareinsights.com")) {
+  failures.push("Worker CSP must keep https://cloudflareinsights.com in connect-src so the manual JS-snippet path keeps working when dashboard access is restored.");
 }
 
 // ---- Social share tags (dogfood d87d715be3d0) -----------------------------
@@ -1555,17 +1779,20 @@ for (const [pageName, pageHtml, pageUrl] of structuredDataPages) {
 // point at the final destination URL: the dogfood run reported every .html
 // navigation target on home ("index.html" -> "/", "audit.html" -> "/audit",
 // "agents.html" -> "/agents", "pricing.html" -> "/pricing", "specimen.html" ->
-// "/specimen") as a redirecting internal link. The five public pages must
-// therefore point every page link at the clean URL the worker serves, never
-// at a .html file that resolves to it. These are STATIC SOURCE GUARDS (regex
-// over the served files): CI has no browser, so they assert the .html target
-// shape cannot return, not that the redirects are absent on the network.
+// "/specimen") as a redirecting internal link. The five public pages (and the
+// /brief-requested post-signup page, which carries the same logo/nav/back
+// shell) must therefore point every page link at the clean URL the worker
+// serves, never at a .html file that resolves to it. These are STATIC SOURCE
+// GUARDS (regex over the served files): CI has no browser, so they assert the
+// .html target shape cannot return, not that the redirects are absent on the
+// network.
 const internalLinkPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
-  ["specimen page", read("public/specimen.html")]
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
 ];
 
 const htmlPageTargets = {
@@ -1573,14 +1800,51 @@ const htmlPageTargets = {
   "audit.html": "/audit",
   "agents.html": "/agents",
   "pricing.html": "/pricing",
-  "specimen.html": "/specimen"
+  "specimen.html": "/specimen",
+  // The post-signup page is served at both forms too (verified 2026-08-17:
+  // /brief-requested.html 307s to /brief-requested), so nothing may link to
+  // its redirecting twin either.
+  "brief-requested.html": "/brief-requested"
 };
+
+// The fault is the DESTINATION, not the spelling. "audit.html",
+// "./audit.html", "/audit.html" and "https://tinystudio.io/audit.html" are the
+// same redirecting request on the network (each 307s to /audit), but the first
+// version of this guard compared the raw href against the bare filename only,
+// so three of those four spellings walked straight past it and the fault could
+// return without CI noticing. Normalize every same-origin anchor target to its
+// site-root-relative file name before the lookup. Off-site links, fragments
+// and non-navigational schemes (mailto:, tel:) are not page links and are
+// skipped.
+const siteHosts = new Set(["tinystudio.io", "www.tinystudio.io"]);
+
+function internalPageTarget(rawHref) {
+  const href = rawHref.trim();
+  if (!href || href.startsWith("#")) return "";
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^https?:/i.test(href)) return "";
+
+  let path = href.split("#")[0].split("?")[0];
+  if (!path) return "";
+
+  if (/^(?:https?:)?\/\//i.test(path)) {
+    let url;
+    try {
+      url = new URL(path.startsWith("//") ? `https:${path}` : path);
+    } catch {
+      return "";
+    }
+    if (!siteHosts.has(url.hostname.toLowerCase())) return "";
+    path = url.pathname;
+  }
+
+  return path.replace(/^(?:\.\.?\/)+/, "").replace(/^\/+/, "");
+}
 
 for (const [pageName, pageHtml] of internalLinkPages) {
   const anchors = [...pageHtml.matchAll(/<a\b[^>]*>/gi)].map((match) => match[0]);
   for (const anchor of anchors) {
-    const href = anchor.match(/\bhref="([^"]*)"/i)?.[1] ?? "";
-    const target = href.split("#")[0];
+    const href = anchor.match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+    const target = internalPageTarget(href);
     if (Object.prototype.hasOwnProperty.call(htmlPageTargets, target)) {
       failures.push(
         `Internal page link on ${pageName} must point at the clean destination ${JSON.stringify(htmlPageTargets[target])} (found ${JSON.stringify(href)}).`
@@ -1700,6 +1964,35 @@ for (const [pageName, pageHtml] of intakePages) {
       failures.push(`Intake input on ${pageName} must carry a persistent programmatic aria-label (placeholder-only labels disappear as buyers type): ${tag}`);
     }
   }
+}
+
+// ---- Specimen in-content conversion CTA ------------------------------------
+// The /specimen proof page is where the homepage routes its "Read the
+// specimen" call-out, so the reader who finishes the sample needs an
+// in-content conversion CTA — not just the nav link — to request their own
+// appraisal. The page must keep a .band block carrying an explicit CTA link
+// to the request surface (/#start, same target as the nav CTA), and the
+// band CTA must keep a >=44px hit area to stay within the site's own
+// tap-target standard. These are STATIC SOURCE GUARDS (regex over the served
+// HTML/CSS), not behavioral tests: CI has no browser.
+const specimenCtaHtml = read("public/specimen.html");
+const specimenCtaBand = specimenCtaHtml.match(/<div class="band">([\s\S]*?)<\/div>\s*<footer>/);
+if (!specimenCtaBand) {
+  failures.push("Specimen page must keep an in-content conversion CTA band between the report and the footer.");
+} else {
+  if (!/<a\b[^>]*class="cta"[^>]*href="\/#start"[^>]*>Request the appraisal<\/a>/.test(specimenCtaBand[1])) {
+    failures.push("Specimen conversion band must carry a .cta link to /#start labelled \"Request the appraisal\".");
+  }
+  if (!/No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees\. Only the work\./.test(specimenCtaBand[1])) {
+    failures.push("Specimen conversion band must keep the no-guarantees note.");
+  }
+}
+const specimenCtaCss = read("public/specimen.css");
+if (!specimenCtaCss.includes(".band .cta")) {
+  failures.push("specimen.css must style the band conversion CTA (.band .cta).");
+}
+if (!/\.band \.cta\{[^}]*padding:16px 24px/.test(specimenCtaCss)) {
+  failures.push("Specimen band CTA must keep a >=44px tap target (padding:16px 24px).");
 }
 
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {

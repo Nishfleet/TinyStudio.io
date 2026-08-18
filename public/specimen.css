@@ -23,3 +23,10 @@
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xs1{padding-top:44px}
 .xs2{font-size:56px}
+
+/* in-content conversion CTA on the dark band — pill link, >=44px hit area */
+.band{margin-top:84px}
+.band .cta{display:inline-block;margin-top:26px;border:1px solid rgba(242,234,220,.4);border-radius:999px;
+  padding:16px 24px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+  color:#F2EADC;text-decoration:none;transition:border-color var(--mid) var(--ease),background var(--mid) var(--ease)}
+.band .cta:hover,.band .cta:focus-visible{border-color:var(--brass-lt);background:rgba(201,165,102,.14)}
