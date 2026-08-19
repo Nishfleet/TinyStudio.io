@@ -1179,7 +1179,9 @@ const ownedPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
   ["desk page", read("public/agents.html")],
-  ["specimen page", read("public/specimen.html")]
+  ["specimen page", read("public/specimen.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
 ];
 
 const identityFacts = [
@@ -1580,9 +1582,9 @@ if (!worker.includes("https://cloudflareinsights.com")) {
 const socialSharePages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
 
@@ -1654,9 +1656,9 @@ for (const [pageName, pageHtml, pageUrl] of socialSharePages) {
 const structuredDataPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 
 const ORGANIZATION_ID = "https://tinystudio.io/#organization";
@@ -1886,15 +1888,14 @@ for (const [pageName, pageHtml] of internalLinkPages) {
 // link sits inside the head and points at the absolute https://tinystudio.io
 // address of the page. The deployed worker 307-redirects every .html form to
 // its clean extensionless twin, so a canonical must name the address that
-// serves 200, never the redirecting form: the audit page's canonical is the
-// clean /audit, while the remaining pages keep their .html form here until
-// they are migrated the same way.
+// serves 200, never the redirecting form: every page's canonical names its
+// clean extensionless address.
 const canonicalPages = [
   ["homepage", siteHome, "https://tinystudio.io/"],
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
-  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents.html"],
-  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing.html"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen.html"]
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
 ];
 
 const canonicalLinkPattern = /<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi;
@@ -1967,12 +1968,12 @@ for (const [pageName, pageHtml] of titlePages) {
 }
 
 // ---- Intake field labels (activation) -------------------------------------
-// Both appraisal intake forms (homepage and /audit) labelled their fields
-// only with placeholder text, which disappears the moment a buyer starts
-// typing and is not a persistent programmatic label. Each intake input must
-// carry a non-empty aria-label so the field keeps its name for assistive
-// tech and for the browser's own validation announcements, no matter what
-// the field contains.
+// Both appraisal intake forms (homepage and /audit) must label each field
+// persistently AND programmatically: a visible <label> bound to the input via
+// label[for]/input[id], so the name survives typing and is exposed to
+// assistive tech and the browser's validation announcements. aria-label alone
+// is programmatic but invisible; placeholder-only labels disappear the moment
+// a buyer starts typing — neither is enough.
 const intakePages = [
   ["homepage", siteHome],
   ["audit page", siteAudit]
@@ -1982,9 +1983,16 @@ for (const [pageName, pageHtml] of intakePages) {
   for (const input of pageHtml.matchAll(/<input\b[^>]*>/gi)) {
     const tag = input[0];
     if (!/\bname="(?:website|email)"/.test(tag)) continue;
-    const aria = tag.match(/\baria-label="([^"]*)"/)?.[1] ?? "";
-    if (!aria.trim()) {
-      failures.push(`Intake input on ${pageName} must carry a persistent programmatic aria-label (placeholder-only labels disappear as buyers type): ${tag}`);
+    const id = tag.match(/\bid="([^"]*)"/)?.[1] ?? "";
+    if (!id.trim()) {
+      failures.push(`Intake input on ${pageName} must carry an id so a persistent <label> can bind to it: ${tag}`);
+      continue;
+    }
+    const labelBody = pageHtml.match(
+      new RegExp(`<label\\b[^>]*\\bfor="${id}"[^>]*>([\\s\\S]*?)<\\/label>`, "i")
+    )?.[1] ?? "";
+    if (!labelBody.trim()) {
+      failures.push(`Intake input on ${pageName} must be bound to a persistent programmatic <label for="${id}"> (placeholder-only labels disappear as buyers type): ${tag}`);
     }
   }
 }
