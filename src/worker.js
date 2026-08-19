@@ -100,6 +100,12 @@ const MAX_FIELD_LENGTH = 1800;
 const MAX_REQUEST_BYTES = 24000;
 const SOFT_AGENT_RUNS_PER_EMAIL_PER_DAY = 5;
 const MAX_AGENT_RUNS_PER_IP_PER_DAY = 20;
+// Public promise: "Six a month. When the sixth is taken, the intake closes
+// until the next." (homepage, /audit, /pricing, /agents, llms.txt). The
+// signup endpoint must honor it: the sixth valid signup in a calendar month
+// is accepted, and any further POST in the same month gets a truthful
+// closed-intake response instead of a normal success.
+const MAX_APPRAISALS_PER_MONTH = 6;
 // The current product's public intake (homepage and /audit) posts to
 // /api/signups. Its rows and the public /health surface must be labeled with
 // the current offer — The Website Appraisal — never the retired self-serve
@@ -307,6 +313,46 @@ function htmlRedirect(url, signal) {
   return withSecurityHeaders(Response.redirect(nextUrl.toString(), 303));
 }
 
+// Truthful closed-intake page for the monthly "six a month" cap. The form
+// posts with Accept: text/html, so a redirect would need homepage machinery
+// to render; a self-contained response (the same pattern as the retired-host
+// pages) tells the visitor the truth in place, with no JS and no new asset.
+function closedIntakeResponse() {
+  return withSecurityHeaders(
+    new Response(
+      `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TinyStudio — The intake is closed</title>
+    <style>
+      body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fffdf7;color:#171713;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+      main{width:min(720px,calc(100% - 40px));padding:48px;border:1px solid rgba(23,23,19,.14);border-radius:8px;background:#fff}
+      h1{margin:0;font-size:clamp(34px,6vw,60px);line-height:1.05;letter-spacing:0}
+      p{color:#57534b;font-size:18px;line-height:1.55}
+      a{display:inline-flex;align-items:center;min-height:46px;padding:0 16px;border-radius:8px;background:#171713;color:#fffdf7;font-weight:800;text-decoration:none}
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>The six appraisals for this month are taken.</h1>
+      <p>Six a month, done by hand. When the sixth is taken, the intake closes until the next — and it is closed now. The form on the homepage will accept requests again on the first of next month.</p>
+      <a href="https://tinystudio.io/">Back to TinyStudio.io</a>
+    </main>
+  </body>
+</html>`,
+      {
+        status: 409,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store"
+        }
+      }
+    )
+  );
+}
+
 function signupPagePath(request, fallback) {
   const referer = request.headers.get("Referer");
 
@@ -377,6 +423,31 @@ async function signupResponse(request, env, url) {
       return htmlRedirect(url, "invalid");
     }
     return jsonResponse({ ok: false, error: "invalid_email" }, { status: 400 });
+  }
+
+  // Monthly intake cap (the "six a month" promise). The bucket key uses the
+  // calendar month so the counter resets naturally on the first of the next
+  // month; the increment is the reservation, so the sixth request passes and
+  // every request after it in the same month is told the truth: the intake
+  // is closed until the next. The counter write is a storage operation, so a
+  // missing or broken D1 must fail closed (503), never accept the signup.
+  let monthCount;
+  try {
+    const monthBucket = `signup:${new Date().toISOString().slice(0, 7)}`;
+    monthCount = await incrementUsageCounter(env, monthBucket);
+  } catch (error) {
+    console.warn("tinystudio_signup_storage_failed", error.message || "storage failed");
+    return jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 });
+  }
+
+  if (monthCount > MAX_APPRAISALS_PER_MONTH) {
+    if (wantsHtmlRedirect(request)) {
+      return closedIntakeResponse();
+    }
+    return jsonResponse(
+      { ok: false, error: "intake_closed", message: "The six appraisals for this month are taken. The intake is closed until the next." },
+      { status: 409 }
+    );
   }
 
   try {
