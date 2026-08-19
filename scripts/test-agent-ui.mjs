@@ -225,7 +225,7 @@ async function loadAuditScript() {
 
 test("AI-search fixture runs carry the right structure for their states", () => {
   const states = [...new Set(AI_EVIDENCE.runs.map((run) => run.state))].sort();
-  assert.deepEqual(states, ["absent", "not-tested", "wrong"]);
+  assert.deepEqual(states, ["absent", "found", "not-tested", "wrong"]);
 
   const questionIds = new Set(AI_QUESTIONS.questions.map((question) => question.id));
   const engineIds = new Set(AI_EVIDENCE.engines.map((engine) => engine.id));
@@ -253,21 +253,16 @@ test("AI-search fixture runs carry the right structure for their states", () => 
   }
 });
 
-test("AI-search q5 wrong run under-claims instead of over-claiming its citation", () => {
+test("AI-search q5 found run cites the tested business and claims no page-specific fix", () => {
   const run = AI_EVIDENCE.runs.find(
     (candidate) => candidate.questionId === "q5-what-is-tinystudio-io" && candidate.engine === "google"
   );
   assert.ok(run, "google/q5 run exists");
-  assert.equal(run.state, "wrong");
+  assert.equal(run.state, "found");
   assert.ok(run.remediation, "q5 carries a remediation note");
   assert.equal(run.remediation.page, undefined, "q5 must not claim a page-specific fix");
-  assert.match(run.remediation.text, /cited page is the homepage/);
-  assert.doesNotMatch(
-    run.remediation.text,
-    /built from the homepage's own description/,
-    "q5 must not claim the homepage's own description produced the answer"
-  );
-  assert.match(run.remediation.text, /no page-specific fix is claimed/);
+  assert.ok(run.sources.some((source) => source.url.startsWith("https://tinystudio.io")), "q5 cites the tested business's site");
+  assert.match(run.captured, /free website leak audits for high-ticket service homepages/);
 });
 
 test("AI-search renderer shows all four states and keeps not-tested distinct from absent", async () => {
