@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -583,8 +583,8 @@ for (const [file, needles] of responsiveCss) {
 const tapTargetCss = [
   // [file, mobile-block needles, whole-file needles]
   ["shared.css",
-    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
-    ["border-radius:999px;padding:16px 20px"]],
+    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}", "form.lead.two > input{padding:12px 14px;min-height:44px;box-sizing:border-box}", "form.lead.two > input + input{border-left:0;border-top:1px solid var(--line)}"],
+    ["border-radius:999px;padding:16px 20px", "form.lead.two > input{padding:12px 18px 11px 24px;min-height:44px;box-sizing:border-box}"]],
   ["index.css",
     [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
     ["border-radius:999px;padding:16px 20px"]],
@@ -1413,15 +1413,35 @@ for (const [pageName, pageHtml] of metaDescriptionPages) {
 // inside its head, pointing at the served /apple-touch-icon.png asset, and
 // the asset itself must stay a tracked, valid PNG so a dropped or rewritten
 // file cannot silently leave the pages pointing at nothing.
-const iconPages = [
-  ["homepage", siteHome],
-  ["audit page", siteAudit],
-  ["desk page", read("public/agents.html")],
-  ["pricing page", read("public/pricing.html")],
-  ["specimen page", read("public/specimen.html")],
-  ["brief-requested page", read("public/brief-requested.html")],
-  ["agent-desk page", read("public/agent-desk.html")]
-];
+//
+// The page list is read off disk rather than hardcoded. A hardcoded list only
+// guards the pages that existed when it was written, so a newly added public
+// page shipping without the link would re-create the exact fault this finding
+// names while CI stayed green (verified 2026-08-20: an un-iconed new
+// public/*.html passed the old guard). Reading public/*.html means every
+// served HTML page — including one added tomorrow — is guarded by default.
+const ICON_PAGE_NAMES = new Map([
+  ["index.html", "homepage"],
+  ["audit.html", "audit page"],
+  ["agents.html", "desk page"],
+  ["pricing.html", "pricing page"],
+  ["specimen.html", "specimen page"],
+  ["brief-requested.html", "brief-requested page"],
+  ["agent-desk.html", "agent-desk page"]
+]);
+const publicHtmlFiles = readdirSync(new URL("../public", import.meta.url))
+  .filter((name) => name.endsWith(".html"))
+  .sort();
+// A rename or deletion must not silently shrink the guarded set either.
+for (const knownFile of ICON_PAGE_NAMES.keys()) {
+  if (!publicHtmlFiles.includes(knownFile)) {
+    failures.push(`Served page public/${knownFile} is missing; every public HTML page must stay served with an apple touch icon.`);
+  }
+}
+const iconPages = publicHtmlFiles.map((file) => [
+  ICON_PAGE_NAMES.get(file) ?? `public/${file}`,
+  read(`public/${file}`)
+]);
 
 for (const [pageName, pageHtml] of iconPages) {
   const head = pageHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
