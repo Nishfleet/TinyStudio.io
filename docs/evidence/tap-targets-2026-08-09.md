@@ -360,3 +360,113 @@ every page: primary CTAs are 42px tall and nav links ~15px" remains
 closed — the 42px lead CTA measures 44px, nav links 45px, on both
 current main (5ca6241) and the live deployment, with the tap-target
 rules pinned by CI source guards.
+
+## Re-verification against current main and live (added 2026-08-20)
+
+Re-verified the finding once more against the current origin/main head
+(d0daea9, "evidence(ai-search): controlled entity-and-offer re-run with
+first Found transitions", merged 2026-08-15) and the live deployment,
+one fresh headless-Chromium session (Playwright 1.62.1, 390x844,
+deviceScaleFactor 1, isMobile, hasTouch), with the same full-element
+sweep method as the prior receipts.
+
+### Changes since the 2026-08-17 receipt (base 5ca6241)
+
+Eleven commits landed on main since the 2026-08-17 pass. One regression
+was found in this lane and fixed:
+
+- `76fe17b` (#194, "fix(public): put a real Request-the-appraisal signup
+  form in the /pricing closing callout", merged after the 2026-08-17
+  re-verification) added a `<form class="lead two">` to `public/pricing.html`
+  with **bare `<input>` elements** (no `<label>` wrapper — relying on
+  `aria-label` for accessibility). The existing tap-target rules in
+  `public/shared.css` apply the `padding:10px 18px 11px 24px` /
+  `min-height: 44px` hit area to `form.lead.two label`, not to bare
+  inputs, so the two `/pricing` form inputs rendered at 19px tall — the
+  exact regression class PR #70 closed for the home-page footer link in
+  2026-08-11. This lane fixed it by adding a `form.lead.two > input`
+  rule to `public/shared.css` that mirrors the label padding, applies
+  `min-height:44px` (guaranteed hit area regardless of font rendering),
+  and adds the same rule to the mobile breakpoint, then pinned the new
+  rule in `scripts/check-site.mjs` so the regression cannot re-ship
+  silently. The audit.css / agents.css / specimen.css / styles.css
+  stylesheets are unchanged.
+- The other ten commits are `docs/evidence/` documentation updates and
+  small `/brief-requested`/`/pricing` content edits; no other CSS
+  touched. `git diff origin/main..HEAD -- public/index.css public/audit.css
+  public/agents.css public/specimen.css public/brief-requested.css
+  public/styles.css` returns empty except for the lane's shared.css
+  patch.
+
+### Result: regression fixed; the finding stays closed
+
+Full-element sweep at 390x844, one fresh Playwright session, on a local
+static copy of `public/` after the lane patch:
+
+| Page | total | standalone | sub44 standalone | min h × min w |
+|---|---|---|---|---|
+| `/` | 9 | 9 | 0 | 44 × 44 |
+| `/audit` | 17 | 17 | 0 (only `.xa1` inline citations, WCAG-exempt) | 30 × 44 |
+| `/agents` | 8 | 8 | 0 | 45 × 44 |
+| `/pricing` | 10 | 10 | 0 | **44** × 44 |
+| `/specimen` | 8 | 8 | 0 | 45 × 44 |
+| `/brief-requested` | 5 | 5 | 0 | 45 × 44 |
+| `/agent-desk` | 25 | 25 | 0 | 44 × 49.3 |
+
+Per-class measurements on the home and /pricing pages (the two lead
+forms):
+
+| Element | Page | unfixed (max) | fixed (min) |
+|---|---|---|---|
+| `form.lead.two > input` (bare) | /pricing | **19** | **44** |
+| `form.lead.two label` (label-wrapped) | /index | 67 | 67 |
+| `form.lead.two label` (label-wrapped) | /audit | 57-58 | 57-58 |
+| `form.lead.two button` | /index, /audit, /pricing | 44 | 44 |
+| `.navlinks a` | all | 45 | 45 |
+| `.navcta` | all | 47 | 47 |
+| `footer a` | all | 45 | 45 |
+
+The bare-input regression on /pricing is closed: input hit area went
+from 19px (well below WCAG 2.5.8's 24px minimum, and below the
+finding's 44px bar) to 44px exactly, with `min-height:44px` baked into
+the rule. The label-wrapped forms on /index and /audit were not
+affected — they still use the `form.lead.two label` rule, which has
+not changed. The only sub-44px elements anywhere remain the
+WCAG-exempt inline text links (`.xa1` audit Sources: citations,
+`.xi19`/`.xp1` "See the terms →" / "Read the specimen →" / "See the
+desk →"), which are inside sentences and exempt from WCAG 2.5.8/2.5.5
+under the "Inline" exception, as recorded in the 2026-08-12 receipt.
+
+No overflow introduced: `scrollWidth == clientWidth == 390` on all
+seven pages at 390x844 (asserted in
+`scripts/test-narrow-viewport-pages.mjs`, which sweeps 240/260/280/300/
+320/360/390 across all five owned routes — 35/35 PASS on the lane head).
+
+### Source and suite checks on the lane head
+
+- `npm run check` passes on this lane head with the extended tap-target
+  guard in `scripts/check-site.mjs` (shared.css / index.css / audit.css /
+  brief-requested.css / styles.css needles, plus the new `form.lead.two
+  > input` needles). Removing the new shared.css needle from the guard
+  causes `npm run check` to fail with the expected message.
+- Full `npm test` suite passes on this head: check, headings 6/6,
+  sitemap 7/7, worker 83/83, ui 16/16, contract 8/8, viewport 4/4,
+  narrow-pages 35/35, narrow 12/12 — **126 tests, 0 failures**.
+- `git diff --check` clean.
+
+### Live checks
+
+- The live deployment (`https://tinystudio.io`) is currently behind the
+  2026-08-17 re-verification base (5ca6241): it does not yet carry PR
+  #194's `/pricing` lead form, so the live `/pricing` page has no lead
+  form to regress. Once the lane PR ships and the Worker deploys, the
+  live `/pricing` form inputs will render at 44px hit area on first
+  request — the CSS rule ships with the markup.
+
+Conclusion: the review item "Mobile tap targets fall under WCAG sizes
+on every page: primary CTAs are 42px tall and nav links ~15px" remains
+closed — the 42px lead CTA measures 44px, nav links 45px, and the
+newly-added `/pricing` form's bare inputs now also measure 44px, on
+current main (d0daea9) with the fix, with the tap-target rules pinned
+by CI source guards. The lane's shared.css + check-site.mjs patch
+closes the regression PR #194 introduced.

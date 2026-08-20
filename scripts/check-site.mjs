@@ -583,8 +583,8 @@ for (const [file, needles] of responsiveCss) {
 const tapTargetCss = [
   // [file, mobile-block needles, whole-file needles]
   ["shared.css",
-    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
-    ["border-radius:999px;padding:16px 20px"]],
+    [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}", "form.lead.two > input{padding:12px 14px;min-height:44px;box-sizing:border-box}", "form.lead.two > input + input{border-left:0;border-top:1px solid var(--line)}"],
+    ["border-radius:999px;padding:16px 20px", "form.lead.two > input{padding:12px 18px 11px 24px;min-height:44px;box-sizing:border-box}"]],
   ["index.css",
     [".logo{padding:11px 0}", ".navlinks a{padding:15px 0}", ".navcta{padding:15px 20px}", "footer a{padding:16px 0}"],
     ["border-radius:999px;padding:16px 20px"]],
