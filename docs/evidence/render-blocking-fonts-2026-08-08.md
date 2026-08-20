@@ -444,3 +444,77 @@ b8f6046e942a ("Render-blocking resources on home") remains closed on the code
 side (PRs #20 and #23), in CI (`npm run check:render-blocking`), and against
 the deployed site; this lane (2026-08-17) re-confirmed all three on the
 current head and found nothing further to change.
+
+### Closeout re-verification (added 2026-08-20)
+
+Re-verified against the current origin/main head (`d0daea9`, "evidence(ai-search):
+controlled entity-and-offer re-run with first Found transitions
+(2026-08-15) (#227)", merged 2026-08-15) after the commits that landed since
+the 2026-08-17 closeout — d0daea9 (controlled AI-search re-run, no public
+assets), dda25f2 (worker six-a-month intake cap honesty, worker-only),
+43cc831 (study figures refreshed, copy in the finding section), 66f7bd6
+(appraisal intake fields switched from `aria-label` to wrapped `<label
+for=...><span>` elements, PR #154), 23a7f06 (footer brand TinyStudio, copy
+only), ed2b1a9 (appraisal-page canonicals and JSON-LD WebPage @ids pointed
+at clean non-307 URLs), 76fe17b (real Request-the-appraisal signup form in
+the /pricing closing callout), 9f79c71 (check-site guard catches every
+redirecting spelling of an internal `.html` page link), 5ca6241 (serve
+`/favicon.ico` from the canonical SVG so legacy clients stop 404-ing) and
+the docs-only re-verification receipts — none of which touched the font
+loading shape. `git diff 798cd71..d0daea9 -- public/fonts.js` is empty;
+`public/index.html` lines 56–59 (the preload link, `fonts.js` promotion
+script and `<noscript>` fallback) are unchanged; `shared.css` carries no
+`@import` chain on any of the six pages. The full test suite passes on this
+head (`node scripts/check-site.mjs` — "TinyStudio.io checks passed"; the
+`--test` runs across `test-heading-hierarchy.mjs`, `test-sitemap.mjs`,
+`test-agent-worker.mjs`, `test-agent-ui.mjs`, `test-product-contract.mjs`,
+`test-study-freshness.mjs` — 122 tests, 0 failures; `test-first-viewport-
+audience.mjs` — 4, 0 failures; `test-narrow-viewport.mjs` and
+`test-narrow-viewport-pages.mjs` — pass; `git diff --check` is clean). Two
+fresh measurements:
+
+1. `npm run check:render-blocking` on the current working tree at `d0daea9`
+   (real Chromium, production CSP, css2 intercepted and delayed 2500ms,
+   stubbed response): all six pages PASS — css2 non-blocking,
+   first-contentful-paint never waits for it (homepage 248ms, audit 132ms,
+   desk 104ms, pricing 72ms, specimen 80ms, brief-requested 68ms; the css2
+   response arrives at 2500ms, i.e. ~2.3–2.4s after first paint), no
+   render-blocking resources other than the site's own same-origin
+   stylesheets, promoted sheet applied.
+
+2. Live re-measurement of the deployed pages in real Chromium (unthrottled),
+   served with the production CSP header emitted by the worker (verified via
+   `curl -sI https://tinystudio.io/`). The desk page is measured at its
+   current served path `/agents` (the retired `/desk` path 404s):
+
+| Page | css2 renderBlockingStatus | FCP (ms) | css2 responseEnd (ms) | Render-blocking resources | Fonts load (Karla / Fraunces) | Promoted sheet applied |
+|---|---|---|---|---|---|---|
+| index.html (home) | non-blocking | 236 | 400 | same-origin index.css only | yes / yes | yes |
+| audit.html | non-blocking | 248 | 436 | same-origin shared.css, audit.css | yes / yes | yes |
+| agents.html (desk, served at /agents) | non-blocking | 260 | 407 | same-origin shared.css, agents.css | yes / yes | yes |
+| pricing.html | non-blocking | 216 | 381 | same-origin shared.css, pricing.css | yes / yes | yes |
+| specimen.html | non-blocking | 260 | 413 | same-origin shared.css, specimen.css | yes / yes | yes |
+| brief-requested.html | non-blocking | 200 | 380 | same-origin shared.css, brief-requested.css | yes / yes | yes |
+
+The live-deployed HTML on every page still carries the preload link, the
+`fonts.js` promotion script and the `<noscript>` fallback (the same three
+head elements the CI check and the live re-measurements rely on), and still
+serves without any `@import` chain — so the served bytes keep the fix even
+where the deployed copy is one fix behind the current source head (the
+deployed intake fields are still on `aria-label`, replaced in the source by
+66f7bd6; the served font head block, which is what this finding measures,
+is unchanged in both source and deploy). On the unthrottled live run the
+preloaded css2 (a non-blocking style preload, fetched at preload priority
+from the first byte) arrives ~140–170ms after first-contentful-paint on
+each page — the same ordering every earlier live run showed. That is
+timing, not blocking: the deterministic delayed-css2 run above paints
+~2.3–2.4s before the css2 response arrives, so first paint cannot be waiting
+on it.
+
+Same result as every earlier pass: no render-blocking scripts, no
+render-blocking external resources, first paint never waits for the font
+stylesheet, fonts still load and apply under the production CSP. Finding
+b8f6046e942a ("Render-blocking resources on home") remains closed on the code
+side (PRs #20 and #23), in CI (`npm run check:render-blocking`), and against
+the deployed site; this lane (2026-08-20) re-confirmed all three on the
+current head and found nothing further to change.
