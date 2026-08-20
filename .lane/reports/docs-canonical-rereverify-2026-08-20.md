@@ -16,8 +16,9 @@ origin/main head d0daea9 and the deployed site:
    exists on this host (`node` v22.23.1, `npm not found`), so each script in
    the chain ran directly: `node scripts/check-site.mjs` →
    "TinyStudio.io checks passed"; headings 6/6, sitemap 7/7, worker 80/80,
-   ui 16/16, contract 8/8, first-viewport 4/4, narrow-pages 34/34 rows PASS,
-   narrow 11/11 rows PASS. The "Canonical URLs (dogfood)" guard
+   ui 16/16, contract 8/8, study-freshness pass, first-viewport 4/4,
+   narrow-pages 34/34 rows PASS, narrow 11/11 rows PASS. The "Canonical URLs
+   (dogfood)" guard
    (`scripts/check-site.mjs`, lines ~1893-1934) still enforces exactly one
    non-commented `<link rel="canonical">` inside `<head>` per page, a
    non-empty href pointing at the page's canonical `https://tinystudio.io`
@@ -110,5 +111,12 @@ every re-verification receipt since the closeout.
 Unchanged from the standing receipt: the live browser check is manual, not a
 CI gate. What prevents regression in CI is the source-string guard in
 `scripts/check-site.mjs`; the served pages are the static files verbatim
-through the Worker's ASSETS binding, so source and served bytes cannot drift
-unless the Worker's asset serving changes.
+through the Worker's ASSETS binding. Source and served bytes can still drift
+in one specific way: when a commit lands on `main` but its static assets
+have not yet been redeployed to the Worker, the live deployment reflects
+the previous deployment's bytes — this PR itself records that exact drift on
+`/agents`, `/pricing`, and `/specimen` (the PR #218 deployment lag), and
+the home canonical finding is unaffected only because `public/index.html`
+is byte-identical between the two deployments. The CI guard enforces
+source-side correctness; live parity is established per-page by the manual
+browser check, not by the source string guard.
