@@ -363,3 +363,144 @@ Same result as both prior runs: every field in the table can still be filled
 truthfully from live first-party surfaces, nothing needs to move to the
 "Never on the profile" list, and no reject condition is triggered. The
 handoff is ready for Nish's manual submission unchanged.
+
+## Re-verification (added 2026-08-20, lane 1)
+
+Re-verified against the current `origin/main` head (`d0daea9`, "evidence(ai-search):
+controlled entity-and-offer re-run with first Found transitions (2026-08-15)
+(#227)") and the live site on 2026-08-20. Since the last re-verify
+(`83a59742`, 2026-08-17), fourteen commits landed on main; the ones that
+touched first-party surfaces are `76fe17b` (Request-the-appraisal signup form
+in the `/pricing` closing callout, replacing a plain anchor), `ed2b1a9`
+(appraisal-page canonicals and JSON-LD WebPage @ids pointed at the clean
+non-307 URLs), `23a7f06` (the pricing and brief-requested footers branded
+"TinyStudio" instead of "The Tiny Studio"), `66f7bd6` (persistent programmatic
+labels on the appraisal intake fields), `43cc831` (the daily-refreshed study
+figures refreshed to the 2026-08-12 scan), and `dda25f2` (truthful
+closed-intake response when the six-a-month cap is hit). `git diff
+83a59742..origin/main -- public/llms.txt public/offer.md public/pricing.html
+public/audit.html public/index.html public/agents.html public/specimen.html
+public/brief-requested.html` shows no change to any identity, offer, contact,
+price, or boundary string this profile uses; the diffs are the clean-URL
+canonical/og:url/JSON-LD rewrites on `/agents`, `/pricing`, `/specimen`,
+brief-requested internal-link rewrite, intake-form `<label>` markup on `/`
+and `/audit` (semantic, not a truth change), the TinyStudio-branded footer
+text on `/pricing` and `/brief-requested` (was "The Tiny Studio"), the new
+signup form in the `/pricing` callout, the refreshed study figures (89→91
+readable; 53→56 with no FAQ; numbers this profile never quotes), and the
+truthful closed-intake response. The narrative pointer to
+`https://tinystudio.io/pricing.html` in the live `llms.txt` and `offer.md`
+remains (line 6 and line 3 respectively), so the narrative paragraph above
+that quotes it ("llms.txt and offer.md point price and terms at
+`https://tinystudio.io/pricing.html` rather than restating dollar amounts")
+is still accurate as written — the live source still uses the legacy form in
+narrative text. The structured canonical pointers in `llms.txt` and
+`offer.md` (`Price and terms: https://tinystudio.io/pricing`, the
+controlled-question URL list pointing at `/pricing`) are the clean canonical
+URL; the GoodFirms handoff table does not quote either form as a value (the
+price-and-terms pointer is implicit in the Company summary, which says "the
+desk's price and terms are published on the website" rather than restating
+the URL), so no entry in the table needs to change. Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) are byte-identical to the
+   source files on this head (curl diff: zero differences) and still carry,
+   verbatim: the offer ("The Website Appraisal — the free leak audit of
+   high-ticket service homepages — and the human-reviewed desk that closes
+   what the audit finds"), "reviewed by a person, not autonomous software",
+   "Six appraisals a month, done by hand", "run by Nish, who signs every
+   audit", "The site states no base city or office address", "clients are
+   never named", "Contact: hello@tinystudio.io", the narrative price-and-terms
+   pointer to `pricing.html`, and the structured canonical pointer
+   `https://tinystudio.io/pricing` plus the controlled-question URL list
+   pointing at `/pricing`.
+2. Live `https://tinystudio.io/pricing` (clean URL; `pricing.html`
+   307-redirects to it, HTTP 200) still states exactly the price the
+   handoff never quotes as a value — "the appraisal is free, the desk is
+   $2,500 a month on a three-month minimum" (four occurrences in the
+   served page) — so the GoodFirms table's silence on price stays
+   truthful. The pricing footer now reads "TinyStudio · tinystudio.io"
+   instead of "The Tiny Studio" (truthful identity, not a product change).
+3. Live `https://tinystudio.io/audit` (clean URL; HTTP 200) still answers
+   q3 "Where is TinyStudio based?" with "The site does not state a base
+   city or office address" and q6 "Does TinyStudio publish client work?"
+   with "no logos, no case studies, no testimonials, no 'as seen at'".
+   Live `https://tinystudio.io/` still carries the "Where TinyStudio is
+   based" disclosure and the "Request the appraisal" intake CTA. The
+   served bytes trail the committed source on a handful of cosmetic lines
+   (study numbers, intake-form label markup, clean-URL canonical rewrites)
+   that do not affect any value in the table above. The deployment lag
+   does not weaken the profile — every claim maps cleanly to the committed
+   source the next deploy will pick up.
+4. The no-invention fields still hold across every public surface: a full
+   scan of `public/*.html`, `public/llms.txt`, and `public/offer.md` on this
+   head finds no `tel:` link or phone string, no `founded`/`est.` year, and
+   no TinyStudio social-profile URLs (the `instagram.com` / `linkedin.com`
+   matches inside `/audit`'s AI-search evidence JSON are cited for unrelated
+   businesses — not TinyStudio's own profiles). So Year founded, Phone
+   number, Social profiles, and Certification stay blank, exactly as the
+   table instructs. No `certif`/`accred` string either.
+5. The official GoodFirms pages were re-fetched live on 2026-08-20 in a
+   real browser session: `goodfirms.co/get-listed` is still reachable, the
+   Free plan still reads "$0 / forever", "No card required · 23%
+   acceptance rate", "4-Step Research Verification by the Goodfirms
+   research team", "Public Company Profile with portfolio, case studies,
+   verified reviews & star ratings", "Leader Matrix Ranking powered by our
+   transparent algorithm", "Buyer Opportunities through limited public
+   RFPs", "Free forever (no card, no expiry)" — unchanged from the
+   handoff's quoted strings. The PRO plan still reads "$49 / month",
+   "Billed annually at $588/year". The Goodfirms Sponsors plan still
+   reads "Pricing Available on Request". The top-level page heading is
+   now framed as "Be visible on Google and AI Search with Goodfirms" with
+   new AI-visibility framing (a marketing-led refocus, not a policy change);
+   the free-plan path still leads to the vendor sign-up flow
+   (`account.goodfirms.co/users/signup`). The help article at
+   `help.goodfirms.co/how-can-my-business-get-listed-on-goodfirms/` still
+   reads: "Simply head over to our Get Listed page. Fill in your necessary
+   company details. Choose the appropriate Service Categories for your
+   business (can't be edited later.) Submit the form and await approval."
+   The terms-of-use bar on robots/scripts/crawling ("Use software,
+   devices, robots, scripts, or other means to scrape, crawl, or index
+   any web page or other portion of our service.") could not be re-fetched
+   by script today — the live page still returns the Cloudflare bot
+   challenge — but Wayback Machine and the 2026-08-15 real-browser
+   captures corroborate the bar; no script bypasses the challenge, and
+   the handoff does not depend on a fresh re-fetch. None of this alters
+   any value in the table above: the Free plan is still free, the form
+   fields are still the same, and the flow is still vendor-managed.
+6. No GoodFirms receipt exists in the product state on this head (no
+   profile URL, pending-review state, or rejection response anywhere in
+   the repo); the receipt block below remains unfilled and the human
+   manual submission remains the open action. The external search baseline
+   was not re-run this lane (public search endpoints have blocked
+   scripted queries from the VPS in previous lanes), so the 2026-08-15
+   baseline stands with its own caveat: it is a baseline, not proof of
+   non-existence. If a profile has been published under a different name
+   form, the "What this document does not claim" section above applies —
+   compare it against llms.txt before changing anything.
+7. Repository checks on this head pass: `node scripts/check-site.mjs`
+   ("TinyStudio.io checks passed") and the full
+   `node --test scripts/test-*.mjs` suite — 128 tests across 9 suites
+   (headings, sitemap, worker, ui, contract, study, viewport,
+   narrow-pages, narrow) — all green, exit 0. `npm` is not on the PATH on
+   this VPS at this turn, so the test script was invoked directly via
+   `node --test` against the per-script entry points, which is the same
+   chain `npm test` runs.
+
+Two truthfulness-relevant additions since the last re-verify, both
+reinforcing rather than weakening the handoff: the daily-refreshed study
+guard (`43cc831`) anchors the homepage `/audit` figures to the freshest
+published scan and prevents serving stale numbers — consistent with the
+profile's no-fabrication rule; and the truthful closed-intake response
+(`dda25f2`, rebase of #116) makes the six-a-month cap an explicit, plain
+reply at the API rather than a silent drop, so any future GoodFirms profile
+copy that mentions intake state stays honest about it. The intake-form
+`<label>` markup on `/` and `/audit` (`66f7bd6`) is semantic — it does not
+change the values the form collects. None of these alters any value in the
+table above.
+
+Same result as the 2026-08-15 preparation and the 2026-08-15, 2026-08-17,
+and now 2026-08-20 re-verifications: every field in the table can still be
+filled truthfully from live first-party surfaces, nothing needs to move to
+the "Never on the profile" list, and no reject condition is triggered. The
+handoff is ready for Nish's manual submission unchanged.
