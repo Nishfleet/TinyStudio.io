@@ -1,6 +1,6 @@
 # The Website Appraisal
 
-TinyStudio's current offer: The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds. The audit is free and yours to keep; the desk's price and terms are on pricing.html.
+TinyStudio's current offer: The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds. The audit is free and yours to keep; the desk's price and terms are on https://tinystudio.io/pricing.
 
 ## Identity
 
