@@ -12,7 +12,7 @@ a superseded campaign plan.
 
 ## What This Repo Owns
 
-- The public `tinystudio.io` and `www.tinystudio.io` Website Appraisal site: the homepage, the appraisal flow, the human-reviewed desk, pricing, specimen, and the agent-readable truth at `/llms.txt` and `/offer.md`.
+- The public `tinystudio.io` and `www.tinystudio.io` Website Appraisal site: the homepage, the appraisal flow, the human-reviewed desk, pricing, specimen, the MSP/IT buyer-intent page at `/msp`, and the agent-readable truth at `/llms.txt` and `/offer.md`.
 - The retired self-serve Agent Desk, still served at `/agent-desk` as a legacy surface, and the legacy `/api/agent-audit` generation endpoint, which remain operational but are not the current product.
 - Email capture through `/api/signups`, stored in Cloudflare D1.
 - Lightweight agent usage metadata in Cloudflare D1, including daily rate-limit counters.
