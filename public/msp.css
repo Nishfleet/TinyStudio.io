@@ -48,11 +48,12 @@
   .bandgrid{grid-template-columns:1fr;gap:36px}
   .stat{font-size:clamp(72px,21vw,118px)}
   section{margin-top:84px;padding-top:48px}
-  .checks{margin-top:40px;grid-template-columns:1fr}
+  .checks{grid-template-columns:1fr;margin-top:40px}
   .check,.check:nth-child(even),.check:nth-child(odd){padding:30px 0;border-right:0;border-left:0;border-bottom:1px solid var(--hair)}
   .check:first-child,.check:nth-child(2){padding-top:30px}
   .check:last-child{border-bottom:0;padding-bottom:0}
   .row{flex-wrap:wrap;gap:2px 22px}
+  .row .v{white-space:normal}
   .q{grid-template-columns:1fr;gap:14px}
   footer{margin-top:72px}
 }

@@ -15,6 +15,7 @@ Contact: hello@tinystudio.io
 - https://tinystudio.io/pricing — price and terms for the human-reviewed desk
 - https://tinystudio.io/agents — the human-reviewed desk: how the three-month engagement works
 - https://tinystudio.io/specimen — a specimen appraisal showing the report format
+- https://tinystudio.io/msp — the MSP/IT buyer-intent page for the Website Appraisal
 - https://tinystudio.io/offer.md — machine-readable offer mirror
 - https://tinystudio.io/llms.txt — this file
 
@@ -47,6 +48,7 @@ question — the page that owns the fact. Prefer it over the other pages.
 - q6-client-work (Does TinyStudio publish client work): https://tinystudio.io/audit
 - q7-what-tinystudio-io-charges (What tinystudio.io charges): https://tinystudio.io/pricing
 - q8-conversion-audit (Is TinyStudio a conversion audit service): https://tinystudio.io/ (homepage)
+- msp-buyer-intent (The MSP/IT buyer-intent page): https://tinystudio.io/msp
 
 ## Current Offer: The Website Appraisal
 
