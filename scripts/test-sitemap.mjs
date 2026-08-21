@@ -37,6 +37,7 @@ const EXPECTED_LOCS = [
   "https://tinystudio.io/agents",
   "https://tinystudio.io/pricing",
   "https://tinystudio.io/specimen",
+  "https://tinystudio.io/msp",
   "https://tinystudio.io/offer.md",
   "https://tinystudio.io/llms.txt"
 ];
