@@ -262,7 +262,7 @@ test("AI-search q5 found run cites the tested business and claims no page-specif
   assert.ok(run.remediation, "q5 carries a remediation note");
   assert.equal(run.remediation.page, undefined, "q5 must not claim a page-specific fix");
   assert.ok(run.sources.some((source) => source.url.startsWith("https://tinystudio.io")), "q5 cites the tested business's site");
-  assert.match(run.captured, /free website leak audits for high-ticket service homepages/);
+  assert.match(run.captured, /free website "leak audits" for high-ticket service homepages/);
 });
 
 test("AI-search renderer shows all four states and keeps not-tested distinct from absent", async () => {
