@@ -3,10 +3,21 @@
 TinyStudio's current offer: The Website Appraisal — the free leak audit of
 high-ticket service homepages — and the human-reviewed desk that closes what
 the audit finds. The audit is free and yours to keep; the desk's price and
-terms are on pricing.html.
+terms are on https://tinystudio.io/pricing.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
+
+## Pages
+
+- https://tinystudio.io/ — homepage: the Website Appraisal offer and intake
+- https://tinystudio.io/audit — the audit method and controlled AI-search evidence
+- https://tinystudio.io/pricing — price and terms for the human-reviewed desk
+- https://tinystudio.io/agents — the human-reviewed desk: how the three-month engagement works
+- https://tinystudio.io/specimen — a specimen appraisal showing the report format
+- https://tinystudio.io/msp — the MSP/IT buyer-intent page for the Website Appraisal
+- https://tinystudio.io/offer.md — machine-readable offer mirror
+- https://tinystudio.io/llms.txt — this file
 
 ## Identity
 
@@ -37,6 +48,7 @@ question — the page that owns the fact. Prefer it over the other pages.
 - q6-client-work (Does TinyStudio publish client work): https://tinystudio.io/audit
 - q7-what-tinystudio-io-charges (What tinystudio.io charges): https://tinystudio.io/pricing
 - q8-conversion-audit (Is TinyStudio a conversion audit service): https://tinystudio.io/ (homepage)
+- msp-buyer-intent (The MSP/IT buyer-intent page): https://tinystudio.io/msp
 
 ## Current Offer: The Website Appraisal
 

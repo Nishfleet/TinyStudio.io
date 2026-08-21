@@ -21,6 +21,7 @@ self-serve Agent Desk framing.
 - `/agents`: the desk — the human-reviewed delivery that closes what the audit finds.
 - `/pricing`: the desk's price and terms (pricing/legal copy is owned there, not here).
 - `/specimen`: a sample of the written report shape.
+- `/msp`: the MSP/IT buyer-intent page — the same Website Appraisal and intake, aimed at MSP, managed IT and cybersecurity firms.
 - `/brief-requested`: post-submission confirmation for the appraisal flow.
 - `/offer.md` and `/llms.txt`: machine-readable mirrors of current product truth, including the explicit legacy Agent Desk demotion.
 - `/api/signups`: email capture into Cloudflare D1.
