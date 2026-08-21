@@ -5,6 +5,7 @@
 - This repo is the deployable public website source for `tinystudio.io`.
 - The Growth Brain operating repo remains at `/Users/nish/Documents/TINY STUDIO` and is the source of deeper offer/delivery truth.
 - The current offer is The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds. Public truth lives at `/llms.txt` and `/offer.md`.
+- `/msp` is the MSP/IT buyer-intent page: it funnels MSP, managed IT and cybersecurity buyers into the same Website Appraisal intake (`/api/signups`).
 - The current plan is `specs/004-website-appraisal/plan.md`; specs 001 and 002 are historical records of the retired Agent Desk, and spec 003 is a superseded campaign plan.
 - The self-serve Agent Desk is retired. Its surfaces and the `/api/agent-audit` generation endpoint still exist operationally as legacy mechanics and must not be presented as the current product.
 
