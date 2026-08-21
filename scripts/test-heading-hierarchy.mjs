@@ -25,6 +25,7 @@ const PAGES = [
   "public/agents.html",
   "public/pricing.html",
   "public/specimen.html",
+  "public/msp.html",
   "public/brief-requested.html"
 ];
 
@@ -36,6 +37,7 @@ const EXPECTED_OUTLINES = {
   "public/agents.html": [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
   "public/pricing.html": [1, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2],
   "public/specimen.html": [1, 2, 2, 2, 2, 3, 2, 2],
+  "public/msp.html": [1, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2],
   "public/brief-requested.html": [1, 2, 2, 2]
 };
 
