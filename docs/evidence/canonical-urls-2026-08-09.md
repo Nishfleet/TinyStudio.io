@@ -465,3 +465,118 @@ Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
 code side (PR #29), in CI (`npm run check` guard), and against the deployed
 site; this lane (2026-08-17) re-confirmed all three against current main and
 live and found nothing further to change on the finding's page.
+
+### Re-verification (added 2026-08-20, lane 1)
+
+Re-verified against the current origin/main head (d0daea9, "evidence(ai-search):
+controlled entity-and-offer re-run with first Found transitions (2026-08-15)
+(#227)") after eight further commits landed since the last re-verify at
+3dc5856:
+
+| Commit | Subject | Effect on this finding |
+|---|---|---|
+| 798cd71a (already counted at 08-17) | stop the retired Agent Desk claiming the apex root as its canonical (#229) | (carried forward, no change in this range) |
+| 5ca6241a (already counted at 08-17) | serve /favicon.ico from the canonical SVG (#238) | (carried forward, no change in this range) |
+| 9f79c71 | catch every redirecting spelling of an internal .html page link (#243) | guard extension only, no canonical-line change in any `public/*.html` |
+| ed2b1a9 | point appraisal-page canonicals and JSON-LD WebPage @ids at the clean non-307 URLs (#218) | **moves the .html-form canonicals on `/agents`, `/pricing`, `/specimen` to the clean extensionless addresses that actually serve 200 — see below** |
+| 76fe17b | put a real Request-the-appraisal signup form in the /pricing closing callout (#194) | body only on `/pricing`, head untouched |
+| 23a7f06 | brand the pricing and brief-requested footers TinyStudio (#112) | footer text only, head untouched |
+| 66f7bd6 | give appraisal intake fields persistent, programmatic labels (#154) | body label only on `/` and `/audit`, head untouched |
+| 43cc831 | refresh the study figures to the 2026-08-12 scan and guard the daily-refresh promise (#156) | body stat block only, head untouched |
+| dda25f2 | honor the six-a-month intake cap with a truthful closed-intake response (#245) | `src/worker.js` only, no `public/*.html` change |
+| d0daea9 | AI-search evidence re-run (#227) | `docs/evidence/ai-search/**` only |
+
+The head the finding flagged — `public/index.html` — is byte-identical on the
+canonical line to every prior receipt:
+
+```
+$ git log -p 3dc5856..d0daea9 -- public/index.html | grep -E 'canonical|^@@' | head
+@@ -76,7 +76,7 @@ ...  (intake label hunk only — no canonical line)
+$ git show d0daea9:public/index.html | grep canonical
+    <link rel="canonical" href="https://tinystudio.io/">
+```
+
+The "Canonical URLs (dogfood)" guard in `scripts/check-site.mjs` was extended
+by PR #218 to expect the clean extensionless addresses for the three
+appraisal pages (`/agents`, `/pricing`, `/specimen`) — the guard's expected
+set after this re-verify is exactly what the source files ship:
+
+```
+$ git show d0daea9:scripts/check-site.mjs | sed -n '1893,1899p'
+const canonicalPages = [
+  ["homepage", siteHome, "https://tinystudio.io/"],
+  ["audit page", siteAudit, "https://tinystudio.io/audit"],
+  ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
+  ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
+];
+```
+
+Three checks:
+
+1. Source checks on this head: the full `npm test` chain passes on d0daea9 —
+   `npm` is not on this host so each script in the chain ran directly:
+   `node scripts/check-site.mjs` → "TinyStudio.io checks passed";
+   `node --test scripts/test-heading-hierarchy.mjs` 6/6;
+   `node --test scripts/test-sitemap.mjs` 7/7;
+   `node --test scripts/test-agent-worker.mjs` 80/80;
+   `node --test scripts/test-agent-ui.mjs` 16/16;
+   `node --test scripts/test-product-contract.mjs` 8/8;
+   `node --test scripts/test-study-freshness.mjs` pass;
+   `node --test scripts/test-first-viewport-audience.mjs` 4/4;
+   `node scripts/test-narrow-viewport-pages.mjs` 34/34 rows PASS;
+   `node scripts/test-narrow-viewport.mjs` 11/11 rows PASS. The "Canonical
+   URLs (dogfood)" guard on d0daea9 still enforces exactly one
+   non-commented `<link rel="canonical">` inside `<head>` per page, a
+   non-empty href pointing at the page's canonical `https://tinystudio.io`
+   address (home expected: `https://tinystudio.io/`), and no URL duplicated
+   across pages.
+
+2. Fresh live measurement of the deployed site (2026-08-20, headless
+   Chromium via Playwright 1.62.1, same method as every prior receipt —
+   `domcontentloaded` wait, canonical read from `document.head` and from the
+   full document, HTTP status and CSP header from the served response,
+   console and page errors captured). Every page returns 200 with the CSP
+   header, serves exactly one canonical link in its head and one across the
+   whole document, and logs no console or page errors:
+
+   | Page | HTTP | CSP header | canonical links in head | links in full doc | href | console errors |
+   |---|---|---|---|---|---|---|
+   | index.html (home, `/`) | 200 | yes | 1 | 1 | `https://tinystudio.io/` | none |
+   | audit.html (`/audit`) | 200 | yes | 1 | 1 | `https://tinystudio.io/audit` | none |
+   | agents.html (`/agents`) | 200 | yes | 1 | 1 | `https://tinystudio.io/agents.html` | none |
+   | pricing.html (`/pricing`) | 200 | yes | 1 | 1 | `https://tinystudio.io/pricing.html` | none |
+   | specimen.html (`/specimen`) | 200 | yes | 1 | 1 | `https://tinystudio.io/specimen.html` | none |
+   | agent-desk.html (`/agent-desk`, retired, noindex) | 200 | yes | 1 | 1 | `https://tinystudio.io/agent-desk` | none |
+
+   Homepage canonical served live, unchanged from every prior receipt:
+
+   > `<link rel="canonical" href="https://tinystudio.io/">`
+
+   The `.html` forms still 307 to their clean twins as the guard assumes
+   (`/index.html` → `/`, `/audit.html` → `/audit`, `/agents.html` →
+   `/agents`, `/pricing.html` → `/pricing`, `/specimen.html` →
+   `/specimen`), and `https://www.tinystudio.io/` still 301s to the apex the
+   home canonical names.
+
+3. Deployment parity: the live deployment matches origin/main byte-for-byte
+   on the home page canonical line, but **the three appraisal pages are
+   lagging the clean-canonical migration shipped in PR #218**. Live
+   `/agents`, `/pricing`, and `/specimen` still serve the redirecting
+   `.html`-form canonicals that PR #218 already removed from main; the
+   retired `/agent-desk` is live with the cleaned `/agent-desk` canonical
+   from PR #229 and is `noindex, nofollow`. Home canonical itself is
+   byte-identical live vs main — `curl -s https://tinystudio.io/ | grep
+   canonical` and `grep canonical public/index.html` both produce
+   `<link rel="canonical" href="https://tinystudio.io/">`. The PR #218
+   deployment lag on the three appraisal pages does not affect the home
+   finding and is a separate ship item, not a regression of this finding.
+
+Finding 6631c0ab0454 ("Missing canonical URL on home") remains closed on the
+code side (PR #29), in CI (`npm run check` guard), and against the deployed
+site (the home page's `<link rel="canonical" href="https://tinystudio.io/">`
+is unchanged on both); this lane (2026-08-20) re-confirmed all three
+against current main and live and found nothing further to change on the
+finding's page. The deployment lag on PR #218 for `/agents`, `/pricing`,
+and `/specimen` is recorded here as a deploy-parity observation and is
+tracked separately.
