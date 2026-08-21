@@ -462,3 +462,103 @@ and 2026-08-14 re-verifications: every field in the table can still be
 filled truthfully from live first-party surfaces, nothing needs to move to
 the "Never on the profile" list, and no reject condition is triggered. The
 handoff is ready for Nish's manual submission unchanged.
+
+## Re-verification (added 2026-08-20, lane 1)
+
+Re-verified against the current origin/main head (d0daea9, "evidence(ai-search):
+controlled entity-and-offer re-run with first Found transitions (2026-08-15)
+(#227)") and the live site on 2026-08-20. Since the last re-verify (cdfa877,
+which measured 5eefa80), twenty-four commits landed on main; the ones that
+touched public surfaces are 76fe17b (Request-the-appraisal signup form in the
+/pricing closing callout, replacing a plain anchor), ed2b1a9 (appraisal-page
+canonicals and JSON-LD WebPage @ids pointed at the clean non-307 URLs),
+23a7f06 (the pricing and brief-requested footers branded "TinyStudio" instead
+of "The Tiny Studio"), 66f7bd6 (persistent programmatic labels on the
+appraisal intake fields), 43cc831 (the daily-refreshed study figures refreshed
+to the 2026-08-12 scan), dda25f2 (truthful closed-intake response when the
+six-a-month cap is hit), and 9f79c71 (the redirecting-spelling guard in
+check-site). `git diff cdfa877..origin/main -- public/llms.txt public/offer.md
+public/pricing.html public/audit.html public/index.html` shows no change to
+any identity, offer, contact, price, or boundary string this profile uses;
+the diffs are the clean-URL canonical/og:url/JSON-LD rewrites on /pricing
+and /audit, the intake-form label markup on / and /audit (semantic, not a
+truth change), the TinyStudio-branded footer text on /pricing and
+/brief-requested (was "The Tiny Studio"), the new signup form in the /pricing
+callout, the refreshed study figures (88→91 readable; 53→56 with no FAQ;
+numbers this profile never quotes), and the aria-label-only attribute on the
+input markup. Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) are byte-identical to the
+   source files on this head (curl diff: zero differences) and still carry,
+   verbatim: the offer ("The Website Appraisal — the free leak audit of
+   high-ticket service homepages — and the human-reviewed desk that closes
+   what the audit finds"), "reviewed by a person, not autonomous software",
+   "month one corrects the costliest fault; months two and three build the
+   loop", "Six appraisals a month, done by hand", "run by Nish, who signs
+   every audit", "The site states no base city or office address", "clients
+   are never named", "Contact: hello@tinystudio.io", and the price-and-terms
+   pointer to `https://tinystudio.io/pricing`.
+2. Live `https://tinystudio.io/pricing` (clean URL; `pricing.html` now
+   307-redirects to it, HTTP 200) still states exactly the price the handoff
+   relies on — "the appraisal is free, the desk is $2,500 a month on a
+   three-month minimum" (four occurrences in the served page) — and still
+   contains no "hourly rate", "minimum project", or "project size" figure
+   anywhere, so those profile fields stay blank. The pricing footer now
+   reads "TinyStudio · tinystudio.io" instead of "The Tiny Studio" (truthful
+   identity, not a product change).
+3. Live `https://tinystudio.io/audit` (clean URL; HTTP 200) still answers
+   q3 "Where is TinyStudio based?" with "The site does not state a base
+   city or office address" and q6 "Does TinyStudio publish client work?"
+   with "no logos, no case studies, no testimonials, no 'as seen at'";
+   live `https://tinystudio.io/` still carries the "Where TinyStudio is
+   based" disclosure. The location and clients fields stay empty. All five
+   live surfaces (`/`, `/audit`, `/pricing`, `llms.txt`, `offer.md`) carry
+   every string this profile depends on; the served bytes trail the
+   committed source on a handful of cosmetic lines (study numbers,
+   intake-form label markup, clean-URL canonical rewrites) that do not
+   affect any value in the table above. The deployment lag does not weaken
+   the profile — every claim maps cleanly to the committed source the next
+   deploy will pick up.
+4. The official Clutch policy page
+   (`https://help.clutch.co/en/knowledge/get-listed-on-clutch`, re-fetched
+   2026-08-20 via plain HTTP) still documents: "Create a free company
+   profile at clutch.co/get-listed", offerings "Basic, Verified, or
+   Advertiser", sign-in "With a LinkedIn, Google Account, or Company Email
+   Address", the same profile fields this handoff maps (Company name,
+   Tagline, Number of employees, Minimum project size and average hourly
+   rate, Website URL, Location(s), Contact information, Overview of your
+   company, Service focus), and the same review-and-publish flow: "Once
+   you have submitted your profile, it will be sent to our team for review
+   and publishing." No paid placement is required for the Basic profile,
+   so no reject condition is triggered.
+5. No Clutch receipt exists in the product state (no Clutch profile URL or
+   rejection response anywhere in the repo on this head); the receipt block
+   below remains unfilled and the human submission remains the open action.
+   The external search baseline was not re-run this lane (public search
+   endpoints have blocked scripted queries from the VPS in previous lanes),
+   so the 2026-08-09 baseline stands with its own caveat: it is a baseline,
+   not proof of non-existence. If a profile has been published under a
+   different name form, the "What this document does not claim" section
+   above applies — compare it against llms.txt before changing anything.
+6. Repository checks on this head pass: `node scripts/check-site.mjs`
+   ("TinyStudio.io checks passed") and the full
+   `node --test scripts/test-*.mjs` suite — 128 tests across 9 suites
+   (headings, sitemap, worker, ui, contract, study, viewport,
+   narrow-pages, narrow) — all green, exit 0.
+
+Two truthfulness-relevant additions since the last re-verify, both
+reinforcing rather than weakening the handoff: the daily-refreshed study
+guard (43cc831) anchors the homepage /audit figures to the freshest
+published scan and prevents serving stale numbers — consistent with the
+profile's no-fabrication rule; and the truthful closed-intake response
+(dda25f2, rebase of #116) makes the six-a-month cap an explicit, plain
+reply at the API rather than a silent drop, so any future Clutch profile
+copy that mentions intake state stays honest about it. Neither change
+alters any value in the table above.
+
+Same result as the 2026-08-09 preparation and the 2026-08-11, 2026-08-12,
+2026-08-14, and 2026-08-15 re-verifications: every field in the table can
+still be filled truthfully from live first-party surfaces, nothing needs
+to move to the "Never on the profile" list, and no reject condition is
+triggered. The handoff is ready for Nish's manual submission unchanged.
