@@ -29,20 +29,21 @@ import { chromium } from "playwright";
 
 const PUBLIC_DIR = fileURLToPath(new URL("../public/", import.meta.url));
 const VIEWPORTS = [240, 260, 280, 300, 320, 360, 390];
-// The five live pages: home (/), /agents, /audit, /pricing, /specimen.
+// The six live pages: home (/), /agents, /audit, /pricing, /specimen, /msp.
 // Each is served as a static HTML file in public/ with its own CSS.
 const PAGES = [
   { path: "/", file: "index.html" },
   { path: "/agents", file: "agents.html" },
   { path: "/audit", file: "audit.html" },
   { path: "/pricing", file: "pricing.html" },
-  { path: "/specimen", file: "specimen.html" }
+  { path: "/specimen", file: "specimen.html" },
+  { path: "/msp", file: "msp.html" }
 ];
 // The routes this packet owns: every page except the home page, whose
 // 240px-only hero-mock overflow is the responsibility of the
 // hero-mock-240px packet. Failures on those owned routes gate exit code;
 // home-page failures are reported but do not gate (out of scope).
-const OWNED_PATHS = new Set(["/agents", "/audit", "/pricing", "/specimen"]);
+const OWNED_PATHS = new Set(["/agents", "/audit", "/pricing", "/specimen", "/msp"]);
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -66,6 +67,7 @@ function startServer() {
       else if (rel === "/audit") rel = "/audit.html";
       else if (rel === "/pricing") rel = "/pricing.html";
       else if (rel === "/specimen") rel = "/specimen.html";
+      else if (rel === "/msp") rel = "/msp.html";
       const file = normalize(join(PUBLIC_DIR, rel));
       if (!file.startsWith(PUBLIC_DIR)) {
         res.writeHead(403).end("forbidden");

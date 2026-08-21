@@ -46,6 +46,7 @@ const PAGES = [
   ["desk page", "agents.html"],
   ["pricing page", "pricing.html"],
   ["specimen page", "specimen.html"],
+  ["msp page", "msp.html"],
   ["brief-requested page", "brief-requested.html"]
 ];
 
