@@ -488,7 +488,8 @@ const currentClaimPages = [
   siteAudit,
   read("public/agents.html"),
   read("public/pricing.html"),
-  read("public/specimen.html")
+  read("public/specimen.html"),
+  read("public/msp.html")
 ];
 
 for (const claim of forbiddenClaims) {
@@ -560,7 +561,8 @@ const responsiveCss = [
   ["shared.css", ["@media (max-width:760px)", ".wrap{padding:0 20px}", ".navlinks{flex-wrap:wrap"]],
   ["index.css", ["@media (max-width:760px)", ".wrap{padding:0 20px}", ".navlinks{flex-wrap:wrap"]],
   ["pricing.css", ["@media (max-width:760px)", ".plan{grid-template-columns:1fr"]],
-  ["agents.css", ["@media (max-width:760px)", ".ag{grid-template-columns:1fr", ".gatebox{grid-template-columns:1fr"]]
+  ["agents.css", ["@media (max-width:760px)", ".ag{grid-template-columns:1fr", ".gatebox{grid-template-columns:1fr"]],
+  ["msp.css", ["@media (max-width:760px)", ".bandgrid{grid-template-columns:1fr", ".checks{grid-template-columns:1fr"]]
 ];
 for (const [file, needles] of responsiveCss) {
   const css = read(`public/${file}`);
@@ -678,6 +680,7 @@ const fontPages = [
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
   ["specimen page", read("public/specimen.html")],
+  ["msp page", read("public/msp.html")],
   ["brief-requested page", read("public/brief-requested.html")]
 ];
 
@@ -1181,6 +1184,7 @@ const ownedPages = [
   ["desk page", read("public/agents.html")],
   ["specimen page", read("public/specimen.html")],
   ["pricing page", read("public/pricing.html")],
+  ["msp page", read("public/msp.html")],
   ["brief-requested page", read("public/brief-requested.html")]
 ];
 
@@ -1372,7 +1376,8 @@ const metaDescriptionPages = [
   ["audit page", siteAudit],
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
-  ["specimen page", read("public/specimen.html")]
+  ["specimen page", read("public/specimen.html")],
+  ["msp page", read("public/msp.html")]
 ];
 
 const seenDescriptions = new Map();
@@ -1426,6 +1431,7 @@ const ICON_PAGE_NAMES = new Map([
   ["agents.html", "desk page"],
   ["pricing.html", "pricing page"],
   ["specimen.html", "specimen page"],
+  ["msp.html", "msp page"],
   ["brief-requested.html", "brief-requested page"],
   ["agent-desk.html", "agent-desk page"]
 ]);
@@ -1486,6 +1492,7 @@ const faviconPages = [
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
   ["specimen page", read("public/specimen.html")],
+  ["msp page", read("public/msp.html")],
   ["brief-requested page", read("public/brief-requested.html")],
   ["agent-desk page", read("public/agent-desk.html")]
 ];
@@ -1562,6 +1569,7 @@ const beaconPages = [
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
   ["specimen page", read("public/specimen.html")],
+  ["msp page", read("public/msp.html")],
   ["brief-requested page", read("public/brief-requested.html")],
   ["agent-desk page", read("public/agent-desk.html")]
 ];
@@ -1604,7 +1612,8 @@ const socialSharePages = [
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
   ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
   ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"],
+  ["msp page", read("public/msp.html"), "https://tinystudio.io/msp"]
 ];
 const SOCIAL_IMAGE_URL = "https://tinystudio.io/og-image.png";
 
@@ -1678,7 +1687,8 @@ const structuredDataPages = [
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
   ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
   ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"],
+  ["msp page", read("public/msp.html"), "https://tinystudio.io/msp"]
 ];
 
 const ORGANIZATION_ID = "https://tinystudio.io/#organization";
@@ -1837,6 +1847,7 @@ const internalLinkPages = [
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
   ["specimen page", read("public/specimen.html")],
+  ["msp page", read("public/msp.html")],
   ["brief-requested page", read("public/brief-requested.html")]
 ];
 
@@ -1846,6 +1857,7 @@ const htmlPageTargets = {
   "agents.html": "/agents",
   "pricing.html": "/pricing",
   "specimen.html": "/specimen",
+  "msp.html": "/msp",
   // The post-signup page is served at both forms too (verified 2026-08-17:
   // /brief-requested.html 307s to /brief-requested), so nothing may link to
   // its redirecting twin either.
@@ -1915,7 +1927,8 @@ const canonicalPages = [
   ["audit page", siteAudit, "https://tinystudio.io/audit"],
   ["desk page", read("public/agents.html"), "https://tinystudio.io/agents"],
   ["pricing page", read("public/pricing.html"), "https://tinystudio.io/pricing"],
-  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"]
+  ["specimen page", read("public/specimen.html"), "https://tinystudio.io/specimen"],
+  ["msp page", read("public/msp.html"), "https://tinystudio.io/msp"]
 ];
 
 const canonicalLinkPattern = /<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi;
@@ -1970,6 +1983,7 @@ const titlePages = [
   ["desk page", read("public/agents.html")],
   ["pricing page", read("public/pricing.html")],
   ["specimen page", read("public/specimen.html")],
+  ["msp page", read("public/msp.html")],
   ["brief-requested page", read("public/brief-requested.html")]
 ];
 
