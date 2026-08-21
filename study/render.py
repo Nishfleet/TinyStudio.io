@@ -18,7 +18,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SNAPS = os.path.join(HERE, "snapshots")
-PAGES = ["index.html", "audit.html", "pricing.html", "specimen.html"]
+PAGES = ["index.html", "audit.html", "pricing.html", "specimen.html", "msp.html"]
 
 WORDS = {0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
          7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve",
