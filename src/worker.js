@@ -34,6 +34,10 @@ const PUBLIC_ASSET_PATHS = new Set([
   "/pricing",
   "/specimen.html",
   "/specimen",
+  // MSP/IT buyer-intent surface for The Website Appraisal. Extensionless twin
+  // is listed because the signup redirect and nav link to the clean form.
+  "/msp.html",
+  "/msp",
   "/brief-requested.html",
   "/brief-requested",
   "/shared.css",
@@ -47,6 +51,8 @@ const PUBLIC_ASSET_PATHS = new Set([
   "/pricing.js",
   "/specimen.css",
   "/specimen.js",
+  "/msp.css",
+  "/msp.js",
   "/brief-requested.css",
   "/brief-requested.js",
   // Same-origin font promotion for the non-blocking Google Fonts stylesheet
