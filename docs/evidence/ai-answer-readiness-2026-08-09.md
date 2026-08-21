@@ -365,6 +365,90 @@ Three checks:
    bundle still matches `evidence-fixtures/ai-search/evidence.json` and
    `controlled-questions.json` byte-for-byte.
 
+### Closeout re-verification (added 2026-08-20)
+
+Re-verified against the current origin/main head (0540cf9, "Merge pull
+request #247") and the live deployment. Since the 2026-08-15
+re-verification (head 50c6b39), no commit touched the declaration files
+(`git diff 50c6b39..origin/main -- public/llms.txt public/offer.md` is
+empty) and no commit touched the Answer Readiness guard block in
+`scripts/check-site.mjs` (the `ANSWER_READINESS_HEADING` section, its
+question-coverage loop, its exactly-one-page rule, its served-page
+membership check, its price-ownership rule and its mirror check are
+unchanged; the post-50c6b39 guard-file edits are new regions — monthly
+intake cap, pricing closing-callout form, /favicon.ico fallback,
+retired-desk canonical, internal-link normalization). The one
+Answer-Readiness-relevant change in the range is PR #227 (d0daea9, merged
+2026-08-19): the controlled entity-and-offer re-run of 2026-08-15 advanced
+the AI-search evidence fixture and the `/audit` embed from
+`testedOn: 2026-08-12` to `testedOn: 2026-08-15`, with q5/google and
+q7/google transitioning `wrong`/`absent` → `found` and the "Missing:
+pricing" gap from the original finding gone (receipt:
+`docs/evidence/ai-search/2026-08-15-controlled-rerun.md`).
+`scripts/test-agent-ui.mjs` updated its q5 assertion to the `found` state;
+the controlled questions themselves are unchanged.
+
+Three checks:
+
+1. Source checks on this head: `npm run check` passes — the "AI Answer
+   Readiness (dogfood 4473a99a9bc9)" guard in `scripts/check-site.mjs`
+   requires both `llms.txt` and `offer.md` to carry the `## Answer
+   Readiness: Preferred Source Pages` section, maps every controlled
+   question in the fixture (eight, including q8) to exactly one served page
+   (sitemap membership, either spelling), forces the price questions (q2,
+   q7) to the pricing page, and fails if `offer.md` mirrors a different page
+   — and the full `npm test` suite passes (check, headings 6/6, sitemap 7/7,
+   worker 83/83, UI 16/16 including the "every controlled question maps to
+   a preferred source page" subtest, contract 8/8, study 2/2, viewport 4/4,
+   narrow-pages 4/4; 126 tests, 0 failures). `git diff --check` is clean.
+
+2. Fresh live measurement of the deployed site (2026-08-20, HTTPS fetch
+   against `https://tinystudio.io`, the same deterministic checks the
+   source guard runs, applied to the served bytes):
+
+   | URL | HTTP | content-type | bytes | Answer Readiness section |
+   |---|---|---|---|---|
+   | `/llms.txt` | 200 | text/plain | 4607 | present |
+   | `/offer.md` | 200 | text/markdown | 3855 | present |
+   | `/sitemap.xml` | 200 | — | 537 (7 locs) | used for membership |
+
+   The live section carries all eight controlled questions, each mapped to
+   exactly one served page: q1 → `https://tinystudio.io/` (homepage), q2 →
+   `https://tinystudio.io/pricing`, q3 → `https://tinystudio.io/audit`,
+   q4 → `https://tinystudio.io/audit`, q5 →
+   `https://tinystudio.io/` (homepage), q6 → `https://tinystudio.io/audit`,
+   q7 → `https://tinystudio.io/pricing`, q8 →
+   `https://tinystudio.io/` (homepage). Both price questions point at the
+   pricing page, which owns the price; every mapped page is a served page
+   per the live sitemap (`/pricing` and `/audit` both serve 200 directly,
+   while the old `.html` twins 307-redirect to them); and `offer.md`
+   mirrors the identical question-to-page mapping. The served bytes are
+   byte-identical to `public/llms.txt` and `public/offer.md` on this head
+   (`diff` empty), so the deployed pair and the guarded source cannot drift
+   without changing the served bytes themselves.
+
+3. The pages the mapping names still answer their questions: the homepage
+   identity block carries one `data-ai-question` row per controlled
+   question (q1-q8, q2/q7 sharing the price row), the q5 row answers "This
+   site: the leak audit and the desk behind it", the q7 row states the
+   $2,500-a-month desk price, and no visible homepage copy frames the
+   retired Agent Desk as the offer. The pricing page states the
+   $2,500-a-month desk price on a three-month minimum.
+
+4. Deploy-lag note (not a regression of this finding): the live `/audit`
+   page still embeds the 2026-08-12 AI-search evidence record (q5/google
+   `wrong`, q7/google `absent` "Missing: pricing"), while source on
+   origin/main embeds the 2026-08-15 record (q5/google and q7/google
+   `found`). `/home/nish/workspaces/agent-state/lanes/
+   release-state-tinystudio-io.json` pins the deployed sha at b4d80f1
+   (2026-08-17), an ancestor of origin/main; the merged-but-undelivered
+   range includes d0daea9 (PR #227, 2026-08-19) and the 2026-08-20 merges
+   #246/#247. This is the established deploy-lag pattern (see
+   `docs/evidence/ai-search-evidence-lag-2026-08-12.md`); it does not
+   affect the Answer Readiness declaration, which is live and correct. The
+   next fleet-release tick ships current origin/main, after which live
+   `/audit` matches source.
+
 ## Limitation (unchanged)
 
 This is still a repository-side declaration plus a served-bytes measurement,
