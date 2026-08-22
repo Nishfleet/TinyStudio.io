@@ -37,5 +37,6 @@ treatment. Item was not already present on origin/main (zero `percensa` hits).
 
 ## Repository checks
 
-`npm run check` / `npm test` were run on the branch; results recorded after
-the suite finishes (docs-only change; no `public/` or `src/` edits).
+`npm run check` and `npm test` were run on the branch and pass (full suite:
+check + headings + sitemap + worker + ui + contract + study + viewport +
+narrow-pages + narrow). Docs-only change; no `public/` or `src/` edits.
