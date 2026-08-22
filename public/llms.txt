@@ -13,7 +13,7 @@ Contact: hello@tinystudio.io
 - https://tinystudio.io/ — homepage: the Website Appraisal offer and intake
 - https://tinystudio.io/audit — the audit method and controlled AI-search evidence
 - https://tinystudio.io/pricing — price and terms for the human-reviewed desk
-- https://tinystudio.io/agents — the human-reviewed desk: how the three-month engagement works
+- https://tinystudio.io/agents — the human-reviewed desk: seven specialists, one human signature
 - https://tinystudio.io/specimen — a specimen appraisal showing the report format
 - https://tinystudio.io/msp — the MSP/IT buyer-intent page for the Website Appraisal
 - https://tinystudio.io/offer.md — machine-readable offer mirror
