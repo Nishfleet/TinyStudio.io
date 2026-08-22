@@ -40,5 +40,9 @@ Files:
 - `python3 study/render.py --check` → `pages match snapshot 2026-08-22`
 - `npm run test:study` → 2 pass, 0 fail
 - `npm run check` → `TinyStudio.io checks passed.`
+- `npm test` → all wired suites green (headings, sitemap, worker, UI, contract, study, viewport, narrow pages)
+- Local static serve of `public/` (port 8765): `/` and `/audit.html` show **54 of 88** / eighty-eight / Fifty-four / eleven blocked; `/pricing.html`, `/specimen.html`, `/msp.html` show the eighty-eight-site study line. No leftover 53 of 89 or 56 of 91.
 
-The scan/deploy path that writes snapshots into a dirty local checkout and skips Cloudflare deploy (missing `~/.config/cloudflare/env`) is unchanged; it is the same root cause recorded on PR #156 and is out of this packet's file claims.
+PR: https://github.com/nish3451/TinyStudio.io/pull/292 (`ed41bfd`)
+
+The scan/deploy path that writes snapshots into a dirty local checkout and skips Cloudflare deploy (missing `~/.config/cloudflare/env`) is unchanged; it is the same root cause recorded on PR #156 and is out of this packet's file claims. Live `https://tinystudio.io/` still serves 56 of 91 until this merges and deploys.
