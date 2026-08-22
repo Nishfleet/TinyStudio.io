@@ -80,7 +80,8 @@ No source files changed.
 
 - Branch: `chore/duplicate-pr-clusters-residual-retire-2026-08-22`
 - Base commit: `5dbe7487ff1034e98490c53b5b3487aece80796e` (`origin/main`)
+- Report commit: `9544425`
 - PR opened: no (already resolved on main; evidence-only PR is churn)
-- `fleet-resolve-item resolve` invoked after this report is committed and pushed, with `--item-id f3c90474c1 --status resolved --receipt-pr 274 --commit dbdb3e8c8f57ce1ab84537f73dc0635600f514a5`
+- `fleet-resolve-item resolve` ran; `fleet-resolve-item status` printed `f3c90474c1  resolved  pr=274`
 
 PACKET COMPLETE
