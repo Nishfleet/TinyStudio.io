@@ -1071,6 +1071,19 @@ if (aiQuestions && aiEvidence) {
     if (pattern.test(artifactCopy)) failures.push(`Forbidden claim in AI-search artifact copy: ${pattern}`);
   }
 
+  // Backlog 80e53f3d7f: the /audit AI-search panel is a one-off human-labelled
+  // test, not a GEO dashboard or continuous monitor.
+  const geoDistinctionPhrases = [
+    "This is not a GEO dashboard",
+    "not continuous monitoring",
+    "Depth, not breadth"
+  ];
+  for (const phrase of geoDistinctionPhrases) {
+    if (!artifactCopy.includes(phrase)) {
+      failures.push(`Audit AI-search section must distinguish the one-off test from automated GEO platforms: missing "${phrase}"`);
+    }
+  }
+
   const narrativeFields = [];
   questions.forEach((question) => narrativeFields.push(question.truth));
   runs.forEach((run) => {
