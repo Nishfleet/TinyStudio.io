@@ -73,11 +73,17 @@ In-repo Clutch/G2/GoodFirms receipts still unfilled (`Submitted: <date>`). No li
 
 ## Checks and tests
 
-Pending at first commit; filled after `npm run check` / `npm test` on this branch.
+- `npm run check` exits 0 and prints `TinyStudio.io checks passed.`
+- `npm test` exits 0 (check, headings, sitemap, worker, ui, contract, study, viewport, narrow-pages, narrow).
+- TABLES-CLEAN: no `$[0-9]` / ROAS / guarant / ranking inside table rows of either new doc.
+- Firmographic grep counts: 0 and 0.
+- Mandated strings present (≥1 per file); pricing phrase count 1 and 1.
+- Claims JSON: `claims-ok`.
+- Diff vs `origin/main` is exactly the three spec files; `public`/`src`/`scripts` empty.
 
 ## PR
 
-Pending.
+Pending `gh pr create`.
 
 ## Explicit
 
