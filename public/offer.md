@@ -58,6 +58,12 @@ The earlier self-serve Agent Desk (one-shot Pipeline Brief) is demoted and is no
 - No prospect message sending
 - Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
+## Data Handling
+
+The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. Submitted business context is processed to generate output and is not stored by this app.
+
+There is no public endpoint for reading collected emails or usage metadata.
+
 ## Contact
 
 hello@tinystudio.io

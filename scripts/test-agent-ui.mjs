@@ -632,6 +632,19 @@ test("offer facts are mirrored by llms.txt and offer.md", () => {
     assert.ok(normalized(LLMS_TXT).includes(normalized(fact)), `llms.txt must state: ${fact}`);
     assert.ok(normalized(OFFER_MD).includes(normalized(fact)), `offer.md must state: ${fact}`);
   }
+
+  assert.match(LLMS_TXT, /^## Data Handling$/m, "llms.txt must carry a Data Handling section");
+  assert.match(OFFER_MD, /^## Data Handling$/m, "offer.md must carry a Data Handling section");
+
+  const DATA_HANDLING_FACTS = [
+    "The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key.",
+    "Submitted business context is processed to generate output and is not stored by this app.",
+    "There is no public endpoint for reading collected emails or usage metadata."
+  ];
+  for (const fact of DATA_HANDLING_FACTS) {
+    assert.ok(normalized(LLMS_TXT).includes(normalized(fact)), `llms.txt must state: ${fact}`);
+    assert.ok(normalized(OFFER_MD).includes(normalized(fact)), `offer.md must state: ${fact}`);
+  }
 });
 
 test("llms.txt and offer.md point at the clean /pricing and never restate price or refund terms", () => {
