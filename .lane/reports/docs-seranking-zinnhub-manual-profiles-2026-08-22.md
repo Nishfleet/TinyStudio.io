@@ -83,7 +83,7 @@ In-repo Clutch/G2/GoodFirms receipts still unfilled (`Submitted: <date>`). No li
 
 ## PR
 
-Pending `gh pr create`.
+https://github.com/nish3451/TinyStudio.io/pull/299
 
 ## Explicit
 
