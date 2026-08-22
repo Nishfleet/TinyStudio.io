@@ -101,8 +101,8 @@ creation by any agent, no unattended submission.
   address for TinyStudio" and q6 "Does TinyStudio publish client work?"
   with "no logos, no case studies, no testimonials, no 'as seen at'".
 - Live homepage `data-study="readable"` is `88` /
-  `data-study="readable_word"` is `eighty-eight`. Never write `89` or
-  `89-site`. The growth packet's older study count is stale.
+  `data-study="readable_word"` is `eighty-eight`. Do not use the growth
+  packet's older study count; it is stale.
 - `https://tinystudio.io/specimen` is a sample report shape; the clinic is
   not a client.
 - Not promised: no revenue, ranking, ROAS, conversion, booked-call, or
