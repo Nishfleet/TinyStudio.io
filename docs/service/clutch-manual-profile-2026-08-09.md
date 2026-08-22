@@ -562,3 +562,94 @@ Same result as the 2026-08-09 preparation and the 2026-08-11, 2026-08-12,
 still be filled truthfully from live first-party surfaces, nothing needs
 to move to the "Never on the profile" list, and no reject condition is
 triggered. The handoff is ready for Nish's manual submission unchanged.
+
+## Re-verification (added 2026-08-22, lane 1)
+
+Re-verified against the current origin/main head (ed69cab, "docs(evidence):
+re-verify canonical-URL finding 6631c0ab0454 against current main and live
+(2026-08-20, lane 1) (#248)") and the live site on 2026-08-22. Since the
+last re-verify (d0daea9, which measured 5eefa80 and whose PR #252 merged
+2026-08-21), 138 commits landed on main; the ones that touched public
+surfaces are the canonical-pointer rewrite in llms.txt and offer.md (the
+price-and-terms pointer now reads the full URL `https://tinystudio.io/pricing`
+instead of `pricing.html`, agreeing exactly with this handoff's own overview
+note), a new "Pages" index section in llms.txt listing `/`, `/audit`,
+`/pricing`, `/agents`, `/specimen`, `/msp`, `/offer.md`, and `/llms.txt`,
+a new `msp-buyer-intent` controlled-question mapping in llms.txt and offer.md,
+and the audit.html embedded AI-search evidence refreshed to its 2026-08-20
+run (embedded JSON content only). `git diff d0daea9..origin/main --
+public/llms.txt public/offer.md public/pricing.html public/audit.html
+public/index.html` shows no change to any identity, offer, contact, price,
+or boundary string this profile uses. Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) are byte-identical to the
+   source files on this head (curl diff: zero differences) and still carry,
+   verbatim: the offer ("The Website Appraisal — the free leak audit of
+   high-ticket service homepages — and the human-reviewed desk that closes
+   what the audit finds"), "reviewed by a person, not autonomous software",
+   "month one corrects the costliest fault; months two and three build the
+   loop", "Six appraisals a month, done by hand", "run by Nish, who signs
+   every audit", clients "never named", "states no base city or office
+   address", "Contact: hello@tinystudio.io", and the price-and-terms pointer
+   to `https://tinystudio.io/pricing`.
+2. Live `https://tinystudio.io/pricing` (clean URL, HTTP 200;
+   `pricing.html` 307-redirects to it) still states exactly the price the
+   handoff relies on — "$2,500 a month on a three-month minimum" appears
+   four times (five total "2,500" occurrences) — and still contains no
+   "hourly rate" or "minimum project size" figure anywhere, so those
+   profile fields stay blank. The footer reads "TinyStudio · tinystudio.io".
+3. Live `https://tinystudio.io/audit` (HTTP 200) still answers q3 "Where is
+   TinyStudio based?" with "does not state a base city or office address"
+   and q6 "Does TinyStudio publish client work?" with "no logos, no case
+   studies, no testimonials, no 'as seen at'"; live `https://tinystudio.io/`
+   (HTTP 200) still carries the where-based disclosure. A new first-party
+   page went live since the last re-verify: `https://tinystudio.io/msp`
+   (HTTP 200), the MSP/IT buyer-intent page speaking to MSP, managed IT and
+   cybersecurity firms about "the same appraisal". It extends the same
+   truthful offer to a named buyer segment; no value in the table above
+   changes, and the service-focus guidance is unchanged (still no category
+   implying valuation, guarantees, ad buying, or the retired Agent Desk).
+   All live surfaces carry every string this profile depends on.
+4. The official Clutch policy page
+   (`https://help.clutch.co/en/knowledge/get-listed-on-clutch`, re-fetched
+   2026-08-22 via plain HTTP) still documents: "Create a free company
+   profile at clutch.co/get-listed", offerings "Basic, Verified, or
+   Advertiser", sign-in "With a LinkedIn, Google Account, or Company Email
+   Address", the same profile fields this handoff maps (Company name,
+   Number of employees, Minimum project size and average hourly rate,
+   Service focus), and the same review-and-publish flow ("sent to our team
+   for review and publishing"). No paid placement is required for the Basic
+   profile, so no reject condition is triggered.
+5. No Clutch receipt exists in the product state (no Clutch profile URL or
+   rejection response anywhere in the repo on this head); the receipt block
+   below remains unfilled and the human submission remains the open action.
+   The external search baseline was not re-run this lane (public search
+   endpoints have blocked scripted queries from the VPS in previous lanes),
+   so the 2026-08-09 baseline stands with its own caveat: it is a baseline,
+   not proof of non-existence. If a profile has been published under a
+   different name form, the "What this document does not claim" section
+   above applies — compare it against llms.txt before changing anything.
+6. Repository checks on this head: `node scripts/check-site.mjs` passes
+   ("TinyStudio.io checks passed"). The test suite runs 127 of 128 tests
+   green; the single failure is `scripts/test-study-freshness.mjs` ("the
+   newest study snapshot is fresh enough to back the daily-refresh
+   promise"), a time-decay guard that fails on main itself because the
+   newest published study snapshot (2026-08-17) has aged four days against
+   today's date. It is pre-existing on main, unrelated to this handoff, and
+   untouched by this branch; it is recorded here rather than papered over,
+   and it affects no value in the table above.
+
+One truthfulness-relevant improvement since the last re-verify, reinforcing
+rather than weakening the handoff: the canonical-pointer rewrite means
+llms.txt and offer.md now point price and terms at
+`https://tinystudio.io/pricing` in exactly the form this handoff's overview
+field uses, closing the last cosmetic mismatch between the prepared copy and
+the live machine-readable surfaces. Neither this nor any other change since
+d0daea9 alters any value in the table above.
+
+Same result as the 2026-08-09 preparation and the 2026-08-11, 2026-08-12,
+2026-08-14, 2026-08-15, and 2026-08-20 re-verifications: every field in the
+table can still be filled truthfully from live first-party surfaces, nothing
+needs to move to the "Never on the profile" list, and no reject condition is
+triggered. The handoff is ready for Nish's manual submission unchanged.
