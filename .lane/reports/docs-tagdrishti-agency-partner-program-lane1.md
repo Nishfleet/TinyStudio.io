@@ -98,5 +98,5 @@ No other field of that record was changed.
 
 ## Git / PR
 
-- First commit: pending (filled after commit)
-- PR: pending (filled after `gh pr create`)
+- First commit: `55e89c78bb6a81eae976dc07191694bd79d9e6df` — `docs: TagDrishti agency partner program competitive assessment (2026-08-23)`
+- PR: https://github.com/nish3451/TinyStudio.io/pull/301 (OPEN, base `main`, head `docs-tagdrishti-agency-partner-program-lane1`)
