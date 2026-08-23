@@ -1958,6 +1958,67 @@ for (const [pageName, pageHtml] of internalLinkPages) {
   }
 }
 
+// ---- Indexable-page orphan guard ------------------------------------------
+// A sitemap-listed page no other served page links to is an orphan: crawlers
+// find it via public/sitemap.xml, users and link equity cannot. The guarded
+// set is the six sitemap-listed indexable HTML pages (test-sitemap.mjs
+// EXPECTED_LOCS minus the /offer.md and /llms.txt machine-readable mirrors).
+// htmlPageTargets above is deliberately NOT reused: it also lists
+// brief-requested.html — the post-signup redirect target that is unlinked by
+// design — and agent-desk.html is the retired, noindex/nofollow,
+// unlink-by-design legacy surface. Neither page appears here as a target, and
+// neither counts as a linker.
+const indexablePages = [
+  { path: "/", html: siteHome },
+  { path: "/audit", html: siteAudit },
+  { path: "/agents", html: read("public/agents.html") },
+  { path: "/pricing", html: read("public/pricing.html") },
+  { path: "/specimen", html: read("public/specimen.html") },
+  { path: "/msp", html: read("public/msp.html") }
+];
+
+function indexableAnchorTarget(rawHref) {
+  const href = rawHref.trim();
+  if (!href || href.startsWith("#")) return "";
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^https?:/i.test(href)) return "";
+
+  let path = href.split("#")[0].split("?")[0];
+  if (!path) return "";
+
+  if (/^(?:https?:)?\/\//i.test(path)) {
+    let url;
+    try {
+      url = new URL(path.startsWith("//") ? `https:${path}` : path);
+    } catch {
+      return "";
+    }
+    if (!siteHosts.has(url.hostname.toLowerCase())) return "";
+    path = url.pathname;
+  }
+
+  // Redirecting .html twins are owned by the existing guard above; they never
+  // count as clean inlinks here.
+  if (/\.html?$/i.test(path.replace(/\/+$/, ""))) return "";
+  if (!path.startsWith("/")) return "";
+  return path === "/" ? "/" : path.replace(/\/+$/, "");
+}
+
+const hasInlink = new Map(indexablePages.map((page) => [page.path, false]));
+for (const page of indexablePages) {
+  const anchors = [...page.html.matchAll(/<a\b[^>]*>/gi)].map((match) => match[0]);
+  for (const anchor of anchors) {
+    const href = anchor.match(/\bhref\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+    const target = indexableAnchorTarget(href);
+    if (!target || target === page.path) continue;
+    if (hasInlink.has(target)) hasInlink.set(target, true);
+  }
+}
+for (const page of indexablePages) {
+  if (!hasInlink.get(page.path)) {
+    failures.push(`Indexable page ${page.path} is an orphan: no other indexable page links to it.`);
+  }
+}
+
 // ---- Canonical URLs (dogfood) ----------------------------------------------
 // The leak audit this site sells also flags a homepage whose served HTML
 // carries no canonical URL, leaving search engines to guess which address is
