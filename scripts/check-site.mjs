@@ -131,6 +131,7 @@ const requiredPublicArtifacts = [
   "clinics, surgeons, dentists, spas",
   "clients are never named",
   "not autonomous software",
+  "No call at any point.",
   "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
   "Client-side code does not call model providers",
   "No campaign publishing",
@@ -295,6 +296,21 @@ for (const [pageName, pageHtml] of monthlyCapPages) {
   }
   if (/\bsix audits a month\b/i.test(pageHtml)) {
     failures.push(`${pageName} must not use the non-canonical "Six audits a month" monthly-cap phrase.`);
+  }
+}
+
+// Public-promise regression: the "No call at any point" promise must appear on
+// every intake surface that posts to /api/signups, not only the homepage and
+// the MSP page. The canonical mirrors are guarded by requiredPublicArtifacts.
+const noCallIntakePages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["pricing page", read("public/pricing.html")],
+  ["msp page", read("public/msp.html")]
+];
+for (const [pageName, pageHtml] of noCallIntakePages) {
+  if (!/No call at any point\./i.test(pageHtml)) {
+    failures.push(`${pageName} must carry the "No call at any point" promise on its intake surface.`);
   }
 }
 
