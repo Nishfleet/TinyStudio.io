@@ -135,7 +135,8 @@ const requiredPublicArtifacts = [
   "Client-side code does not call model providers",
   "No campaign publishing",
   "No ad spend changes",
-  "https://tinystudio.io/pricing"
+  "https://tinystudio.io/pricing",
+  "Six appraisals a month, done by hand. When the sixth is taken, the intake closes until the next."
 ];
 
 const forbiddenClaims = [
@@ -278,6 +279,24 @@ for (const optionalName of [
 
 const siteHome = read("public/index.html");
 const siteAudit = read("public/audit.html");
+
+// Monthly cap phrase on every conversion surface must stay canonical:
+// the short "Six a month." promise, never the product-name drift "Six audits a month.".
+const monthlyCapPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["msp page", read("public/msp.html")]
+];
+for (const [pageName, pageHtml] of monthlyCapPages) {
+  if (!/\bsix a month\b/i.test(pageHtml)) {
+    failures.push(`${pageName} must carry the canonical "Six a month" monthly-cap phrase.`);
+  }
+  if (/\bsix audits a month\b/i.test(pageHtml)) {
+    failures.push(`${pageName} must not use the non-canonical "Six audits a month" monthly-cap phrase.`);
+  }
+}
 
 // Conversion-friction regression: the signup website field must accept a bare
 // business domain (example.com) at the browser level instead of requiring a
