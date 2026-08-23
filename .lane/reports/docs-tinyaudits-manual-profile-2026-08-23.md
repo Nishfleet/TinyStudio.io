@@ -71,9 +71,9 @@ conversion lift, rankings, speed metrics, or UX-redesign deliverables. Skipped
 | --- | --- |
 | Claims published to `lane-1.json` | OK |
 | `git switch -C docs-tinyaudits-manual-profile-2026-08-23 origin/main` | OK |
-| `npm test` | (see below) |
-| `git push -u origin docs-tinyaudits-manual-profile-2026-08-23` | (see below) |
-| `gh pr create` | (see below) |
+| `npm test` | exit 0 (all suites green) |
+| `git push -u origin docs-tinyaudits-manual-profile-2026-08-23` | OK |
+| `gh pr create` | PR #305 opened |
 
 ## Open blockers / unknowns
 
@@ -84,4 +84,4 @@ conversion lift, rankings, speed metrics, or UX-redesign deliverables. Skipped
 
 ## PR
 
-(Updated after PR creation.)
+https://github.com/nish3451/TinyStudio.io/pull/305
