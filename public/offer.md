@@ -28,6 +28,8 @@ The Website Appraisal is the free leak audit of high-ticket service homepages, r
 
 The appraisal is a written report on one page of your choosing — each fault named, in order of what it costs you, with the fix beside each. It is yours to keep and to hand to any developer, including one who is not us.
 
+No call at any point. The report lands in your inbox; there is no meeting, no onboarding sequence and no call to book.
+
 Six appraisals a month, done by hand. When the sixth is taken, the intake closes until the next.
 
 A "conversion audit" search intent is answered truthfully: the appraisal is the leak audit of the money page — each fault named in order of what it costs you, with the fix beside it — and TinyStudio is not sold as a conversion audit service, so no conversion lift is promised. Nor is the appraisal a domain-value estimate: no domain is priced and no resale value is estimated — the report names what each fault costs you and puts no value on the site itself.

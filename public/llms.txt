@@ -61,6 +61,9 @@ The appraisal is a written report on one page of your choosing — each fault
 named, in order of what it costs you, with the fix beside each. It is yours
 to keep and to hand to any developer, including one who is not us.
 
+No call at any point. The report lands in your inbox; there is no meeting,
+no onboarding sequence and no call to book.
+
 Buyer: high-ticket service businesses — clinics, surgeons, dentists, spas,
 dealers, brokers — and clients are never named.
 
