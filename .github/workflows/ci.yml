@@ -15,6 +15,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npx playwright install chromium
       - run: npm test
       # Browser step for the render-blocking guarantee (dogfood finding
       # b8f6046e942a): the static guards prove the blocking shape cannot
