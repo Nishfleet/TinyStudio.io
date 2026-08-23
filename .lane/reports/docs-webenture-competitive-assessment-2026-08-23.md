@@ -31,5 +31,5 @@ Fetched four WebEnture URLs and five TinyStudio first-party surfaces live with `
 
 ## Git / PR
 
-- First commit: pending (filled after commit)
-- PR: pending (filled after `gh pr create`)
+- First commit: `6914a9d9a8d73a1a2b6503918f506c508e962f37` — `docs: WebEnture competitive assessment (2026-08-23)`
+- PR: https://github.com/nish3451/TinyStudio.io/pull/304 (OPEN, base `main`, head `docs-webenture-competitive-assessment-2026-08-23`)
