@@ -12,3 +12,5 @@ dist/
 playwright-report/
 test-results/
 .playwright-mcp/
+# Internal scout/audit artifacts; these stay in agent-state, not the public repo.
+var/scout/
