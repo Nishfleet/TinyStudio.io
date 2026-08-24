@@ -1,23 +1,11 @@
 name: PR checks
 
-# Consolidated pull-request validation gate for TinyStudio.io. Two
-# separate workflows (CI, Secret Scan) paid two controller spin-ups per
-# PR; they now share one workflow. Every job name the branch-protection
-# rules reference is preserved exactly: `verify` and `Gitleaks`.
-#
-# Concurrency with cancel-in-progress bounds the queue to one live run
-# per PR head / main ref. Superseded runs cancel instead of queueing
-# behind each other. Observed on this repo: 1 superseded run/week before
-# this change; the saving is smaller here than on aiconverter-app because
-# this repo's supersede rate is lower, but the queue bound still matters.
-#
-# Docs-only fast path inside each required-context job: the
-# ./.github/actions/docs-classify composite action classifies every PR
-# conservatively. When the diff is prose/evidence only, each job reaches
-# a real success conclusion in ~5s by skipping its heavy install / build
-# / test steps. The job ALWAYS runs - a SKIPPED required context counts
-# as SATISFIED, which is the failure this rule exists to avoid (standing
-# rule 2026-08-23).
+# Thin caller for the canonical reusable PR-checks workflow.
+# The standard (timeout-minutes, concurrency+cancel, npm cache, batched CI +
+# gitleaks, docs-only fast path, 7-day SARIF retention) lives in
+# nish3451/shared-workflows and is applied here by construction. Updates on the
+# `v1` branch propagate automatically. Do not override the called workflow's
+# steps — pass inputs instead.
 
 on:
   pull_request:
@@ -26,143 +14,12 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
-
-concurrency:
-  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  verify:
-    name: verify
-    runs-on: ubuntu-latest
-    # Observed history (origin/main ci.yml::verify): median ~1.8min, healthy
-    # max ~2.7min. The 1102.9min outlier was a queued run, not execution.
-    # 15min is ~5x the healthy max and well under the 360min hosted-runner
-    # cap; a hang here would otherwise hold the pr-checks concurrency group
-    # indefinitely (the 2026-08-23/24 fleet stall).
-    timeout-minutes: 15
-    steps:
-      - name: Classify the PR (docs-only fast path)
-        id: docs
-        uses: ./.github/actions/docs-classify
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docs-only fast path
-        if: steps.docs.outputs.docs-only == 'true'
-        run: |
-          echo "::notice::Docs-only PR - verify skipped."
-      - name: Checkout
-        if: steps.docs.outputs.docs-only != 'true'
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - name: Set up Node
-        if: steps.docs.outputs.docs-only != 'true'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 24
-          cache: npm
-      - name: Install dependencies
-        if: steps.docs.outputs.docs-only != 'true'
-        run: npm ci
-      - name: Install Playwright Chromium
-        if: steps.docs.outputs.docs-only != 'true'
-        run: npx playwright install chromium
-      - name: Run unit tests
-        if: steps.docs.outputs.docs-only != 'true'
-        run: npm test
-      # Browser step for the render-blocking guarantee (dogfood finding
-      # b8f6046e942a): the static guards prove the blocking shape cannot
-      # return, this step proves the served pages actually render without it.
-      - name: Render-blocking regression check (real Chromium)
-        if: steps.docs.outputs.docs-only != 'true'
-        run: |
-          npx playwright install chromium
-          npm run check:render-blocking
-      - name: Wrangler config and bundle check
-        if: steps.docs.outputs.docs-only != 'true'
-        run: npm run deploy:dry-run
-
-  gitleaks:
-    name: Gitleaks
-    runs-on: ubuntu-latest
-    # Observed history (origin/main secret-scan.yml::gitleaks): median ~0.3min,
-    # healthy max ~0.5min. 10min is ~20x the healthy max and well under the
-    # 360min hosted-runner cap; a hang here would otherwise hold the pr-checks
-    # concurrency group indefinitely.
-    timeout-minutes: 10
-    steps:
-      - name: Classify the PR (docs-only fast path)
-        id: docs
-        uses: ./.github/actions/docs-classify
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docs-only fast path
-        if: steps.docs.outputs.docs-only == 'true'
-        run: |
-          echo "::notice::Docs-only PR - Gitleaks skipped."
-      - name: Checkout
-        if: steps.docs.outputs.docs-only != 'true'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      # gitleaks-action v3 requires a GITLEAKS_LICENSE secret for
-      # organization repos (Nishfleet). Without it the job fails with
-      # "missing gitleaks license" on every PR (verified 2026-08-24,
-      # run 32697482061). The license is free but requires a signup at
-      # gitleaks.io. Installing the gitleaks binary directly needs no
-      # license, no secret, and no actions cache - the same shape
-      # aiconverter-app and fleet1-proof-sandbox already run at 0% failure.
-      # Verified locally: gitleaks 8.24.3 scans this repo clean (680 commits,
-      # no leaks) with no license present.
-      - name: Install Gitleaks
-        if: steps.docs.outputs.docs-only != 'true'
-        run: |
-          set -euo pipefail
-          mkdir -p "$GITHUB_WORKSPACE/.gitleaks"
-          curl -fsSL --retry 3 --retry-delay 2 \
-            -o "$GITHUB_WORKSPACE/.gitleaks/gitleaks.tgz" \
-            "https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz"
-          tar -xzf "$GITHUB_WORKSPACE/.gitleaks/gitleaks.tgz" -C "$GITHUB_WORKSPACE/.gitleaks"
-          "$GITHUB_WORKSPACE/.gitleaks/gitleaks" version
-      - name: Scan repository
-        if: steps.docs.outputs.docs-only != 'true'
-        env:
-          GITLEAKS_BIN: ${{ github.workspace }}/.gitleaks/gitleaks
-        run: |
-          set -euo pipefail
-          log_opts=""
-          case "$GITHUB_EVENT_NAME" in
-            pull_request)
-              log_opts="--no-merges --first-parent ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
-              ;;
-            push)
-              if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
-                log_opts="-1"
-              elif [ "$GITHUB_SHA" = "0000000000000000000000000000000000000000" ]; then
-                echo "No commits to scan"
-                exit 0
-              else
-                log_opts="--no-merges --first-parent ${{ github.event.before }}..${GITHUB_SHA}"
-              fi
-              ;;
-          esac
-          args=(detect --redact -v --exit-code=2 --report-format=sarif --report-path=results.sarif)
-          if [ -n "$log_opts" ]; then
-            args+=(--log-opts "${log_opts}")
-          fi
-          set +e
-          "$GITLEAKS_BIN" "${args[@]}"
-          rc=$?
-          set -e
-          # Exit-code contract (same as gitleaks-action v3):
-          # 0 = clean, 2 = leaks found, anything else = scanner error.
-          if [ "$rc" -eq 0 ]; then
-            echo "No leaks detected"
-          elif [ "$rc" -eq 2 ]; then
-            echo "::error::Leaks detected - see results.sarif for details"
-            exit 1
-          else
-            echo "::error::Unexpected exit code [$rc] from gitleaks"
-            exit 1
-          fi
+  pr-checks:
+    uses: nish3451/shared-workflows/.github/workflows/pr-checks.yml@v1
+    with:
+      node-version: "24"
+      install-command: npm ci
+      verify-command: npx playwright install chromium && npm test && npm run check:render-blocking && npm run deploy:dry-run
+    secrets: inherit
