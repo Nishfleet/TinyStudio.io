@@ -36,6 +36,12 @@ jobs:
   verify:
     name: verify
     runs-on: ubuntu-latest
+    # Observed history (origin/main ci.yml::verify): median ~1.8min, healthy
+    # max ~2.7min. The 1102.9min outlier was a queued run, not execution.
+    # 15min is ~5x the healthy max and well under the 360min hosted-runner
+    # cap; a hang here would otherwise hold the pr-checks concurrency group
+    # indefinitely (the 2026-08-23/24 fleet stall).
+    timeout-minutes: 15
     steps:
       - name: Classify the PR (docs-only fast path)
         id: docs
@@ -79,6 +85,11 @@ jobs:
   gitleaks:
     name: Gitleaks
     runs-on: ubuntu-latest
+    # Observed history (origin/main secret-scan.yml::gitleaks): median ~0.3min,
+    # healthy max ~0.5min. 10min is ~20x the healthy max and well under the
+    # 360min hosted-runner cap; a hang here would otherwise hold the pr-checks
+    # concurrency group indefinitely.
+    timeout-minutes: 10
     steps:
       - name: Classify the PR (docs-only fast path)
         id: docs
