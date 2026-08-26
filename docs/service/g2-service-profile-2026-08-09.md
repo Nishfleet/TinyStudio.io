@@ -62,7 +62,8 @@ scraping, no account creation by any agent, no unattended submission.
   audit finds"; six appraisals a month, done by hand; run by Nish, who signs every
   audit; clients are never named; the site states no base city or office address;
   no revenue/ranking/ROAS/conversion/booked-call/sales-volume guarantees; price and
-  terms are pointed at `https://tinystudio.io/pricing.html`.
+  terms are pointed at `https://tinystudio.io/pricing` (the site's own clean
+  canonical; `pricing.html` 307-redirects to it).
 - No G2 receipt exists in the product state.
 
 ## Prepared profile content (copy-paste)
@@ -85,9 +86,9 @@ here, leave it empty — an empty field is truthful; an invented one is not.
 | References / portfolio / case studies / reviews | Leave empty. Clients are never named and no client work is published — no logos, no case studies, no testimonials, no "as seen at". Real client reviews, when they exist, arrive through G2's own verified review process. | audit.html q6 truth; llms.txt Buyer |
 
 The description intentionally does not restate the desk price in dollars: llms.txt
-and offer.md point price and terms at `https://tinystudio.io/pricing.html` rather
-than restating amounts, and G2 copy rules keep URLs and contact details out of the
-description, so this profile follows the same rule.
+and offer.md point price and terms at `https://tinystudio.io/pricing` (the site's
+own clean canonical) rather than restating amounts, and G2 copy rules keep URLs
+and contact details out of the description, so this profile follows the same rule.
 
 ## Never on the profile
 
@@ -463,3 +464,163 @@ re-verifications: every field in the table can still be filled truthfully
 from live first-party surfaces, nothing needs to move to the "Never on the
 profile" list, and no reject condition is triggered. The handoff is ready
 for Nish's manual submission unchanged.
+
+## Re-verification (added 2026-08-20, lane 1)
+
+Re-verified against the current `origin/main` head (d0daea9, "evidence(ai-search):
+controlled entity-and-offer re-run with first Found transitions (2026-08-15)
+(#227)") and the live site on 2026-08-20. Since the last re-verify (which
+measured `e9fc96a` after landing on 2026-08-14, the same commit the previous
+G2 re-verify section cites), 126 commits landed on main, of which 21
+modified files under `public/`. The ones that changed identity, offer,
+contact, price, or boundary strings this profile depends on are 76fe17b
+(Request-the-appraisal signup form in the `/pricing` closing callout,
+replacing a plain anchor), ed2b1a9 (appraisal-page canonicals and JSON-LD
+WebPage `@id`s pointed at the clean non-307 URLs on `/agents`, `/pricing`,
+`/specimen`), 23a7f06 (the pricing and brief-requested footers branded
+"TinyStudio" instead of "The Tiny Studio" in source), 9b0589a5 (brief-requested
+internal links pointed at the clean non-307 paths), c4475858 (the price-and-
+terms pointer in `llms.txt` and `offer.md` migrated to `https://tinystudio.io/pricing`
+along with the controlled-question URL list), ffc1672b (the new
+domain-valuation distinction paragraph appended to the conversion-audit
+boundary in `llms.txt` and `offer.md` — "Nor is the appraisal a domain-value
+estimate: no domain is priced and no resale value is estimated"), 798cd71a
+(the retired `/agent-desk` page now stops claiming the apex root as its
+canonical), 43cc831 (the daily-refreshed study figures refreshed to the
+2026-08-12 scan: 89→91 readable, 53→56 with no FAQ), 66f7bd6 (persistent
+programmatic `<label>` markup on the appraisal intake fields), dda25f2
+(truthful closed-intake response when the six-a-month cap is hit), and
+9f79c71 (the redirecting-spelling guard in `check-site`). The other public-
+touching commits (0e7373fe adding `autocomplete="email"`, 2d8599a4 keeping
+the hero mock in-viewport below 320px, a654ab49 landing the stranded
+2026-08-12 AI-search re-run PR #128) are semantic / layout changes that do
+not touch any boundary string. `git diff --stat e9fc96a..origin/main --
+public/llms.txt public/offer.md public/pricing.html public/audit.html
+public/index.html public/agents.html public/specimen.html
+public/brief-requested.html` shows 8 files changed, 58 insertions(+), 50
+deletions(-); the diffs are the clean-URL canonical/og:url/JSON-LD rewrites
+on `/agents`, `/pricing`, `/specimen`, the brief-requested internal-link
+rewrite, the controlled-question URL list and price-and-terms pointer in
+`llms.txt` and `offer.md` migrated to the clean canonical, the new
+domain-valuation distinction paragraph in `llms.txt` and `offer.md`, the
+intake-form `<label>` markup on `/` and `/audit`, the TinyStudio-branded
+footer text in source on `/pricing` and `/brief-requested` (live still
+serves "The Tiny Studio" — deployment lag; see check 2 below), the new
+signup form in the `/pricing` callout, the refreshed study figures
+(89→91 readable; 53→56 with no FAQ; numbers this profile never quotes), the
+retired `/agent-desk` clean canonical, and the `autocomplete="email"`
+attribute on the email input. None of the diffs alters the offer, the desk
+price, the audit pricing, the six-a-month cap, the human-review boundary,
+the no-client-work rule, or the contact email — every value in the table
+above still maps to live first-party text.
+
+One truthfulness fix landed in the base content this lane — matching the
+2026-08-15 fix the parallel Clutch handoff landed, and consistent with
+PR #218's clean-canonical migration: the two active references to the
+price-and-terms pointer now read `https://tinystudio.io/pricing` (the site's
+own clean canonical; `pricing.html` 307-redirects to it) instead of the
+legacy `https://tinystudio.io/pricing.html`. Historical re-verify sections
+were left untouched.
+
+Fresh checks:
+
+1. Live `https://tinystudio.io/llms.txt` and its mirror
+   `https://tinystudio.io/offer.md` (both 200) are byte-identical to the
+   source files on this head (curl diff: zero differences) and still carry,
+   verbatim: the offer ("The Website Appraisal — the free leak audit of
+   high-ticket service homepages — and the human-reviewed desk that closes
+   what the audit finds"), "reviewed by a person, not autonomous software",
+   "month one corrects the costliest fault; months two and three build the
+   loop", "Six appraisals a month, done by hand", "run by Nish, who signs
+   every audit", "The site states no base city or office address", "clients
+   are never named", "Contact: hello@tinystudio.io", the price-and-terms
+   pointer to `https://tinystudio.io/pricing`, the domain-value boundary
+   ("Nor is the appraisal a domain-value estimate: no domain is priced and
+   no resale value is estimated"), and the conversion-audit boundary
+   ("TinyStudio is not sold as a conversion audit service, so no conversion
+   lift is promised").
+2. Live `https://tinystudio.io/pricing` (clean URL; `pricing.html` 307-redirects
+   to it, HTTP 200) still states exactly the price the handoff relies on —
+   "the appraisal is free, the desk is $2,500 a month on a three-month
+   minimum" (four occurrences in the served page) — and still contains no
+   "hourly rate", "minimum project", or "project size" figure anywhere, so
+   those profile fields stay blank. The pricing footer text trails the
+   committed source: the source now reads "TinyStudio · tinystudio.io"
+   (PR #112 brand correction) while the served page still reads "The Tiny
+   Studio" — a deployment lag, not a product change. The served canonical
+   also trails the committed source — the live page declares
+   `https://tinystudio.io/pricing.html` while the source declares
+   `https://tinystudio.io/pricing` (a PR #218 deployment lag on this one
+   page) — so the handoff's pointer was updated to the canonical form
+   rather than the redirect target. Functionally both resolve to the same
+   page.
+3. Live `https://tinystudio.io/audit` (clean URL; HTTP 200) still answers
+   q3 "Where is TinyStudio based?" with "The site does not state a base city
+   or office address" and q6 "Does TinyStudio publish client work?" with "no
+   logos, no case studies, no testimonials, no 'as seen at'"; live
+   `https://tinystudio.io/` still carries the "Where TinyStudio is based"
+   disclosure and the "Request the appraisal" intake CTA. The location and
+   clients fields stay empty. All five live surfaces (`/`, `/audit`,
+   `/pricing`, `llms.txt`, `offer.md`) carry every string this profile
+   depends on; the served bytes trail the committed source on a handful of
+   cosmetic lines (study numbers, intake-form label markup, clean-URL
+   canonical rewrites on `/agents`, `/pricing`, `/specimen`) that do not
+   affect any value in the table above. The deployment lag does not weaken
+   the profile — every claim maps cleanly to the committed source the next
+   deploy will pick up.
+4. The official G2 pages were re-fetched 2026-08-20 (plain HTTP) and still
+   document the flow and rules this handoff relies on:
+   - `https://sell.g2.com/create-a-profile` still says the submitted product
+     or service "will be conditionally approved", the G2 research team
+     "verifies your product or service—in about 3-5 business days—before
+     placing it in the right category", "your profile is live on our site
+     and ready to be claimed", the claim request is reviewed "for final
+     approval within 1-3 business days", and "You can claim your profile for
+     free"; its "Add your product/service" link still opens
+     `https://www.g2.com/products/new`.
+   - `https://www.g2digitalmarkets.com/listing-guidelines` (still "Last
+     updated on May 4, 2026") still requires the offer to be "publicly
+     available, with a call to action that highlights an offer on sale to
+     the public", still states "we do not list custom-made/bespoke
+     software", still requires the listing "under the product or service
+     name on the Vendor's website", and still carries the copy rules the
+     table obeys: no first-person point of view ("e.g., we, our, us"), no
+     calls to action, no "phone, email, fax, URL" inside the description, no
+     superlatives or comparative language ("e.g., best, most, fastest"), no
+     suffixes in the company name ("e.g., no Inc, Corporation, LLC, etc."),
+     and "the final copy is subject to the discretion of our content team".
+   - `https://research.g2.com/methodology/research-faq` still says "Service
+     providers are represented with one profile per vendor" and still advises
+     first checking that the product or company is not "already listed on G2
+     under a different name".
+5. No G2 receipt exists in the product state (no G2 profile URL or rejection
+   response anywhere in the repo on this head); the receipt block below
+   remains unfilled and the human submission remains the open action. The
+   external search baseline was not re-run this lane (public search endpoints
+   have blocked scripted queries from the VPS in previous lanes), so the
+   2026-08-09 baseline stands with its own caveat: it is a baseline, not
+   proof of non-existence. If a profile has been published under a different
+   name form, the "What this document does not claim" section above applies
+   — compare it against llms.txt before changing anything.
+6. Repository checks on this head pass: `node scripts/check-site.mjs`
+   ("TinyStudio.io checks passed") and the full
+   `node --test scripts/test-*.mjs` suite — 128 tests across 9 suites
+   (headings, sitemap, worker, ui, contract, study, viewport, narrow-pages,
+   narrow) — all green, exit 0.
+
+Two truthfulness-relevant additions since the last re-verify, both
+reinforcing rather than weakening the handoff: the daily-refreshed study
+guard (43cc831) anchors the homepage /audit figures to the freshest
+published scan and prevents serving stale numbers — consistent with the
+profile's no-fabrication rule; and the truthful closed-intake response
+(dda25f2, rebase of #116) makes the six-a-month cap an explicit, plain
+reply at the API rather than a silent drop, so any future G2 profile copy
+that mentions intake state stays honest about it. Neither change alters
+any value in the table above.
+
+Same result as the 2026-08-09 preparation and the 2026-08-11, 2026-08-12,
+and 2026-08-14 re-verifications: every field in the table can still be
+filled truthfully from live first-party surfaces, nothing needs to move
+to the "Never on the profile" list, and no reject condition is triggered.
+The handoff is ready for Nish's manual submission with the canonical price
+pointer corrected.
