@@ -9,8 +9,10 @@ fails if the embedded copy drifts from these files.
 
 - `controlled-questions.json` — the registry of named controlled questions.
   Each question carries a stable `id`, a short `name`, the exact `prompt`
-  sent to each engine, and a `truth` the verdict is checked against. The truth
-  statements are drawn from the live site, not from what we wish were true.
+  sent to each engine, a `truth` the verdict is checked against, and
+  `answerFacts` — the canonical first-party facts the site must state to
+  answer it (see "The answer contract" below). The truth and answer facts are
+  drawn from the live site, not from what we wish were true.
 - `evidence.json` — the captured runs. One `run` per question-and-engine
   pair, with the verbatim answer (or observation), the pages the engine cited,
   and a remediation note.
@@ -59,6 +61,20 @@ is not answered on the homepage or if a referenced id does not exist in the
 fixture, and the same invariant is asserted in `scripts/test-agent-ui.mjs`. The
 fixture never changes to match the site — the site is what gets edited to
 answer the questions the evidence asks.
+
+## The answer contract
+
+Each question's `answerFacts` are the facts a correct answer must state: the
+first-party facts drawn from the site's own copy when the question was
+registered. `scripts/check-site.mjs` fails if any answer fact is missing from
+the homepage identity section, and `scripts/test-agent-ui.mjs` asserts the same
+binding. The check is case-insensitive and runs against the section as a whole,
+so wording may change but a fact may not disappear; when the site's answer
+genuinely changes, the fixture's answer facts are what get updated, not the
+other way around. The contract is repository-side: it makes a buyer's assistant
+that reads this site receive unambiguous, current, first-party facts, and it
+does not claim ranking, leads, visibility, or any live AI outcome. The receipt
+recording this binding lives in `docs/evidence/ai-search/`.
 
 ## Adding a run
 

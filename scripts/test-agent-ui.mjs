@@ -550,6 +550,50 @@ test("every owned identity surface states the human-reviewed outcome", () => {
   }
 });
 
+test("every owned identity surface states the TinyStudio identity facts", () => {
+  // Mirrors the check-site guard: the same five identity facts must anchor
+  // the homepage, the audit page, llms.txt and offer.md, so the agent-readable
+  // surface cannot drift from the visible one.
+  const identityFacts = [
+    "tinystudio.io",
+    "Mac subtitle app",
+    "fibre-arts magazine",
+    "human-reviewed",
+    "states no base city or office address"
+  ];
+  for (const [name, text] of [
+    ["homepage", HOME_HTML],
+    ["audit page", AUDIT_HTML],
+    ["llms.txt", LLMS_TXT],
+    ["offer.md", OFFER_MD]
+  ]) {
+    for (const fact of identityFacts) {
+      assert.ok(text.includes(fact), `${name} must state the identity fact: ${fact}`);
+    }
+  }
+});
+
+test("homepage identity section states every controlled question's answer facts", () => {
+  // Mirrors the check-site answer contract: each question's answerFacts must
+  // be present in the homepage identity section (case-insensitive, section as
+  // a whole), so the canonical answers cannot drift from the fixture.
+  const section = HOME_HTML.match(/<section[^>]*id="identity"[\s\S]*?<\/section>/i)?.[0] ?? "";
+  assert.ok(section, "homepage carries the identity section");
+  const sectionText = section.toLowerCase();
+  for (const question of AI_QUESTIONS.questions) {
+    assert.ok(
+      Array.isArray(question.answerFacts) && question.answerFacts.length > 0,
+      `${question.id} carries answer facts`
+    );
+    for (const fact of question.answerFacts) {
+      assert.ok(
+        sectionText.includes(fact.toLowerCase()),
+        `${question.id} answer fact must be stated on the homepage: ${fact}`
+      );
+    }
+  }
+});
+
 test("offer facts are mirrored by llms.txt and offer.md", () => {
   // Case-insensitive, matching the check-site guard: one file may head a fact
   // while the other embeds it mid-sentence.

@@ -569,6 +569,30 @@ if (aiQuestions && aiEvidence) {
     }
   }
 
+  // The answer contract: every controlled question carries `answerFacts` —
+  // the canonical first-party facts a correct answer must state, drawn from
+  // the site's own copy when the question was registered. The check runs
+  // case-insensitively against the identity section as a whole, so wording
+  // may change but a fact may not disappear. The fixture never changes to
+  // match the site: the site is what gets edited to answer the questions.
+  const identitySectionText = homepageIdentitySection.toLowerCase();
+  for (const question of questions) {
+    const facts = Array.isArray(question.answerFacts) ? question.answerFacts : [];
+    if (!facts.length) {
+      failures.push(`AI-search question must carry answerFacts: ${question.id}`);
+      continue;
+    }
+    for (const fact of facts) {
+      if (typeof fact !== "string" || !fact) {
+        failures.push(`AI-search answer fact must be a non-empty string: ${question.id}`);
+        continue;
+      }
+      if (!identitySectionText.includes(fact.toLowerCase())) {
+        failures.push(`Homepage identity section must state the answer fact for ${question.id}: ${fact}`);
+      }
+    }
+  }
+
   const fixtureText = JSON.stringify(aiQuestions) + "\n" + JSON.stringify(aiEvidence);
   if (/[\w.+-]+@[\w-]+\.[\w.]{2,}/.test(fixtureText)) {
     failures.push("AI-search fixture must not capture email addresses.");
@@ -594,7 +618,10 @@ if (aiQuestions && aiEvidence) {
   }
 
   const narrativeFields = [];
-  questions.forEach((question) => narrativeFields.push(question.truth));
+  questions.forEach((question) => {
+    narrativeFields.push(question.truth);
+    (question.answerFacts || []).forEach((fact) => narrativeFields.push(fact));
+  });
   runs.forEach((run) => {
     if (run.remediation) narrativeFields.push(run.remediation.text);
     if (run.reason) narrativeFields.push(run.reason);
@@ -609,6 +636,22 @@ if (aiQuestions && aiEvidence) {
     /\brank\s*(#\s*\d|number\s+one|first)\b/i
   ]) {
     if (pattern.test(narrativeText)) failures.push(`Forbidden claim in AI-search fixture narrative: ${pattern}`);
+  }
+
+  // The repository-side receipt records what the answer contract is, what it
+  // claims and what it does not. Existence and section anchors only — the
+  // receipt is a dated record, not a behavioral test.
+  const aiSearchReceipt = read("docs/evidence/ai-search/2026-08-08-identity-answer-contract.md");
+  for (const anchor of [
+    "answer contract",
+    "answerFacts",
+    "no live results",
+    "not a re-run",
+    "Exact verification method"
+  ]) {
+    if (!aiSearchReceipt.includes(anchor)) {
+      failures.push(`AI-search evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+    }
   }
 }
 
@@ -643,6 +686,7 @@ for (const phrase of identityFacts) {
   if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
   if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
   if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
+  if (!llms.includes(phrase)) failures.push(`llms.txt must state the TinyStudio identity: ${phrase}`);
 }
 
 if (!siteHome.includes('id="identity"')) {
