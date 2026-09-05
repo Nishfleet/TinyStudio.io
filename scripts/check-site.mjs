@@ -219,6 +219,7 @@ for (const optionalName of [
 
 const siteHome = read("public/index.html");
 const siteAudit = read("public/audit.html");
+const auditStyles = read("public/audit.css");
 
 // Conversion-friction regression: the signup website field must accept a bare
 // business domain (example.com) at the browser level instead of requiring a
@@ -259,6 +260,35 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
 
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
+}
+
+// /audit narrow-viewport regression: at 390x844 the page measured 569px wide —
+// nav links, the CTA, and the 53-of-89 stat ran off-canvas. The fix is resilient
+// layout in audit.css, not hidden content: the wrap slims down, nav wraps, the
+// stat scales via clamp, and the band and checks stack. All of it sits inside a
+// max-width query, so the base (desktop) rules must stay in place untouched.
+const auditMobileRules = [
+  ["narrow breakpoint", "@media (max-width:1024px)"],
+  ["slim wrap padding", ".wrap{padding:0 24px}"],
+  ["wrapping nav", "nav{flex-wrap:wrap"],
+  ["wrapping nav links", ".navlinks{flex-wrap:wrap"],
+  ["scaled stat", ".stat{font-size:clamp(64px,21vw,128px)}"],
+  ["stacked band grid", ".bandgrid{grid-template-columns:1fr"],
+  ["slim band padding", ".band{padding:36px 26px"],
+  ["two-across checks", ".checks{grid-template-columns:repeat(2,1fr)"],
+  ["single-column checks on small phones", "@media (max-width:560px){.checks{grid-template-columns:1fr}}"]
+];
+for (const [label, rule] of auditMobileRules) {
+  if (!auditStyles.includes(rule)) failures.push(`Audit page mobile layout must include ${label} rule: ${rule}`);
+}
+
+const auditDesktopRules = [
+  ["128px stat", ".stat{font-family:'Fraunces',serif;font-weight:200;font-size:128px"],
+  ["side-by-side band grid", ".bandgrid{display:grid;grid-template-columns:auto 1fr"],
+  ["four-across checks", ".checks{margin-top:54px;display:grid;grid-template-columns:repeat(4,1fr)"]
+];
+for (const [label, rule] of auditDesktopRules) {
+  if (!auditStyles.includes(rule)) failures.push(`Audit page desktop layout must keep ${label} rule: ${rule}`);
 }
 
 for (const claim of forbiddenClaims) {

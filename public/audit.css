@@ -19,3 +19,25 @@
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xa1{color:var(--brass)}
+
+/* Narrow screens: keep every element on-canvas (390px regression: page measured
+   569px wide, nav links and the 53-of-89 stat ran off-canvas). Nothing is hidden;
+   the wrap slims down, nav wraps, the stat scales via clamp, and the band and
+   checks stack. max-width query only, so the 1280px desktop layout is untouched. */
+@media (max-width:1024px){
+  .wrap{padding:0 24px}
+  nav{flex-wrap:wrap;row-gap:16px}
+  .navlinks{flex-wrap:wrap;gap:14px 20px}
+  .phead{padding-top:56px}
+  .phead h1{font-size:clamp(38px,9.5vw,70px)}
+  .band{padding:36px 26px;margin-top:80px}
+  .bandgrid{grid-template-columns:1fr;gap:30px}
+  .bandgrid>*{min-width:0}
+  .band h2{font-size:30px}
+  .stat{font-size:clamp(64px,21vw,128px)}
+  section{margin-top:84px;padding-top:48px}
+  section h2{font-size:36px}
+  .checks{grid-template-columns:repeat(2,1fr);row-gap:40px}
+  .row{flex-wrap:wrap}
+}
+@media (max-width:560px){.checks{grid-template-columns:1fr}}
