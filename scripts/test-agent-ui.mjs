@@ -509,14 +509,34 @@ const LLMS_TXT = readFileSync(new URL("../public/llms.txt", import.meta.url), "u
 const OFFER_MD = readFileSync(new URL("../public/offer.md", import.meta.url), "utf8");
 
 const OFFER_FACTS = [
+  "free leak audit",
+  "The Growth Desk",
+  "$2,500",
+  "three-month minimum",
+  "delivery guarantee",
+  "five working days",
+  "six audits a month",
+  "seven specialist",
   "human-reviewed managed service",
-  "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "no revenue, ranking, ROAS",
   "not autonomous software",
   "Client-side code does not call model providers",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "Cloudflare D1",
+  "no public endpoint",
+  "not the current offer",
+  "never published"
+];
+
+const STALE_OFFERS = ["The Website Correction", "founder pilots", "Managed IT"];
+
+const IDENTITY_FACTS = [
+  "tinystudio.io",
+  "Mac subtitle app",
+  "fibre-arts magazine",
+  "human-reviewed",
+  "states no base city or office address"
 ];
 
 test("homepage disambiguation block answers every controlled question", () => {
@@ -550,12 +570,25 @@ test("every owned identity surface states the human-reviewed outcome", () => {
   }
 });
 
+test("llms.txt carries the identity disambiguation for machine readers", () => {
+  for (const fact of IDENTITY_FACTS) {
+    assert.ok(LLMS_TXT.includes(fact), `llms.txt must state the identity fact: ${fact}`);
+  }
+});
+
 test("offer facts are mirrored by llms.txt and offer.md", () => {
   // Case-insensitive, matching the check-site guard: one file may head a fact
   // while the other embeds it mid-sentence.
   for (const fact of OFFER_FACTS) {
     assert.ok(LLMS_TXT.toLowerCase().includes(fact.toLowerCase()), `llms.txt must state: ${fact}`);
     assert.ok(OFFER_MD.toLowerCase().includes(fact.toLowerCase()), `offer.md must state: ${fact}`);
+  }
+});
+
+test("machine-readable contract sells the live offer, not the retired pitch", () => {
+  for (const stale of STALE_OFFERS) {
+    assert.ok(!LLMS_TXT.includes(stale), `llms.txt must not sell the retired offer: ${stale}`);
+    assert.ok(!OFFER_MD.includes(stale), `offer.md must not sell the retired offer: ${stale}`);
   }
 });
 

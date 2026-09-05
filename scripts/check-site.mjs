@@ -122,15 +122,41 @@ const requiredWorkerCopy = [
   "noAutopublishing: true"
 ];
 
+// The machine-readable contract (llms.txt + offer.md) must describe the offer
+// the rendered routes and the controlled AI-search truths actually state: the
+// free leak audit (The Website Appraisal) and The Growth Desk at $2,500 a
+// month, for high-ticket service businesses. Any other offer text makes an AI
+// reader of llms.txt answer the controlled questions against the site.
 const requiredPublicArtifacts = [
+  "free leak audit",
+  "The Growth Desk",
+  "$2,500",
+  "three-month minimum",
+  "delivery guarantee",
+  "five working days",
+  "six audits a month",
+  "seven specialist",
   "human-reviewed managed service",
-  "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "no revenue, ranking, ROAS",
   "not autonomous software",
   "Client-side code does not call model providers",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "Cloudflare D1",
+  "no public endpoint",
+  "not the current offer",
+  "never published"
+];
+
+// The retired Website Correction pitch must not return as the current
+// machine-readable offer: it appears on no rendered route, and the routes are
+// the authoritative product claims. The legacy scoping may say "Agent Desk"
+// and "Pipeline Brief", so the forbidden phrases are the retired offer's own
+// names, not those words.
+const forbiddenStaleOffers = [
+  "The Website Correction",
+  "founder pilots",
+  "Managed IT"
 ];
 
 const forbiddenClaims = [
@@ -175,6 +201,11 @@ for (const text of requiredPublicArtifacts) {
   // other embeds it mid-sentence), so neither file can silently drift.
   if (!llms.toLowerCase().includes(text.toLowerCase())) failures.push(`Missing offer fact in llms.txt: ${text}`);
   if (!offer.toLowerCase().includes(text.toLowerCase())) failures.push(`Missing offer fact in offer.md: ${text}`);
+}
+
+for (const text of forbiddenStaleOffers) {
+  const haystack = `${llms}\n${offer}`.toLowerCase();
+  if (haystack.includes(text.toLowerCase())) failures.push(`Retired offer found in machine-readable contract: ${text}`);
 }
 
 function formFieldTags(html) {
@@ -643,6 +674,7 @@ for (const phrase of identityFacts) {
   if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
   if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
   if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
+  if (!llms.includes(phrase)) failures.push(`llms.txt must state the TinyStudio identity: ${phrase}`);
 }
 
 if (!siteHome.includes('id="identity"')) {

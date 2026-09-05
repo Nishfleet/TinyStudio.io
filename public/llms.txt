@@ -1,58 +1,98 @@
 # TinyStudio
 
-TinyStudio sells one human-reviewed managed service: The Website Correction.
+TinyStudio is the business behind this site, tinystudio.io. Other businesses
+share the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a
+video production studio, a Los Angeles venue, an unrelated studio LLC. None of
+them are this TinyStudio, and this TinyStudio is none of them. The site states no base city or office address.
+
+TinyStudio sells one human-reviewed managed service around the page a
+business's revenue depends on: The Website Appraisal, a free leak audit of
+high-ticket service homepages, and The Growth Desk that closes what the audit
+finds. It is a managed service with human review, not autonomous software.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Current Offer: The Website Correction
+## Current Offer: The Website Appraisal
 
-The Website Correction is a managed service with human review, not autonomous software.
+The Website Appraisal is a complimentary leak audit, yours to keep whether or
+not TinyStudio is ever engaged. It serves high-ticket service businesses —
+clinics, surgeons, dentists, spas, property, dealers, brokers and similar —
+and clients are never named.
 
-Buyer: founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
+Six audits a month; when the sixth is taken, the intake closes until the
+next. Findings arrive inside five working days, and no call is required at
+any point.
 
-In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
+The audit reads the one page a business's revenue depends on, the way a
+customer with intent reads it, in four passes: the money page, the paid
+creative, the unanswered pre-purchase questions, and the reach. Each pass is
+run by a specialist with one job, then read and signed by a person before it
+reaches the client. The result is a short, plain document: each fault named,
+in the order it costs the business, with the fix beside it.
 
-## Included
+## The Growth Desk
 
-- fault map for the selected page
-- rewrite or redesign of that page
-- one implementation pass or a dev-ready handoff
-- search-trust basics
-- before/after proof
-- Loom walkthrough
-- measurement plan
-- one revision
-- 14-day implementation tracking
+If the leaks are to be closed rather than merely found, The Growth Desk runs
+at $2,500 a month on a three-month minimum. Month one corrects the costliest
+fault: the page rewritten or rebuilt, a dev-ready handoff if the client's own
+team ships it, and search-trust basics. Months two and three build the loop
+that keeps the standard up: weekly checks, one revision, and tracking that
+says whether the fix held.
 
-## Price And Start
+There is one promise about outcomes, and only one: the delivery guarantee. If
+the month-one deliverables are not in the client's hands within fourteen
+working days of Day 0, month one is refunded in full. Day 0 begins only once
+payment, access, the approval owner and the implementation owner are
+recorded, and the clock pauses if TinyStudio is waiting on the client.
 
-The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
+## How The Work Runs
 
-Day 0 starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
+Seven specialist agents do the research, drafting and checking, each with a
+single job, a fixed set of inputs and a checklist it must satisfy, working
+from the client's own pages and numbers — never a template for the sector. A
+person reviews fit, every claim, all client-facing work, delivery and
+renewal, and signs every audit. Automation may prepare research, drafts, QA,
+packages and routing, but never autonomously sends, publishes, spends,
+approves, accepts or renews.
 
-## Human Review Boundary
+## Evidence
 
-Human review gates fit, claims, client-facing work, delivery/acceptance, and renewal. Automation may prepare research, drafts, QA, packages, and routing, but never autonomously sends, publishes, spends, approves, accepts, or renews.
+The site's finding is backed by market research that TinyStudio shares freely:
+an automated read of served homepage HTML, refreshed daily. The current set
+covers 99 sites across thirteen industries and eight geographies; 89 are
+readable and ten are blocked by bot protection and excluded from every count.
+Of the 89 readable, 53 answer none of the questions a buyer asks before
+committing, and 57 show no price. Inner pages are deliberately not counted.
+This number is today's and changes as the set is re-read.
 
 ## Not Promised
 
-There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
+There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume
+guarantees. The delivery guarantee is a promise about the work, not the
+market. Client work is never published: no logos, no case studies, no
+testimonials, no "as seen at".
+
+## Data Handling
+
+The public app stores email signup and lightweight usage metadata in
+Cloudflare D1, including daily rate-limit counters and a daily IP-derived
+rate-limit key. Submitted business context is processed to generate output
+and is not stored by this app.
+
+There is no public endpoint for reading collected emails or usage metadata.
+Client-side code does not call model providers, platform admin APIs, ad
+accounts, databases, or private credentials directly.
 
 ## Legacy Self-Serve Agent Desk
 
-The earlier self-serve Agent Desk, which generated a one-shot Pipeline Brief, is demoted and is not the product TinyStudio sells. Agent Desk surfaces still reachable on this site are legacy, not the current offer.
-
-The legacy surface keeps its safety rails:
+The earlier self-serve Agent Desk, which generated a one-shot Pipeline Brief,
+is demoted and is not the current offer. Agent Desk surfaces still reachable
+on this site are legacy, not the current offer. The legacy surface keeps its
+safety rails:
 
 - No campaign publishing
 - No ad spend changes
 - No ad account connection
 - No prospect message sending
 - Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
-
-## Data Handling
-
-The public app stores email signup and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key. Submitted business context is processed to generate output and is not stored by this app.
-
-There is no public endpoint for reading collected emails or usage metadata.
