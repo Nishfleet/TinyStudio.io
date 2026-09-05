@@ -1,5 +1,8 @@
-import { existsSync, readFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
+import { createServer } from "node:http";
+import { homedir, tmpdir } from "node:os";
+import path from "node:path";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -259,6 +262,221 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
 
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
+}
+
+// Mobile layout regression, static guard: at 390x844 the /audit page
+// previously overflowed horizontally (navlinks measured to x=569, the
+// 53-of-89 stat to x=451). The mobile treatment must live in audit.css behind
+// the shared 760px breakpoint and stack every overflowing block. These are
+// deterministic SOURCE-STRING checks (fast, CI-safe, no browser, no network).
+// They assert the guard rails, not the layout: the behavioral proof is the
+// Chromium layout probe below, plus docs/evidence/audit-390-mobile-overflow-proof.md.
+const auditCss = read("public/audit.css");
+const auditMobile = auditCss.match(/@media \(max-width:760px\)\{([\s\S]*)\}\s*$/)?.[1] ?? "";
+
+if (!auditMobile) {
+  failures.push("Audit page must carry a mobile (max-width:760px) media query in audit.css.");
+} else {
+  const requireMobileRule = (label, pattern) => {
+    if (!pattern.test(auditMobile)) failures.push(`Audit mobile layout must ${label}.`);
+  };
+  requireMobileRule("scale the 128px stat instead of leaving it nowrap at full size", /\.stat\{[^}]*clamp\(/);
+  requireMobileRule("turn the nav into a wrapping two-tier layout", /\.navlinks\{[^}]*flex-wrap:wrap/);
+  requireMobileRule("give the nav CTA its own full-width row", /\.navcta\{[^}]*1 1 100%/);
+  requireMobileRule("stack the band stat and copy into one column", /\.bandgrid\{[^}]*grid-template-columns:1fr/);
+  requireMobileRule("stack the four checks into one column", /\.checks\{[^}]*grid-template-columns:1fr/);
+  requireMobileRule("let proof rows wrap instead of overflowing", /\.row\{[^}]*flex-wrap:wrap/);
+}
+
+// Behavioral layout probe (optional, no dependencies). When a real Chromium
+// binary is available, this serves the audit page over localhost and measures
+// the ACTUAL layout at 390x844 and 1280x800 over the DevTools protocol:
+// document.scrollWidth vs clientWidth, elements escaping the viewport, and
+// whether the mobile/desktop treatments applied. A browser-less environment
+// gets a loud SKIP — the source guards above remain the CI-enforced floor.
+// Finding a browser but failing to measure is a hard failure, never a silent
+// pass.
+
+const MEASURE_LAYOUT = `(async () => {
+  const deadline = Date.now() + 15000;
+  while (document.readyState !== "complete" && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  await document.fonts.ready;
+  const root = document.documentElement;
+  const vw = root.clientWidth;
+  const offenders = [...document.querySelectorAll("body *")]
+    .map((el) => [el, el.getBoundingClientRect()])
+    .filter(([, r]) => r.width > 1 && r.right > vw + 0.5)
+    .map(([el, r]) => {
+      const name = typeof el.className === "string" && el.className ? "." + el.className.trim().split(/\\s+/)[0] : "";
+      return el.tagName.toLowerCase() + name + " right=" + Math.round(r.right);
+    });
+  const css = (sel) => { const el = document.querySelector(sel); return el ? getComputedStyle(el) : null; };
+  const checks = css(".checks");
+  const band = css(".bandgrid");
+  const stat = css(".stat");
+  return {
+    clientWidth: root.clientWidth,
+    scrollWidth: root.scrollWidth,
+    bodyScrollWidth: document.body.scrollWidth,
+    offenders,
+    checksColumns: checks ? checks.gridTemplateColumns.split(" ").length : null,
+    bandgridColumns: band ? band.gridTemplateColumns.split(" ").length : null,
+    statFontSize: stat ? stat.fontSize : null
+  };
+})()`;
+
+function findChromium() {
+  for (const candidate of [process.env.CHROME_PATH, "chromium", "chromium-browser", "google-chrome", "google-chrome-stable", "chrome"]) {
+    if (!candidate) continue;
+    if (path.isAbsolute(candidate) && existsSync(candidate)) return candidate;
+    try {
+      const which = spawnSync("which", [candidate], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      if (which.status === 0 && which.stdout.trim()) return which.stdout.trim().split("\n")[0];
+    } catch { /* keep looking */ }
+  }
+  if (process.platform === "linux") {
+    const cacheDir = path.join(homedir(), ".cache", "ms-playwright");
+    if (existsSync(cacheDir)) {
+      for (const entry of readdirSync(cacheDir)) {
+        const dir = path.join(cacheDir, entry);
+        if (!statSync(dir).isDirectory()) continue;
+        const shell = path.join(dir, "chrome-headless-shell-linux64", "chrome-headless-shell");
+        if (existsSync(shell)) return shell;
+        const chrome = path.join(dir, "chrome-linux", "chrome");
+        if (existsSync(chrome)) return chrome;
+      }
+    }
+  }
+  return null;
+}
+
+async function runLayoutProbe() {
+  if (typeof WebSocket === "undefined") {
+    console.log("[layout probe] SKIPPED: needs Node >= 21 (global WebSocket) and a Chromium binary.");
+    return;
+  }
+  if (process.platform === "win32") {
+    console.log("[layout probe] SKIPPED on Windows: no Chromium discovery implemented here.");
+    return;
+  }
+  const chromium = findChromium();
+  if (!chromium) {
+    console.log("[layout probe] SKIPPED: no Chromium found. Set CHROME_PATH (or install Chrome) to get real layout measurement; the source guards above still apply.");
+    return;
+  }
+
+  const publicDir = new URL("../public/", import.meta.url).pathname;
+  const server = createServer((req, res) => {
+    const file = path.join(publicDir, new URL(req.url, "http://127.0.0.1").pathname.slice(1));
+    if (!existsSync(file)) {
+      res.writeHead(404);
+      res.end("not found");
+      return;
+    }
+    const mime = file.endsWith(".css") ? "text/css; charset=utf-8" : file.endsWith(".js") ? "text/javascript; charset=utf-8" : "text/html; charset=utf-8";
+    res.writeHead(200, { "content-type": mime });
+    res.end(readFileSync(file));
+  });
+  server.listen(0, "127.0.0.1");
+  await new Promise((resolve, reject) => {
+    server.once("listening", resolve);
+    server.once("error", reject);
+  });
+  const serverUrl = `http://127.0.0.1:${server.address().port}`;
+
+  const profile = mkdtempSync(path.join(tmpdir(), "audit-probe-"));
+  // --no-sandbox: many Linux distros (Ubuntu 23.10+/AppArmor) deny unprivileged
+  // userns, which headless Chrome requires for its sandbox. This probe only
+  // loads localhost content into a throwaway temp profile, so the browser
+  // sandbox is not a security boundary here.
+  const chrome = spawn(chromium, ["--headless=new", "--no-sandbox", "--disable-gpu", `--user-data-dir=${profile}`, "--remote-debugging-port=0", "about:blank"], { stdio: "ignore" });
+  try {
+    const activePort = path.join(profile, "DevToolsActivePort");
+    const deadline = Date.now() + 15_000;
+    while (!existsSync(activePort) && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    if (!existsSync(activePort)) {
+      failures.push("Layout probe: Chromium did not expose its DevTools port.");
+      return;
+    }
+    const [debugPort] = readFileSync(activePort, "utf8").trim().split("\n");
+
+    let target = null;
+    for (let attempt = 0; attempt < 50 && !target; attempt++) {
+      try {
+        const targets = await (await fetch(`http://127.0.0.1:${debugPort}/json/list`)).json();
+        target = targets.find((entry) => entry.type === "page");
+      } catch { /* not up yet */ }
+      if (!target) await new Promise((r) => setTimeout(r, 100));
+    }
+    if (!target) {
+      failures.push("Layout probe: could not reach Chromium DevTools target list.");
+      return;
+    }
+
+    const ws = new WebSocket(target.webSocketDebuggerUrl);
+    await new Promise((resolve, reject) => {
+      ws.onopen = resolve;
+      ws.onerror = () => reject(new Error("DevTools websocket failed"));
+    });
+    const pending = new Map();
+    let nextId = 0;
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (!message.id || !pending.has(message.id)) return;
+      const { resolve, reject } = pending.get(message.id);
+      pending.delete(message.id);
+      if (message.error) reject(new Error(message.error.message));
+      else resolve(message.result);
+    };
+    const send = (method, params = {}) => {
+      const id = ++nextId;
+      ws.send(JSON.stringify({ id, method, params }));
+      return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+    };
+
+    for (const [viewport, checks] of [
+      ["390x844", { clientWidth: 390, checksColumns: 1, bandgridColumns: 1 }],
+      ["1280x800", { clientWidth: 1280, checksColumns: 4, bandgridColumns: 2, statFontSize: "128px" }]
+    ]) {
+      const [width, height] = viewport.split("x").map(Number);
+      await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
+      await send("Emulation.setScrollbarsHidden", { hidden: true });
+      await send("Page.navigate", { url: `${serverUrl}/audit.html` });
+      const evaluated = await send("Runtime.evaluate", { expression: MEASURE_LAYOUT, awaitPromise: true, returnByValue: true });
+      if (evaluated.exceptionDetails) {
+        failures.push(`Layout probe at ${viewport}: measurement threw in the page (${evaluated.exceptionDetails.text}).`);
+        continue;
+      }
+      const measured = evaluated.result.value;
+      console.log(`[layout probe] ${viewport}: scrollWidth=${measured.scrollWidth} clientWidth=${measured.clientWidth} offenders=${measured.offenders.length} checks=${measured.checksColumns} bandgrid=${measured.bandgridColumns} stat=${measured.statFontSize}`);
+      if (measured.scrollWidth !== measured.clientWidth) {
+        failures.push(`Layout probe at ${viewport}: page overflows horizontally, scrollWidth ${measured.scrollWidth} != clientWidth ${measured.clientWidth}.`);
+      }
+      for (const offender of measured.offenders) {
+        failures.push(`Layout probe at ${viewport}: element escapes the viewport: ${offender}.`);
+      }
+      for (const [key, expected] of Object.entries(checks)) {
+        if (measured[key] !== expected) {
+          failures.push(`Layout probe at ${viewport}: expected ${key}=${expected}, measured ${measured[key]}.`);
+        }
+      }
+    }
+    ws.close();
+  } finally {
+    chrome.kill("SIGKILL");
+    server.close();
+    rmSync(profile, { recursive: true, force: true });
+  }
+}
+
+try {
+  await runLayoutProbe();
+} catch (error) {
+  failures.push(`Layout probe failed: ${error.message}`);
 }
 
 for (const claim of forbiddenClaims) {
