@@ -1,0 +1,30 @@
+{
+  "schema": "buyer-question-map/v1",
+  "purpose": "The canonical answers to the four questions a buyer — or an AI search surface reading for one — must be able to answer about tinystudio.io: which TinyStudio this is, what it sells, who it is for, and what it does not promise. The machine-readable surfaces (public/llms.txt, public/offer.md) and the visible homepage section state these same facts; scripts/check-site.mjs refuses any contradiction between this fixture and those surfaces, and refuses any promise that the owned surfaces do not already make. The map adds no new product promises and no prices: every fact it states is already on the owned surfaces.",
+  "questions": [
+    {
+      "id": "bq-identity",
+      "name": "Which TinyStudio this is",
+      "question": "Which TinyStudio is this?",
+      "answer": "tinystudio.io's TinyStudio: the business behind this site — the free leak audit of high-ticket service homepages and the desk that closes what the audit finds, run by Nish, who signs every audit. Other businesses share the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a video production studio, a Los Angeles venue, an unrelated studio LLC. None of them are this TinyStudio. The site states no base city or office address."
+    },
+    {
+      "id": "bq-service",
+      "name": "What TinyStudio sells",
+      "question": "What does TinyStudio sell?",
+      "answer": "One human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software. In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step."
+    },
+    {
+      "id": "bq-buyer",
+      "name": "Who TinyStudio is for",
+      "question": "Who is it for?",
+      "answer": "Founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer."
+    },
+    {
+      "id": "bq-non-claims",
+      "name": "What TinyStudio does not promise",
+      "question": "What is not promised?",
+      "answer": "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees. The earlier self-serve Agent Desk is retired and is not the current offer."
+    }
+  ]
+}

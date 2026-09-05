@@ -1,9 +1,10 @@
 # AI-search evidence fixture
 
 This directory is the data model behind the AI-search evidence artifact on the
-audit page (`public/audit.html`, section `#ai-search`). It is the single source
-of truth; the page embeds a copy of both files, and `scripts/check-site.mjs`
-fails if the embedded copy drifts from these files.
+audit page (`public/audit.html`, section `#ai-search`) and the canonical
+buyer-question map for the site's identity and offer. It is the single source
+of truth: the audit page embeds a copy of the run-bearing files, and
+`scripts/check-site.mjs` fails if the embedded copy drifts from these files.
 
 ## Files
 
@@ -14,6 +15,13 @@ fails if the embedded copy drifts from these files.
 - `evidence.json` — the captured runs. One `run` per question-and-engine
   pair, with the verbatim answer (or observation), the pages the engine cited,
   and a remediation note.
+- `buyer-questions.json` — the canonical buyer-question map: the four answers
+  (identity, service, buyer, non-claims) a buyer or an AI search surface must
+  be able to recover about tinystudio.io. `public/llms.txt`, `public/offer.md`
+  and the visible homepage section state the same facts; `scripts/check-site.mjs`
+  refuses any contradiction between the fixture and those surfaces, and refuses
+  any promise the owned surfaces do not already make. The map states no prices
+  and adds no new product promises.
 
 ## The four states — strict and distinct
 

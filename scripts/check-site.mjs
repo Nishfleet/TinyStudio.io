@@ -466,10 +466,35 @@ if (aiQuestions && aiEvidence) {
 
   const runs = aiEvidence.runs || [];
   if (!runs.length) failures.push("AI-search fixture must carry at least one captured run.");
+  const runKeys = new Set();
   for (const run of runs) {
     if (!AI_STATES.includes(run.state)) failures.push(`AI-search run has an unknown state: ${run.state}`);
     if (!questionIds.has(run.questionId)) failures.push(`AI-search run references an unknown question: ${run.questionId}`);
     if (!engines.has(run.engine)) failures.push(`AI-search run references an unknown engine: ${run.engine}`);
+    // Strict state transitions: a run is a dated observation of one question
+    // on one engine. A question/engine pair may never be re-run into a second
+    // observation in this fixture, and every observation must say when it was
+    // taken, so a state can never be silently relabelled.
+    const runKey = `${run.questionId}/${run.engine}`;
+    if (runKeys.has(runKey)) failures.push(`AI-search run must be unique per question and engine: ${runKey}`);
+    runKeys.add(runKey);
+    if (typeof run.testedAt !== "string" || !run.testedAt) {
+      failures.push(`AI-search run must record when it was tested: ${run.questionId}/${run.engine}`);
+    }
+    // Source-host validation: every cited page must be a real http(s) URL, so
+    // a citation can never be a guessed or fabricated path.
+    for (const source of run.sources || []) {
+      let parsed = null;
+      try {
+        parsed = new URL(source.url);
+      } catch {
+        failures.push(`AI-search run must cite valid URLs: ${run.questionId}/${run.engine}`);
+        continue;
+      }
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        failures.push(`AI-search run must cite http(s) URLs only: ${run.questionId}/${run.engine}`);
+      }
+    }
     if (run.state === "not-tested") {
       if (!run.reason) failures.push(`not-tested run must state a reason: ${run.questionId}/${run.engine}`);
       if (run.captured || (run.sources || []).length) {
@@ -479,6 +504,9 @@ if (aiQuestions && aiEvidence) {
       if (!run.captured) failures.push(`run must capture what was observed: ${run.questionId}/${run.engine}`);
       if (run.state !== "absent" && !(run.sources || []).length) {
         failures.push(`run must cite its sources: ${run.questionId}/${run.engine}`);
+      }
+      if (run.state === "absent" && (run.sources || []).length) {
+        failures.push(`absent run must not cite sources: ${run.questionId}/${run.engine}`);
       }
     }
     if (run.remediation && run.remediation.page) {
@@ -571,6 +599,7 @@ const identityFacts = [
 for (const phrase of identityFacts) {
   if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
   if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
+  if (!llms.includes(phrase)) failures.push(`llms.txt must state the TinyStudio identity: ${phrase}`);
   if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
 }
 
@@ -604,6 +633,80 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
   if (!pageHtml.includes("tinystudio.io")) {
     failures.push(`Every owned page must anchor the identity to the domain: ${pageName}`);
+  }
+}
+
+// ---- Buyer-question map -----------------------------------------------------
+// The canonical four answers (identity, service, buyer, non-claims) a buyer —
+// or an AI search surface reading for one — must be able to recover about
+// tinystudio.io. The fixture is the contract; llms.txt and offer.md mirror it,
+// and the homepage carries the same four questions visibly. These checks
+// refuse a contradiction between the fixture and any owned surface, and refuse
+// any promise that is not already stated on the owned surfaces. The map adds
+// no prices and no new product promises.
+let buyerMap = null;
+try {
+  buyerMap = JSON.parse(read("evidence-fixtures/ai-search/buyer-questions.json"));
+} catch (error) {
+  failures.push(`Buyer-question map must exist and be valid JSON: ${error.message}`);
+}
+
+if (buyerMap) {
+  const buyerTopics = [
+    ["bq-identity", ["tinystudio.io", "Mac subtitle app", "fibre-arts magazine", "states no base city or office address"]],
+    ["bq-service", ["human-reviewed managed service", "The Website Correction", "not autonomous software"]],
+    ["bq-buyer", ["founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer"]],
+    ["bq-non-claims", ["There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees"]]
+  ];
+  const buyerById = new Map();
+  for (const question of buyerMap.questions || []) {
+    for (const field of ["id", "name", "question", "answer"]) {
+      if (typeof question[field] !== "string" || !question[field]) {
+        failures.push(`Buyer map question must carry ${field}: ${JSON.stringify(question.id || question)}`);
+      }
+    }
+    if (buyerById.has(question.id)) failures.push(`Buyer map question id must be unique: ${question.id}`);
+    buyerById.set(question.id, question);
+  }
+  for (const [topicId, facts] of buyerTopics) {
+    const question = buyerById.get(topicId);
+    if (!question) {
+      failures.push(`Buyer map must carry the ${topicId} question.`);
+      continue;
+    }
+    for (const fact of facts) {
+      if (!question.answer.toLowerCase().includes(fact.toLowerCase())) {
+        failures.push(`Buyer map ${topicId} answer must state: ${fact}`);
+      }
+      if (!llms.toLowerCase().includes(fact.toLowerCase())) {
+        failures.push(`llms.txt must state the buyer map fact: ${fact}`);
+      }
+      if (!offer.toLowerCase().includes(fact.toLowerCase())) {
+        failures.push(`offer.md must state the buyer map fact: ${fact}`);
+      }
+      if (!siteHome.toLowerCase().includes(fact.toLowerCase())) {
+        failures.push(`Homepage must state the buyer map fact: ${fact}`);
+      }
+    }
+    if (!siteHome.includes(question.question)) {
+      failures.push(`Homepage must answer the buyer map question visibly: ${question.question}`);
+    }
+  }
+  if (!siteHome.includes('id="buyer-map"')) {
+    failures.push("Homepage must carry the buyer-map section (id=\"buyer-map\").");
+  }
+  for (const claim of forbiddenClaims) {
+    if (JSON.stringify(buyerMap).toLowerCase().includes(claim.toLowerCase())) {
+      failures.push(`Forbidden claim in buyer-question map: ${claim}`);
+    }
+  }
+  try {
+    execFileSync("git", ["ls-files", "--error-unmatch", "evidence-fixtures/ai-search/buyer-questions.json"], {
+      cwd: new URL("..", import.meta.url),
+      stdio: "ignore"
+    });
+  } catch {
+    failures.push("Buyer-question map fixture must be tracked by git.");
   }
 }
 
