@@ -218,3 +218,27 @@
 .xi20{max-width:18ch}
 
 .xh1{color:var(--brass)}
+
+/* mobile — keep everything on-canvas */
+@media (max-width:760px){
+  .wrap{padding:0 24px}
+  nav{flex-wrap:wrap;gap:14px 22px}
+  .navlinks{flex-wrap:wrap;gap:18px;row-gap:12px}
+  header{padding:64px 0 0}
+  h1{font-size:46px;line-height:1.06}
+  .finding{grid-template-columns:1fr;gap:34px;padding:40px 26px}
+  .finding .stat{font-size:clamp(64px,22vw,132px)}
+  .checkgrid{grid-template-columns:1fr 1fr;gap:34px 26px}
+  .check{padding:0;border:0}
+  .check:not(:first-child){padding:0}
+  .track{grid-template-columns:1fr 1fr;row-gap:36px}
+  .track::before{display:none}
+  .stop{padding-right:20px}
+  .offer{flex-direction:column;gap:36px}
+  .price{text-align:left}
+  .price .big{font-size:clamp(56px,20vw,88px)}
+  .guarantee{max-width:none}
+  .spec{grid-template-columns:1fr;gap:40px}
+  .mock{padding:26px 22px 38px}
+  .flag{font-size:8px;letter-spacing:.12em}
+}

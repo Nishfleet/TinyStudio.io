@@ -109,3 +109,17 @@ form.lead.two button{flex:0 0 auto}
   form.lead.two input:first-child{border-right:0;border-bottom:1px solid var(--line)}
   form.lead.two button{width:100%}
 }
+
+/* mobile — keep everything on-canvas */
+@media (max-width:760px){
+  .wrap{padding:0 24px}
+  nav{flex-wrap:wrap;gap:14px 22px}
+  .navlinks{flex-wrap:wrap;gap:18px;row-gap:12px}
+  .phead{padding:56px 0 0}
+  .phead h1{font-size:44px;line-height:1.08}
+  section{margin-top:72px;padding-top:46px}
+  section h2{font-size:34px}
+  .band{margin-top:72px;padding:38px 26px}
+  .band h2{font-size:30px}
+  footer{gap:22px}
+}
