@@ -32,3 +32,15 @@
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xp1{color:var(--brass)}
+
+/* mobile: stack the plan and the timeline instead of side-by-side */
+@media (max-width:760px){
+  .plan{grid-template-columns:1fr}
+  .plan .l{border-right:0;border-bottom:1px solid var(--line);padding:32px 28px}
+  .plan .r{padding:32px 28px;text-align:left}
+  .track{grid-template-columns:1fr}
+  .track::before{display:none}
+  .stop{padding-right:0;padding-left:30px;margin-bottom:40px}
+  .stop .d{margin-top:0}
+  .stop:last-child{margin-bottom:0}
+}

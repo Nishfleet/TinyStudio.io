@@ -109,3 +109,12 @@ form.lead.two button{flex:0 0 auto}
   form.lead.two input:first-child{border-right:0;border-bottom:1px solid var(--line)}
   form.lead.two button{width:100%}
 }
+
+/* mobile shell: keep the nav on screen and give content breathing room */
+@media (max-width:760px){
+  .wrap{padding:0 24px}
+  nav{flex-wrap:wrap;gap:14px 0;padding-top:22px}
+  .navlinks{flex-wrap:wrap;gap:8px 26px;width:100%}
+  .navlinks a{padding:15px 0}
+  .navcta{padding:15px 18px}
+}

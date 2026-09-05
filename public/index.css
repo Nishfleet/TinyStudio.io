@@ -218,3 +218,35 @@
 .xi20{max-width:18ch}
 
 .xh1{color:var(--brass)}
+
+/* mobile shell: keep the nav on screen and give content breathing room */
+@media (max-width:760px){
+  .wrap{padding:0 24px}
+  nav{flex-wrap:wrap;gap:14px 0;padding-top:22px}
+  .navlinks{flex-wrap:wrap;gap:8px 26px;width:100%}
+  .navlinks a{padding:15px 0}
+  .navcta{padding:15px 18px}
+
+  /* finding band: stat above the body instead of beside it */
+  .finding{grid-template-columns:1fr;gap:30px;padding:44px 30px}
+  .finding .stat{font-size:clamp(64px,24vw,104px)}
+
+  /* checks: one column instead of four */
+  .checkgrid{grid-template-columns:1fr}
+  .check{padding:0 0 30px;border-right:0;border-bottom:1px solid var(--hair)}
+  .check:not(:first-child){padding-left:0;padding-top:30px}
+  .check:last-child{border-right:0;border-bottom:0;padding-bottom:0}
+
+  /* method timeline: stacked stops instead of four columns */
+  .track{grid-template-columns:1fr}
+  .track::before{display:none}
+  .stop{padding-right:0;padding-left:30px;margin-bottom:40px}
+  .stop .d{margin-top:0}
+  .stop:last-child{margin-bottom:0}
+
+  /* who band and offer: stacked, left-aligned */
+  .who{flex-direction:column;align-items:flex-start;gap:18px}
+  .offer{flex-direction:column;gap:34px}
+  .price{flex-shrink:1;text-align:left}
+  .guarantee{max-width:100%}
+}
