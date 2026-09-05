@@ -261,6 +261,28 @@ if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"o
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
+// Mobile layout regression: at 390x844 the /audit page previously overflowed
+// horizontally (navlinks measured to x=569, the 53-of-89 stat to x=451).
+// The mobile treatment must live in audit.css behind the shared 760px
+// breakpoint and stack every overflowing block, so document.scrollWidth can
+// equal clientWidth again. These are deterministic source checks, no network.
+const auditCss = read("public/audit.css");
+const auditMobile = auditCss.match(/@media \(max-width:760px\)\{([\s\S]*)\}\s*$/)?.[1] ?? "";
+
+if (!auditMobile) {
+  failures.push("Audit page must carry a mobile (max-width:760px) media query in audit.css.");
+} else {
+  const requireMobileRule = (label, pattern) => {
+    if (!pattern.test(auditMobile)) failures.push(`Audit mobile layout must ${label}.`);
+  };
+  requireMobileRule("scale the 128px stat instead of leaving it nowrap at full size", /\.stat\{[^}]*clamp\(/);
+  requireMobileRule("turn the nav into a wrapping two-tier layout", /\.navlinks\{[^}]*flex-wrap:wrap/);
+  requireMobileRule("give the nav CTA its own full-width row", /\.navcta\{[^}]*1 1 100%/);
+  requireMobileRule("stack the band stat and copy into one column", /\.bandgrid\{[^}]*grid-template-columns:1fr/);
+  requireMobileRule("stack the four checks into one column", /\.checks\{[^}]*grid-template-columns:1fr/);
+  requireMobileRule("let proof rows wrap instead of overflowing", /\.row\{[^}]*flex-wrap:wrap/);
+}
+
 for (const claim of forbiddenClaims) {
   const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
