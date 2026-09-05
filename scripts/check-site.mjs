@@ -257,6 +257,29 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
+// Mobile horizontal-overflow regression (390x844): the audit page's responsive
+// rules must keep the nav, stat band, and check grid inside the viewport.
+const auditCss = read("public/audit.css");
+
+const auditMobileGuardrails = [
+  ["mobile breakpoint", "@media (max-width:760px)"],
+  ["wrapping nav links", ".navlinks{flex-wrap:wrap"],
+  ["stacked stat band", ".bandgrid{grid-template-columns:1fr;gap:30px}"],
+  ["fluid stat size", ".stat{font-size:clamp(44px,calc((100vw - 190px)/3),128px)}"],
+  ["stacked check grid", ".checks{grid-template-columns:1fr}"],
+  ["shrink-safe check grid", "repeat(4,minmax(0,1fr))"]
+];
+
+for (const [label, needle] of auditMobileGuardrails) {
+  if (!auditCss.includes(needle)) {
+    failures.push(`Audit page mobile CSS regression: missing ${label} (${needle}).`);
+  }
+}
+
+if (!siteAudit.includes('<meta name="viewport"')) {
+  failures.push("Audit page must keep the mobile viewport meta tag.");
+}
+
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }

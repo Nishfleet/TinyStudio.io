@@ -2,7 +2,7 @@
     letter-spacing:-.05em;color:#F2EADC;white-space:nowrap}
   .stat s{text-decoration:none;color:var(--brass-lt)}
   .bandgrid{display:grid;grid-template-columns:auto 1fr;gap:66px;align-items:center}
-  .checks{margin-top:54px;display:grid;grid-template-columns:repeat(4,1fr)}
+  .checks{margin-top:54px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
   .check{padding-right:32px;border-right:1px solid var(--hair)}
   .check:last-child{border-right:0;padding-right:0}
   .check:not(:first-child){padding-left:32px}
@@ -19,3 +19,16 @@
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xa1{color:var(--brass)}
+
+/* mobile: keep the audit page inside the viewport (390px horizontal-overflow regression) */
+@media (max-width:760px){
+  nav{flex-wrap:wrap;row-gap:16px}
+  .navlinks{flex-wrap:wrap;gap:18px;row-gap:13px}
+  .band{padding:44px 28px}
+  .bandgrid{grid-template-columns:1fr;gap:30px}
+  .stat{font-size:clamp(44px,calc((100vw - 190px)/3),128px)}
+  .checks{grid-template-columns:1fr}
+  .check{padding:0 0 30px;border-right:0;border-bottom:1px solid var(--hair)}
+  .check:not(:first-child){padding-left:0}
+  .check:last-child{border-bottom:0;padding-bottom:0}
+}
