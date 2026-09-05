@@ -32,3 +32,12 @@
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xp1{color:var(--brass)}
+
+/* mobile — stack the layouts that overflow a 390px viewport */
+@media (max-width:760px){
+  .plan{grid-template-columns:1fr}
+  .plan .l{border-right:0;border-bottom:1px solid var(--line);padding:32px 28px}
+  .plan .r{padding:32px 28px;text-align:left}
+  .track{grid-template-columns:1fr;gap:28px}
+  .stop{padding-right:0}
+}

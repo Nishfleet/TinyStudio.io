@@ -218,3 +218,18 @@
 .xi20{max-width:18ch}
 
 .xh1{color:var(--brass)}
+
+/* mobile — stack the layouts that overflow a 390px viewport */
+@media (max-width:760px){
+  .wrap{padding:0 20px}
+  nav{flex-wrap:wrap;column-gap:28px;row-gap:14px}
+  .navlinks{flex-wrap:wrap;gap:12px 18px}
+  .finding{grid-template-columns:1fr;gap:34px;padding:44px 28px}
+  .finding .stat{font-size:120px}
+  .checkgrid{grid-template-columns:1fr 1fr;gap:40px 26px}
+  .check,.check:last-child,.check:not(:first-child){padding:0;border:0}
+  .track{grid-template-columns:1fr;gap:28px}
+  .stop{padding-right:0}
+  .offer{flex-direction:column;gap:36px}
+  .price{flex-shrink:1;text-align:left}
+}

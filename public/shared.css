@@ -100,12 +100,20 @@ footer a:hover{color:var(--ink)}
 
 /* two-field lead form — website + email, still one line on desktop */
 form.lead.two{max-width:720px;padding:7px 7px 7px 0;overflow:hidden}
-form.lead.two input{flex:1 1 0;min-width:0;padding:12px 18px 12px 24px}
-form.lead.two input:first-child{border-right:1px solid var(--line)}
-form.lead.two button{flex:0 0 auto}
+  form.lead.two input{flex:1 1 0;min-width:0;padding:12px 18px 12px 24px}
+  form.lead.two input:first-child{border-right:1px solid var(--line)}
+  form.lead.two button{flex:0 0 auto}
 @media (max-width:760px){
   form.lead.two{flex-direction:column;align-items:stretch;border-radius:20px;padding:8px;max-width:100%}
   form.lead.two input{padding:14px 18px}
   form.lead.two input:first-child{border-right:0;border-bottom:1px solid var(--line)}
   form.lead.two button{width:100%}
+}
+
+/* mobile — stack the layouts that overflow a 390px viewport */
+@media (max-width:760px){
+  .wrap{padding:0 20px}
+  nav{flex-wrap:wrap;column-gap:28px;row-gap:14px}
+  .navlinks{flex-wrap:wrap;gap:12px 18px}
+  .band{padding:44px 28px}
 }

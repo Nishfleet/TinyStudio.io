@@ -304,6 +304,75 @@ for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agen
   }
 }
 
+// Public routes must keep the mobile stacking rules that prevent the known
+// 390px off-canvas overflow on /, /pricing and /agents. Deleting any of these
+// rules regresses the layouts that outgrew a 390px viewport.
+function flatCss(css) {
+  return css.replace(/\s+/g, "");
+}
+
+function mediaBlocks(css) {
+  const flat = flatCss(css);
+  const blocks = [];
+  let from = 0;
+  while (true) {
+    const start = flat.indexOf("@media(max-width:760px){", from);
+    if (start === -1) break;
+    let depth = 0;
+    let end = start;
+    for (; end < flat.length; end++) {
+      if (flat[end] === "{") depth++;
+      else if (flat[end] === "}") {
+        depth--;
+        if (depth === 0) {
+          end++;
+          break;
+        }
+      }
+    }
+    blocks.push(flat.slice(start, end));
+    from = end;
+  }
+  return blocks;
+}
+
+const responsiveRules = {
+  "public/index.css": [
+    ".wrap{padding:0 20px}",
+    ".navlinks{flex-wrap:wrap;",
+    ".finding{grid-template-columns:1fr;",
+    ".finding .stat{font-size:120px}",
+    ".checkgrid{grid-template-columns:1fr 1fr;",
+    ".track{grid-template-columns:1fr;",
+    ".offer{flex-direction:column;"
+  ],
+  "public/shared.css": [
+    ".wrap{padding:0 20px}",
+    "nav{flex-wrap:wrap;",
+    ".navlinks{flex-wrap:wrap;",
+    ".band{padding:44px 28px}"
+  ],
+  "public/pricing.css": [
+    ".plan{grid-template-columns:1fr}",
+    ".plan .r{padding:32px 28px;text-align:left}",
+    ".track{grid-template-columns:1fr;"
+  ],
+  "public/agents.css": [
+    ".ag{grid-template-columns:1fr;",
+    ".gatebox{grid-template-columns:1fr}",
+    ".stack{grid-template-columns:1fr}"
+  ]
+};
+
+for (const [path, rules] of Object.entries(responsiveRules)) {
+  const blocks = mediaBlocks(read(path));
+  for (const rule of rules) {
+    if (!blocks.some((block) => block.includes(flatCss(rule)))) {
+      failures.push(`${path} missing mobile overflow rule in @media (max-width:760px): ${rule}`);
+    }
+  }
+}
+
 if (failures.length) {
   console.error(failures.map((failure) => `- ${failure}`).join("\n"));
   process.exit(1);
