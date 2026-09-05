@@ -268,6 +268,132 @@ for (const claim of forbiddenClaims) {
   }
 }
 
+// AI-search visibility check — the fifth check of the reviewed audit.
+// The audit page reports found / wrong / absent / not-tested with captured
+// evidence, never a promise of visibility or ranking. The fixture in
+// evidence-fixtures is the canonical evidence record; the page embeds an
+// inline copy that must not drift from it.
+
+const AI_SEARCH_STATES = ["found", "wrong", "absent", "not-tested"];
+const AI_SEARCH_EVIDENCE_STATES = ["found", "wrong", "absent"];
+
+let aiSearchFixture = null;
+try {
+  aiSearchFixture = JSON.parse(read("evidence-fixtures/ai-search/visibility-check.json"));
+} catch {
+  failures.push("AI-search evidence fixture must be valid JSON at evidence-fixtures/ai-search/visibility-check.json.");
+}
+
+if (aiSearchFixture) {
+  if (aiSearchFixture.check_id !== "ai-search-visibility") {
+    failures.push("AI-search evidence fixture must carry check_id 'ai-search-visibility'.");
+  }
+  if (aiSearchFixture.kind !== "specimen") {
+    failures.push("AI-search evidence fixture must be marked kind 'specimen'.");
+  }
+  if (!Array.isArray(aiSearchFixture.records) || aiSearchFixture.records.length === 0) {
+    failures.push("AI-search evidence fixture must contain at least one record.");
+  }
+  const seenIds = new Set();
+  for (const [position, record] of (aiSearchFixture.records || []).entries()) {
+    const where = `AI-search fixture record ${position + 1}`;
+    if (!record || typeof record !== "object") {
+      failures.push(`${where} must be an object.`);
+      continue;
+    }
+    if (typeof record.id !== "string" || !record.id) {
+      failures.push(`${where} must carry a non-empty string id.`);
+    } else if (seenIds.has(record.id)) {
+      failures.push(`${where} repeats id '${record.id}'.`);
+    } else {
+      seenIds.add(record.id);
+    }
+    if (!AI_SEARCH_STATES.includes(record.state)) {
+      failures.push(`${where} must resolve to one of ${AI_SEARCH_STATES.join(", ")}; got '${record.state}'.`);
+    }
+    if (typeof record.surface !== "string" || !record.surface) {
+      failures.push(`${where} must name the surface tested.`);
+    }
+    if (record.state === "not-tested") {
+      if (record.prompt !== undefined) failures.push(`${where} (not-tested) must not carry a prompt — it was not asked.`);
+      if (record.evidence !== undefined) failures.push(`${where} (not-tested) must not carry evidence — none was captured.`);
+      if (record.fix !== undefined) failures.push(`${where} (not-tested) must not carry a fix — there is no evidence to support one.`);
+      if (typeof record.reason !== "string" || !record.reason) {
+        failures.push(`${where} (not-tested) must state why the surface was not tested.`);
+      }
+    } else {
+      if (typeof record.prompt !== "string" || !record.prompt) {
+        failures.push(`${where} (${record.state}) must carry the named prompt that was asked.`);
+      }
+      if (typeof record.tested_at !== "string" || !record.tested_at) {
+        failures.push(`${where} (${record.state}) must carry the date it was tested.`);
+      }
+      const evidence = record.evidence;
+      if (!evidence || typeof evidence.quote !== "string" || !evidence.quote) {
+        failures.push(`${where} (${record.state}) must quote the captured answer.`);
+      }
+      if (!evidence || typeof evidence.source !== "string" || !evidence.source) {
+        failures.push(`${where} (${record.state}) must reference the source the answer came from.`);
+      }
+      if (record.fix !== undefined && !AI_SEARCH_EVIDENCE_STATES.includes(record.state)) {
+        failures.push(`${where} (${record.state}) must not carry a fix — only wrong or absent evidence supports one.`);
+      }
+    }
+  }
+}
+
+const inlineEvidenceMatch = siteAudit.match(/<script type="application\/json" id="ai-search-evidence">([\s\S]*?)<\/script>/);
+if (!inlineEvidenceMatch) {
+  failures.push("Audit page must embed the AI-search evidence fixture inline.");
+} else {
+  try {
+    if (JSON.stringify(JSON.parse(inlineEvidenceMatch[1])) !== JSON.stringify(JSON.parse(read("evidence-fixtures/ai-search/visibility-check.json")))) {
+      failures.push("Audit page inline AI-search evidence must match evidence-fixtures/ai-search/visibility-check.json.");
+    }
+  } catch {
+    failures.push("Audit page inline AI-search evidence must be valid JSON.");
+  }
+}
+
+const requiredAuditAiSearchCopy = [
+  "Five checks, by hand",
+  "The five checks",
+  "The AI-search check",
+  '<span class="t">Found</span>',
+  '<span class="t">Wrong</span>',
+  '<span class="t">Absent</span>',
+  '<span class="t">Not tested</span>',
+  'Not tested is not "invisible"',
+  "specimen record",
+  "No revenue, ranking, AI-visibility or booking guarantees",
+  "The money page",
+  "The paid creative",
+  "The unanswered",
+  "The reach"
+];
+
+for (const text of requiredAuditAiSearchCopy) {
+  if (!siteAudit.includes(text)) failures.push(`Missing audit AI-search copy: ${text}`);
+}
+
+const forbiddenAiSearchClaims = [
+  "guaranteed AI visibility",
+  "guaranteed AI-search visibility",
+  "guaranteed AI ranking",
+  "rank in AI search",
+  "top of ChatGPT",
+  "top of Perplexity",
+  "visible in ChatGPT",
+  "visible in Perplexity",
+  "first result in AI search"
+];
+
+for (const claim of forbiddenAiSearchClaims) {
+  if (siteAudit.toLowerCase().includes(claim.toLowerCase())) {
+    failures.push(`Forbidden AI-search claim on audit page: ${claim}`);
+  }
+}
+
 for (const route of ["tinystudio.io", "www.tinystudio.io", "app.tinystudio.io", "api.tinystudio.io"]) {
   if (!wrangler.includes(`"pattern": "${route}/*"`)) {
     failures.push(`Missing Cloudflare route: ${route}`);

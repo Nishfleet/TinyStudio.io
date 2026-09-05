@@ -1,0 +1,51 @@
+{
+  "check_id": "ai-search-visibility",
+  "kind": "specimen",
+  "title": "AI-search visibility check",
+  "note": "Specimen evidence record. One reviewed check, resolved per surface. Names, quotes and dates are illustrative; the shape is the deliverable. A fix appears only where the captured evidence supports one, and only as a page-level change.",
+  "records": [
+    {
+      "id": "rec-1",
+      "state": "found",
+      "prompt": "Which private GP practice in Mayfair is open in the evening?",
+      "surface": "ChatGPT with browsing",
+      "tested_at": "2026-07-28",
+      "evidence": {
+        "quote": "The Marlowe Clinic in Mayfair keeps evening hours most weekdays, per its site.",
+        "source": "https://marlowe-clinic.example/evening-appointments"
+      }
+    },
+    {
+      "id": "rec-2",
+      "state": "wrong",
+      "prompt": "What does The Marlowe Clinic charge for a first appointment?",
+      "surface": "Google AI Overviews",
+      "tested_at": "2026-07-28",
+      "evidence": {
+        "quote": "A first appointment at The Marlowe Clinic is about 190 pounds, per its website.",
+        "source": "https://marlowe-clinic.example/",
+        "note": "No price appears anywhere on the page; the figure the surface gave is not in the evidence."
+      },
+      "fix": "State the first-appointment price on the homepage. The wrong answer the surface gave is what the page's silence produced."
+    },
+    {
+      "id": "rec-3",
+      "state": "absent",
+      "prompt": "Which private clinics in Mayfair offer same-day blood tests?",
+      "surface": "Perplexity",
+      "tested_at": "2026-07-28",
+      "evidence": {
+        "quote": "The answer named four Mayfair clinics. The Marlowe Clinic did not appear.",
+        "source": "Perplexity search dated 2026-07-28; transcript kept in the client packet"
+      },
+      "fix": "State same-day testing on the homepage. Every clinic the surface named states it on its own homepage."
+    },
+    {
+      "id": "rec-4",
+      "state": "not-tested",
+      "surface": "Gemini",
+      "tested_at": "2026-07-28",
+      "reason": "The surface required a signed-in account during this audit window. The record is marked not tested rather than guessed."
+    }
+  ]
+}

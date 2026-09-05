@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
+
+const AI_SEARCH_FIXTURE = JSON.parse(
+  readFileSync(new URL("../evidence-fixtures/ai-search/visibility-check.json", import.meta.url), "utf8")
+);
 
 const SAMPLE_SECTIONS = {
   pipelineBrief: "# Pipeline Brief\n\n## Assumptions\n- **Offer**: <script>alert(1)</script>\n\nBrief body",
@@ -189,4 +194,181 @@ test("agent UI renders generated sections, switches tabs, supports keyboard tabs
 
   await dom.copyButton.dispatch("click");
   assert.equal(dom.clipboardText(), SAMPLE_SECTIONS.weeklyFixReport);
+});
+
+const AI_SEARCH_STATES = ["found", "wrong", "absent", "not-tested"];
+
+test("AI-search evidence fixture satisfies the report record contract", () => {
+  assert.equal(AI_SEARCH_FIXTURE.check_id, "ai-search-visibility");
+  assert.equal(AI_SEARCH_FIXTURE.kind, "specimen");
+  assert.ok(Array.isArray(AI_SEARCH_FIXTURE.records) && AI_SEARCH_FIXTURE.records.length > 0);
+
+  const ids = new Set();
+  for (const record of AI_SEARCH_FIXTURE.records) {
+    assert.equal(typeof record.id, "string");
+    assert.ok(!ids.has(record.id), `duplicate record id ${record.id}`);
+    ids.add(record.id);
+
+    assert.ok(AI_SEARCH_STATES.includes(record.state), `state must be one of ${AI_SEARCH_STATES}`);
+    assert.equal(typeof record.surface, "string");
+    assert.ok(record.surface.length > 0);
+
+    if (record.state === "not-tested") {
+      assert.equal(record.prompt, undefined, "not-tested records must not carry a prompt");
+      assert.equal(record.evidence, undefined, "not-tested records must not carry evidence");
+      assert.equal(record.fix, undefined, "not-tested records must not carry a fix");
+      assert.equal(typeof record.reason, "string");
+      assert.ok(record.reason.length > 0);
+    } else {
+      assert.equal(typeof record.prompt, "string");
+      assert.ok(record.prompt.length > 0);
+      assert.equal(typeof record.tested_at, "string");
+      assert.ok(record.tested_at.length > 0);
+      assert.equal(typeof record.evidence?.quote, "string");
+      assert.ok(record.evidence.quote.length > 0);
+      assert.equal(typeof record.evidence.source, "string");
+      assert.ok(record.evidence.source.length > 0);
+      if (record.fix !== undefined) {
+        assert.ok(["wrong", "absent"].includes(record.state), "fixes require wrong or absent evidence");
+      }
+    }
+  }
+});
+
+class FakeNode {
+  constructor(tag = "") {
+    this.tagName = tag;
+    this.children = [];
+    this.dataset = {};
+    this.className = "";
+    this.textContent = "";
+    this.attributes = new Map();
+  }
+
+  appendChild(node) {
+    this.children.push(node);
+    return node;
+  }
+
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
+  }
+
+  getAttribute(name) {
+    if (name.startsWith("data-")) {
+      const key = name
+        .slice(5)
+        .replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      return this.dataset[key];
+    }
+    return this.attributes.get(name) ?? null;
+  }
+}
+
+class FakeContainer extends FakeNode {
+  replaceChildren(...nodes) {
+    this.children = [...nodes];
+  }
+}
+
+function auditDom() {
+  const container = new FakeContainer();
+  const evidenceScript = new FakeElement({ textContent: JSON.stringify(AI_SEARCH_FIXTURE) });
+  globalThis.document = {
+    readyState: "complete",
+    activeElement: null,
+    createElement(tag) {
+      return new FakeNode(tag);
+    },
+    querySelector(selector) {
+      if (selector === "#ai-search-evidence") return evidenceScript;
+      if (selector === "#ai-search-report") return container;
+      return null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+    addEventListener() {}
+  };
+  return container;
+}
+
+async function loadAuditScript() {
+  const url = new URL("../public/audit.js", import.meta.url);
+  url.searchParams.set("testRun", crypto.randomUUID());
+  return import(url.href);
+}
+
+function walk(node, visit) {
+  visit(node);
+  for (const child of node.children || []) walk(child, visit);
+}
+
+test("audit page renders the specimen AI-search report with all four states", async () => {
+  const container = auditDom();
+  await loadAuditScript();
+
+  const rows = container.children.filter((node) => node.className === "row");
+  assert.equal(rows.length, 4);
+  assert.deepEqual(rows.map((row) => row.dataset.aiState).sort(), ["absent", "found", "not-tested", "wrong"]);
+
+  const found = rows.find((row) => row.dataset.aiState === "found");
+  assert.match(found.children[0].children[0].textContent, /Which private GP practice in Mayfair is open in the evening\?/);
+  assert.match(found.children[0].children[2].textContent, /ChatGPT with browsing · 2026-07-28/);
+  assert.equal(found.children[1].textContent, "Found");
+
+  const notTested = rows.find((row) => row.dataset.aiState === "not-tested");
+  assert.equal(notTested.children[0].children[0].textContent, "Gemini");
+  assert.equal(notTested.children[0].children[2].textContent, "2026-07-28");
+  assert.equal(notTested.children[1].textContent, "Not tested");
+
+  const micros = container.children.filter((node) => node.className === "micro");
+  assert.equal(micros.length, 4);
+  assert.equal(micros.filter((line) => line.textContent.startsWith("Evidence — “")).length, 3);
+  assert.equal(micros.filter((line) => line.textContent.includes(" Fix — ")).length, 2);
+
+  const foundEvidence = micros[0];
+  assert.match(foundEvidence.textContent, /The Marlowe Clinic in Mayfair keeps evening hours/);
+  assert.match(foundEvidence.textContent, /marlowe-clinic\.example/);
+  assert.doesNotMatch(foundEvidence.textContent, /Fix —/);
+
+  const wrongFix = micros[1];
+  assert.match(wrongFix.textContent, /Fix — State the first-appointment price on the homepage/);
+
+  const notTestedLine = micros[3];
+  assert.equal(notTestedLine.textContent, "Not tested — The surface required a signed-in account during this audit window. The record is marked not tested rather than guessed.");
+});
+
+test("renderAiSearchReport writes fixture text as text, never as markup", async () => {
+  const container = auditDom();
+  const auditModule = await loadAuditScript();
+  const hostile = [{
+    id: "hostile-1",
+    state: "wrong",
+    prompt: "<script>alert(1)</script>",
+    surface: "<b>Surface</b>",
+    tested_at: "2026-01-01",
+    evidence: {
+      quote: "<img src=x onerror=alert(2)>",
+      source: "https://example.com/?q=<i>"
+    },
+    fix: "<i>fix</i>"
+  }];
+
+  const count = auditModule.renderAiSearchReport(container, hostile);
+  assert.equal(count, 1);
+
+  const forbiddenTags = [];
+  walk(container, (node) => {
+    const tag = String(node.tagName || "").toLowerCase();
+    if (["script", "img", "b", "i", "iframe"].includes(tag)) forbiddenTags.push(tag);
+  });
+  assert.deepEqual(forbiddenTags, []);
+
+  const row = container.children[0];
+  assert.equal(row.dataset.aiState, "wrong");
+  assert.equal(row.children[0].children[0].textContent, "<script>alert(1)</script>");
+  assert.match(row.children[0].children[2].textContent, /<b>Surface<\/b> · 2026-01-01/);
+  assert.match(container.children[1].textContent, /<img src=x onerror=alert\(2\)>/);
+  assert.match(container.children[1].textContent, /Fix — <i>fix<\/i>/);
 });

@@ -23,7 +23,7 @@
   <div class="phead">
     <span class="orn sc">The leak audit</span>
     <h1>We read your page <em>as a customer with intent reads it.</em></h1>
-    <p class="sub">Four passes, by hand, on the surfaces that decide whether someone who arrived ready to buy stays that way. You get a short, plain document — named leaks in the order they cost you money, with the fix beside each one. No deck. No dashboard.</p>
+    <p class="sub">Five checks, by hand, on the surfaces that decide whether someone who arrived ready to buy stays that way. You get a short, plain document — named leaks in the order they cost you money, with the fix beside each one. No deck. No dashboard.</p>
     <form class="lead two" id="start" action="/api/signups" method="post">
       <input type="text" name="website" required inputmode="url" autocomplete="url" placeholder="yourwebsite.com" pattern="(https?://)?([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(:[0-9]+)?(/[^\s]*)?" title="Enter your domain, like example.com">
       <input type="email" name="email" required placeholder="Your work email">
@@ -45,7 +45,7 @@
   </div>
 
   <section>
-    <h2>The four passes</h2>
+    <h2>The five checks</h2>
     <p class="lede">Each one is run by a specialist that does only that job, then read and signed by a person before it reaches you.</p>
     <div class="checks">
       <div class="check"><div class="num">i</div><h3>The money page</h3>
@@ -56,7 +56,22 @@
         <p>The questions people need settled before they commit, and whether your site settles a single one of them.</p></div>
       <div class="check"><div class="num">iv</div><h3>The reach</h3>
         <p>Whether new work is reaching new people, or quietly re-serving the audience you already had.</p></div>
+      <div class="check"><div class="num">v</div><h3>The AI-search visibility</h3>
+        <p>What the surfaces people now consult answer about your page — asked the way a customer asks, quoted with the date and the source, read by a person before it reaches you.</p></div>
     </div>
+  </section>
+
+  <section id="ai-search">
+    <h2>The AI-search check</h2>
+    <p class="lede">The surfaces people now consult before they commit — ChatGPT, Perplexity, Google's AI answers and the rest — answer from your page whether it gives them anything to answer from. We ask the way a customer asks: named questions, one surface at a time, with the date and the quote recorded. Then a person reads the record, like every other pass. Every record resolves to one of four states.</p>
+    <div class="rows">
+      <div class="row"><span class="t">Found</span><span class="v">The surface answered with your facts, and cited your page.</span></div>
+      <div class="row"><span class="t">Wrong</span><span class="v">It answered about you with stale or invented facts. The quote is in the record.</span></div>
+      <div class="row"><span class="t">Absent</span><span class="v">It answered a question you are the obvious answer to, and you did not appear.</span></div>
+      <div class="row"><span class="t">Not tested</span><span class="v">We did not run this surface. Not tested is not "invisible" — it means the record honestly stops where we did.</span></div>
+    </div>
+    <p class="lede">Below is a specimen record — the exact shape a reviewed record takes. It is not a claim about any business, and it is not a promise that anything can be made visible; AI-search answers change day to day, which is why every record carries the date, the question, the quote and the source it came from. Where a record carries a fix, the fix is a page change the captured evidence supports — nothing more.</p>
+    <div class="rows" id="ai-search-report" aria-label="Specimen AI-search evidence record"></div>
   </section>
 
   <section>
@@ -67,6 +82,7 @@
       <div class="row"><span class="t">Enquiry flow — friction count</span><span class="v">Field by field</span></div>
       <div class="row"><span class="t">Paid creative — distinct concepts</span><span class="v">Concepts, not hooks</span></div>
       <div class="row"><span class="t">Pre-purchase questions</span><span class="v">Asked vs answered</span></div>
+      <div class="row"><span class="t">AI-search visibility</span><span class="v">Found · Wrong · Absent · Not tested</span></div>
       <div class="row"><span class="t">Each finding</span><span class="v">With the fix beside it</span></div>
     </div>
   </section>
@@ -85,10 +101,63 @@
   <footer>
     <span class="sc">TinyStudio</span>
     <span class="sc"><a href="agents.html">The desk</a> · <a href="pricing.html">Pricing</a></span>
-    <span class="sc">No revenue, ranking or booking guarantees. Only the work.</span>
+    <span class="sc">No revenue, ranking, AI-visibility or booking guarantees. Only the work.</span>
   </footer>
 </div>
 
-<script src="audit.js" defer></script>
+<script type="application/json" id="ai-search-evidence">
+{
+  "check_id": "ai-search-visibility",
+  "kind": "specimen",
+  "title": "AI-search visibility check",
+  "note": "Specimen evidence record. One reviewed check, resolved per surface. Names, quotes and dates are illustrative; the shape is the deliverable. A fix appears only where the captured evidence supports one, and only as a page-level change.",
+  "records": [
+    {
+      "id": "rec-1",
+      "state": "found",
+      "prompt": "Which private GP practice in Mayfair is open in the evening?",
+      "surface": "ChatGPT with browsing",
+      "tested_at": "2026-07-28",
+      "evidence": {
+        "quote": "The Marlowe Clinic in Mayfair keeps evening hours most weekdays, per its site.",
+        "source": "https://marlowe-clinic.example/evening-appointments"
+      }
+    },
+    {
+      "id": "rec-2",
+      "state": "wrong",
+      "prompt": "What does The Marlowe Clinic charge for a first appointment?",
+      "surface": "Google AI Overviews",
+      "tested_at": "2026-07-28",
+      "evidence": {
+        "quote": "A first appointment at The Marlowe Clinic is about 190 pounds, per its website.",
+        "source": "https://marlowe-clinic.example/",
+        "note": "No price appears anywhere on the page; the figure the surface gave is not in the evidence."
+      },
+      "fix": "State the first-appointment price on the homepage. The wrong answer the surface gave is what the page's silence produced."
+    },
+    {
+      "id": "rec-3",
+      "state": "absent",
+      "prompt": "Which private clinics in Mayfair offer same-day blood tests?",
+      "surface": "Perplexity",
+      "tested_at": "2026-07-28",
+      "evidence": {
+        "quote": "The answer named four Mayfair clinics. The Marlowe Clinic did not appear.",
+        "source": "Perplexity search dated 2026-07-28; transcript kept in the client packet"
+      },
+      "fix": "State same-day testing on the homepage. Every clinic the surface named states it on its own homepage."
+    },
+    {
+      "id": "rec-4",
+      "state": "not-tested",
+      "surface": "Gemini",
+      "tested_at": "2026-07-28",
+      "reason": "The surface required a signed-in account during this audit window. The record is marked not tested rather than guessed."
+    }
+  ]
+}
+</script>
+<script type="module" src="audit.js"></script>
 </body>
 </html>
