@@ -1,0 +1,4 @@
+Aurelia Spa — fetch log, 2026-08-06 06:00 UTC
+GET https://aureliaspa.example.com/ → HTTP 403 — challenge page returned; no page text readable
+Body bytes received: 0. No headings, no paragraphs, no text nodes extracted.
+Outcome for every prompt on this site: not tested, until the page is readable.

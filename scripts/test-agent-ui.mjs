@@ -190,3 +190,84 @@ test("agent UI renders generated sections, switches tabs, supports keyboard tabs
   await dom.copyButton.dispatch("click");
   assert.equal(dom.clipboardText(), SAMPLE_SECTIONS.weeklyFixReport);
 });
+
+function aiRowHtml(html, checkId) {
+  const rows = html.split('<div class="row"');
+  const row = rows.find((chunk) => chunk.includes(`data-check="${checkId}"`));
+  assert.ok(row, `rendered output must include a row for ${checkId}`);
+  return `<div class="row"${row}`;
+}
+
+async function loadAuditScript() {
+  return await import(new URL("../public/audit.js", import.meta.url).href);
+}
+
+test("AI-search pass defines exactly the four states, with absent distinct from not-tested", async () => {
+  const audit = await loadAuditScript();
+  assert.deepEqual(Object.keys(audit.AI_STATES), ["found", "wrong", "absent", "not-tested"]);
+  assert.equal(audit.AI_STATES.absent.label, "Absent");
+  assert.equal(audit.AI_STATES["not-tested"].label, "Not tested");
+  assert.notEqual(audit.AI_STATES.absent.meaning, audit.AI_STATES["not-tested"].meaning);
+  assert.match(audit.AI_STATES.absent.meaning, /answer is not on the page/);
+  assert.match(audit.AI_STATES["not-tested"].meaning, /never read/);
+  for (const state of Object.keys(audit.AI_STATES)) {
+    assert.ok(audit.AI_CHECKS.some((check) => check.outcome === state), `sample must exercise ${state}`);
+  }
+});
+
+test("AI-search pass renders every check row with its outcome state and label", async () => {
+  const audit = await loadAuditScript();
+  const html = audit.aiPassHtml();
+  assert.match(html, /class="row"/);
+  for (const check of audit.AI_CHECKS) {
+    const row = aiRowHtml(html, check.id);
+    assert.match(row, new RegExp(`data-state="${check.outcome}"`));
+    assert.match(row, new RegExp(`>${audit.AI_STATES[check.outcome].label}</div>`));
+    assert.match(row, new RegExp(check.prompt));
+  }
+});
+
+test("AI-search pass renders absent with a fix and not-tested with none", async () => {
+  const audit = await loadAuditScript();
+  const html = audit.aiPassHtml();
+  const notTested = audit.AI_CHECKS.filter((check) => check.outcome === "not-tested");
+  const absent = audit.AI_CHECKS.filter((check) => check.outcome === "absent");
+  assert.ok(notTested.length >= 2);
+  assert.ok(absent.length >= 2);
+  for (const check of notTested) {
+    assert.equal(check.fix, "");
+    const row = aiRowHtml(html, check.id);
+    assert.doesNotMatch(row, /Fix: /);
+    assert.match(row, /do not recommend changes to a page we could not read/);
+    assert.match(row, /HTTP 403/);
+  }
+  for (const check of absent) {
+    assert.ok(check.fix.length > 0);
+    assert.match(aiRowHtml(html, check.id), /Fix: /);
+  }
+});
+
+test("AI-search pass binds every check to named fixture evidence with a working link", async () => {
+  const audit = await loadAuditScript();
+  const html = audit.aiPassHtml();
+  for (const check of audit.AI_CHECKS) {
+    assert.ok(check.prompt.length > 0, `${check.id} must name its question`);
+    assert.ok(check.quotes.length > 0, `${check.id} must carry source quotes`);
+    assert.match(html, new RegExp(`id="ev-${check.id}"`));
+    assert.match(html, new RegExp(`href="#ev-${check.id}"`));
+    assert.match(html, new RegExp(`>${check.fixture}</a>`));
+    const row = aiRowHtml(html, check.id);
+    assert.match(row, new RegExp(check.fixture));
+    assert.match(row, new RegExp(check.quotes[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+});
+
+test("AI-search pass renders into its mount and escapes quotes", async () => {
+  const audit = await loadAuditScript();
+  assert.equal(audit.esc('<b>&"'), "&lt;b&gt;&amp;&quot;");
+  const container = new FakeElement();
+  const html = audit.renderAiPass(container);
+  assert.equal(container.innerHTML, html);
+  assert.ok(html.includes("&ldquo;") && html.includes("&rdquo;"));
+  assert.doesNotMatch(html, /<script/);
+});

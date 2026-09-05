@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { AI_CHECKS, AI_STATES, AI_PASS } from "../public/audit.js";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -139,12 +140,16 @@ const forbiddenClaims = [
   "guaranteed rankings",
   "guaranteed sales",
   "guaranteed profit",
+  "guaranteed AI visibility",
+  "guaranteed AI ranking",
   "10x revenue",
   "10x sales",
   "rank #1",
   "rank number one",
   "fully autonomous ad buying",
   "autonomously publish",
+  "automatically publish",
+  "publishes for you",
   "change ad spend for you",
   "30% booking rate",
   "80% show-up rate",
@@ -261,8 +266,90 @@ if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"o
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
+// AI-search pass (sealed packet 2): every check is fixture-bound, every outcome
+// is exactly one of four states, absent is proven distinct from not-tested, and
+// page-level remediation appears only where the evidence supports it.
+const AI_FIXTURE_DIR = new URL("../evidence-fixtures/ai-search/", import.meta.url);
+const AI_FIXTURE_FILES = new Set(readdirSync(AI_FIXTURE_DIR));
+const AI_FIXTURE_TEXT = new Map();
+for (const file of AI_FIXTURE_FILES) {
+  AI_FIXTURE_TEXT.set(file, readFileSync(new URL(file, AI_FIXTURE_DIR), "utf8"));
+}
+
+const AI_BLOCKED_FIXTURE = "aurelia-spa-fetch.txt";
+const AI_BLOCKED_LOG = "HTTP 403 — challenge page returned; no page text readable";
+const AI_VALID_OUTCOMES = Object.keys(AI_STATES);
+
+for (const check of AI_CHECKS) {
+  const tag = `AI-search check ${check.id}`;
+  if (typeof check.prompt !== "string" || !check.prompt.trim()) {
+    failures.push(`${tag} must name the question it asks.`);
+  }
+  if (!AI_VALID_OUTCOMES.includes(check.outcome)) {
+    failures.push(`${tag} outcome must be exactly one of ${AI_VALID_OUTCOMES.join(", ")}.`);
+  }
+  if (!AI_FIXTURE_FILES.has(check.fixture)) {
+    failures.push(`${tag} must cite a fixture in evidence-fixtures/ai-search/: ${check.fixture} is missing.`);
+  } else {
+    const fixtureText = AI_FIXTURE_TEXT.get(check.fixture);
+    for (const quote of check.quotes) {
+      if (!fixtureText.includes(quote)) {
+        failures.push(`${tag} quote not found in ${check.fixture}: ${JSON.stringify(quote)}`);
+      }
+    }
+  }
+  if (check.outcome === "not-tested") {
+    if (typeof check.fix === "string" && check.fix.trim()) {
+      failures.push(`${tag} must not carry a page-level fix — the page was never read.`);
+    }
+    if (check.fixture !== AI_BLOCKED_FIXTURE) {
+      failures.push(`${tag} not-tested evidence must come from the blocked-page fetch log.`);
+    }
+  } else if (typeof check.fix !== "string" || !check.fix.trim()) {
+    failures.push(`${tag} an evidence-backed outcome needs a page-level fix beside it.`);
+  }
+}
+
+if (!AI_CHECKS.some((check) => check.outcome === "absent" && /cost/i.test(check.prompt))) {
+  failures.push("AI-search sample must include a cost question that came back absent.");
+}
+if (!AI_CHECKS.some((check) => check.outcome === "not-tested" && /cost/i.test(check.prompt))) {
+  failures.push("AI-search sample must include the same cost question marked not-tested.");
+}
+
+const blockedFixtureText = AI_FIXTURE_TEXT.get(AI_BLOCKED_FIXTURE) || "";
+if (!blockedFixtureText.includes(AI_BLOCKED_LOG)) {
+  failures.push("Blocked-page fixture must record the unreadable response verbatim.");
+}
+
+for (const file of AI_FIXTURE_FILES) {
+  if (!AI_CHECKS.some((check) => check.fixture === file)) {
+    failures.push(`Unused AI-search fixture: ${file}`);
+  }
+}
+
+if (!AI_PASS.reviewed || typeof AI_PASS.reviewedOn !== "string" || !AI_PASS.reviewedOn) {
+  failures.push("AI-search pass must be marked human-reviewed with a review date.");
+}
+
+for (const phrase of [
+  'id="ai-pass"',
+  'type="module" src="audit.js"',
+  "The AI-search pass",
+  "found",
+  "wrong",
+  "absent",
+  "not tested",
+  "A person signs the pass before it reaches you",
+  "it never publishes, posts, or changes anything on your site",
+  "No visibility, ranking or lead promises",
+  "AI-search visibility"
+]) {
+  if (!siteAudit.includes(phrase)) failures.push(`Missing AI-search pass copy or wiring: ${phrase}`);
+}
+
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = `${index}\n${script}\n${llms}\n${offer}\n${siteAudit}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }
