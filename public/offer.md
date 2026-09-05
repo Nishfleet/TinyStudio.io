@@ -4,7 +4,7 @@ TinyStudio sells one human-reviewed managed service: The Website Correction. It 
 
 ## Identity
 
-TinyStudio is the business behind tinystudio.io: the free leak audit of high-ticket service homepages and the desk that closes what the audit finds, run by Nish, who signs every audit. Other businesses share the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a video production studio, a Los Angeles venue, an unrelated studio LLC. None of them are this TinyStudio. The site states no base city or office address. Contact: hello@tinystudio.io.
+TinyStudio is the business behind tinystudio.io: the free leak audit of high-ticket service homepages and the human-reviewed desk that closes what the audit finds, run by Nish, who signs every audit. Other businesses share the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a video production studio, a Los Angeles venue, an unrelated studio LLC. None of them are this TinyStudio. The site states no base city or office address. Contact: hello@tinystudio.io.
 
 ## Buyer
 
@@ -50,6 +50,7 @@ The earlier self-serve Agent Desk (one-shot Pipeline Brief) is demoted and is no
 - No ad spend changes
 - No ad account connection
 - No prospect message sending
+- Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
 ## Contact
 

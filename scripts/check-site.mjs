@@ -170,8 +170,11 @@ for (const text of requiredWorkerCopy) {
 }
 
 for (const text of requiredPublicArtifacts) {
-  const haystack = `${llms}\n${offer}`;
-  if (!haystack.includes(text)) failures.push(`Missing public artifact copy: ${text}`);
+  // llms.txt and offer.md are mirrors of the same offer contract. A fact must
+  // appear in BOTH (case-insensitively, since one file may head it while the
+  // other embeds it mid-sentence), so neither file can silently drift.
+  if (!llms.toLowerCase().includes(text.toLowerCase())) failures.push(`Missing offer fact in llms.txt: ${text}`);
+  if (!offer.toLowerCase().includes(text.toLowerCase())) failures.push(`Missing offer fact in offer.md: ${text}`);
 }
 
 function formFieldTags(html) {
@@ -501,6 +504,71 @@ if (aiQuestions && aiEvidence) {
     }
   }
 
+  // Source-host validation: every source is a page the engine actually cited,
+  // so its URL must be a well-formed absolute http(s) URL with a real host.
+  for (const run of runs) {
+    for (const source of run.sources || []) {
+      let parsedUrl = null;
+      try {
+        parsedUrl = new URL(source.url);
+      } catch {
+        parsedUrl = null;
+      }
+      if (!parsedUrl || !/^https?:$/.test(parsedUrl.protocol) || !parsedUrl.hostname || !parsedUrl.hostname.includes(".") || /\s/.test(source.url)) {
+        failures.push(`AI-search source URL must be a valid absolute http(s) URL: ${run.questionId}/${run.engine} ${JSON.stringify(source.url)}`);
+      }
+    }
+  }
+
+  // Strict state transition: "found" means the answer named the tested business
+  // and its facts checked out against the site — so the run must cite the
+  // business's own site. This prevents relabeling a wrong/absent result as
+  // found without the site itself among the cited pages.
+  let businessHost = "";
+  try {
+    businessHost = new URL(aiEvidence.business.site).hostname;
+  } catch {
+    failures.push("AI-search business site must be a valid URL.");
+  }
+  if (businessHost) {
+    for (const run of runs) {
+      if (run.state === "found") {
+        const citesOwnSite = (run.sources || []).some((source) => {
+          try {
+            return new URL(source.url).hostname === businessHost;
+          } catch {
+            return false;
+          }
+        });
+        if (!citesOwnSite) {
+          failures.push(`found run must cite the tested business's own site: ${run.questionId}/${run.engine}`);
+        }
+      }
+    }
+  }
+
+  // The homepage disambiguation block must answer every controlled question:
+  // each fixture question id appears in a data-ai-question attribute inside the
+  // id="identity" section, and every referenced id must exist in the fixture.
+  const homepageIdentitySection = siteHome.match(/<section[^>]*id="identity"[\s\S]*?<\/section>/i)?.[0] || "";
+  const referencedQuestionIds = [...homepageIdentitySection.matchAll(/\bdata-ai-question="([^"]+)"/gi)]
+    .flatMap((match) => match[1].trim().split(/\s+/))
+    .filter(Boolean);
+  const referencedSet = new Set(referencedQuestionIds);
+  if (!homepageIdentitySection.includes("data-ai-identity")) {
+    failures.push("Homepage disambiguation block must carry data-ai-identity.");
+  }
+  for (const question of questions) {
+    if (!referencedSet.has(question.id)) {
+      failures.push(`Homepage disambiguation block must answer the controlled question: ${question.id}`);
+    }
+  }
+  for (const ref of referencedSet) {
+    if (!questionIds.has(ref)) {
+      failures.push(`Homepage disambiguation block references an unknown question id: ${ref}`);
+    }
+  }
+
   const fixtureText = JSON.stringify(aiQuestions) + "\n" + JSON.stringify(aiEvidence);
   if (/[\w.+-]+@[\w-]+\.[\w.]{2,}/.test(fixtureText)) {
     failures.push("AI-search fixture must not capture email addresses.");
@@ -547,13 +615,15 @@ if (aiQuestions && aiEvidence) {
 // ---- TinyStudio identity clarification -------------------------------------
 // One precise identity must run through every owned public surface: TinyStudio
 // is the business behind tinystudio.io — the free leak audit of high-ticket
-// service homepages plus the desk that closes what it finds. The clarification
-// must be present on the homepage, the audit page, and in offer.md, and the
-// ambiguous or retired framings ("The Tiny Studio", the spaced name form, and
-// the self-serve Agent Desk product names) must not reappear in visible copy.
-// The embedded AI-search evidence bundle is a verbatim record of captured
-// engine answers that legitimately quotes other businesses' names, so script
-// blocks are stripped before the stale-string scan.
+// service homepages plus the human-reviewed desk that closes what it finds. The
+// clarification must be present on the homepage, the audit page, and in
+// offer.md, and the ambiguous or retired framings ("The Tiny Studio", the
+// spaced name form, and the self-serve Agent Desk product names) must not
+// reappear in visible copy. The embedded AI-search evidence bundle is a
+// verbatim record of captured engine answers that legitimately quotes other
+// businesses' names, so script blocks are stripped before the stale-string
+// scan. The homepage identity section also answers the controlled AI-search
+// questions one row at a time (see the data-ai-question tie above).
 const ownedPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
@@ -565,6 +635,7 @@ const identityFacts = [
   "tinystudio.io",
   "Mac subtitle app",
   "fibre-arts magazine",
+  "human-reviewed",
   "states no base city or office address"
 ];
 

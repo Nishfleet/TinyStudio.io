@@ -49,6 +49,17 @@ tests in `scripts/test-agent-ui.mjs` enforce the difference.
 6. Nothing here captures customer briefs, emails, phones, or credentials —
    the controlled-test business is first-party and non-client.
 
+## Tied surfaces
+
+The homepage identity section (`public/index.html`, `id="identity"`) leads with
+a compact "which TinyStudio" disambiguation block: one row per controlled
+question, each row tagged with the fixture question id(s) via
+`data-ai-question`. `scripts/check-site.mjs` fails if any controlled question
+is not answered on the homepage or if a referenced id does not exist in the
+fixture, and the same invariant is asserted in `scripts/test-agent-ui.mjs`. The
+fixture never changes to match the site — the site is what gets edited to
+answer the questions the evidence asks.
+
 ## Adding a run
 
 1. Add or reuse a question in `controlled-questions.json` (stable id, name,

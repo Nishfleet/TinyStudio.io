@@ -500,3 +500,90 @@ test("AI-search remediation links resolve defensively and reject cross-host or i
   assert.match(invalidHtml, /Remediation: fix it/);
   assert.doesNotMatch(invalidHtml, /javascript:/);
 });
+
+// ---- Candidate 2: identity tie, offer mirror, source-host validation --------
+
+const HOME_HTML = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+const AUDIT_HTML = readFileSync(new URL("../public/audit.html", import.meta.url), "utf8");
+const LLMS_TXT = readFileSync(new URL("../public/llms.txt", import.meta.url), "utf8");
+const OFFER_MD = readFileSync(new URL("../public/offer.md", import.meta.url), "utf8");
+
+const OFFER_FACTS = [
+  "human-reviewed managed service",
+  "The Website Correction",
+  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
+  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "not autonomous software",
+  "Client-side code does not call model providers",
+  "No campaign publishing",
+  "No ad spend changes"
+];
+
+test("homepage disambiguation block answers every controlled question", () => {
+  const section = HOME_HTML.match(/<section[^>]*id="identity"[\s\S]*?<\/section>/i)?.[0] ?? "";
+  assert.ok(section, "homepage carries the identity section");
+  assert.match(section, /data-ai-identity/);
+  const refs = new Set(
+    [...section.matchAll(/\bdata-ai-question="([^"]+)"/gi)]
+      .flatMap((match) => match[1].trim().split(/\s+/))
+      .filter(Boolean)
+  );
+  for (const question of AI_QUESTIONS.questions) {
+    assert.ok(refs.has(question.id), `homepage answers the controlled question ${question.id}`);
+  }
+  for (const ref of refs) {
+    assert.ok(
+      AI_QUESTIONS.questions.some((question) => question.id === ref),
+      `homepage references a known question id: ${ref}`
+    );
+  }
+});
+
+test("every owned identity surface states the human-reviewed outcome", () => {
+  for (const [name, text] of [
+    ["homepage", HOME_HTML],
+    ["audit page", AUDIT_HTML],
+    ["llms.txt", LLMS_TXT],
+    ["offer.md", OFFER_MD]
+  ]) {
+    assert.match(text, /human-reviewed/, `${name} must state the human-reviewed outcome`);
+  }
+});
+
+test("offer facts are mirrored by llms.txt and offer.md", () => {
+  // Case-insensitive, matching the check-site guard: one file may head a fact
+  // while the other embeds it mid-sentence.
+  for (const fact of OFFER_FACTS) {
+    assert.ok(LLMS_TXT.toLowerCase().includes(fact.toLowerCase()), `llms.txt must state: ${fact}`);
+    assert.ok(OFFER_MD.toLowerCase().includes(fact.toLowerCase()), `offer.md must state: ${fact}`);
+  }
+});
+
+test("every cited source URL is a valid absolute http(s) URL", () => {
+  for (const run of AI_EVIDENCE.runs) {
+    for (const source of run.sources || []) {
+      assert.doesNotMatch(source.url, /\s/, `source URL must not contain whitespace (${run.questionId}/${run.engine})`);
+      let parsed;
+      assert.doesNotThrow(() => {
+        parsed = new URL(source.url);
+      }, `source URL must parse (${run.questionId}/${run.engine})`);
+      assert.match(parsed.protocol, /^https?:$/, `source URL must be http(s) (${run.questionId}/${run.engine})`);
+      assert.ok(parsed.hostname.includes("."), `source URL host must be a real hostname (${run.questionId}/${run.engine})`);
+    }
+  }
+});
+
+test("found runs must cite the tested business's own site", () => {
+  const siteHost = new URL(AI_EVIDENCE.business.site).hostname;
+  for (const run of AI_EVIDENCE.runs) {
+    if (run.state !== "found") continue;
+    const citesOwnSite = (run.sources || []).some((source) => {
+      try {
+        return new URL(source.url).hostname === siteHost;
+      } catch {
+        return false;
+      }
+    });
+    assert.ok(citesOwnSite, `found run must cite the site: ${run.questionId}/${run.engine}`);
+  }
+});
