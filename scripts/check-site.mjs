@@ -462,6 +462,49 @@ if (aiQuestions && aiEvidence) {
   }
   if (!questions.length) failures.push("AI-search fixture must name at least one controlled question.");
 
+  // Truth grounding: every truth cites the owned page(s) it draws from and
+  // carries grounding phrases; each phrase must appear verbatim in the truth
+  // itself and on at least one cited page. This pins the fixture's facts to
+  // the site copy they were drawn from, so the fixture cannot drift from the
+  // pages it cites without failing the check.
+  for (const question of questions) {
+    const grounding = question.grounding;
+    if (!Array.isArray(grounding) || !grounding.length || grounding.some((token) => typeof token !== "string" || !token)) {
+      failures.push(`AI-search question must carry grounding phrases: ${question.id}`);
+    }
+    const citedPages = [...String(question.truth).matchAll(/\(([^)]+)\)/g)]
+      .flatMap((match) => match[1].split(","))
+      .map((token) => token.trim())
+      .filter(Boolean);
+    if (!citedPages.length) {
+      failures.push(`AI-search truth must cite the owned pages it draws from: ${question.id}`);
+    }
+    for (const page of citedPages) {
+      try {
+        read(`public/${page}`);
+      } catch {
+        failures.push(`AI-search truth cites an unknown owned page: ${question.id} -> ${page}`);
+      }
+    }
+    const pageText = citedPages
+      .map((page) => {
+        try {
+          return read(`public/${page}`);
+        } catch {
+          return "";
+        }
+      })
+      .join("\n");
+    for (const token of grounding || []) {
+      if (!question.truth.toLowerCase().includes(token.toLowerCase())) {
+        failures.push(`AI-search truth must state its grounding phrase: ${question.id} -> ${token}`);
+      }
+      if (!pageText.toLowerCase().includes(token.toLowerCase())) {
+        failures.push(`AI-search grounding phrase must be stated on a cited page: ${question.id} -> ${token}`);
+      }
+    }
+  }
+
   const engines = new Map((aiEvidence.engines || []).map((engine) => [engine.id, engine]));
   for (const engine of aiEvidence.engines || []) {
     if (!engine.id || !engine.name) failures.push("AI-search engine entries must carry id and name.");
@@ -567,6 +610,71 @@ if (aiQuestions && aiEvidence) {
     if (!questionIds.has(ref)) {
       failures.push(`Homepage disambiguation block references an unknown question id: ${ref}`);
     }
+  }
+
+  // The homepage answer rows must actually state the grounded facts, not just
+  // carry the question id: every grounding phrase of a question must appear in
+  // the text (heading and body) of the row tagged with that question id.
+  const identityRows = [...homepageIdentitySection.matchAll(/<div class="q"[^>]*\bdata-ai-question="([^"]+)"[^>]*>([\s\S]*?)<\/div>/gi)];
+  for (const question of questions) {
+    const row = identityRows.find((match) => match[1].trim().split(/\s+/).includes(question.id));
+    if (!row) continue; // row existence is enforced by the id tie checks above
+    const rowText = row[2].toLowerCase();
+    for (const token of question.grounding || []) {
+      if (!rowText.includes(token.toLowerCase())) {
+        failures.push(`Homepage answer must state the grounded fact: ${question.id} -> ${token}`);
+      }
+    }
+  }
+
+  // Machine-readable identity block: the homepage carries a compact JSON-LD
+  // Organization declaration that states the same disambiguation facts in
+  // structured form, so engines can read the entity identity without parsing
+  // prose. It must parse, name the business and its canonical URL, carry the
+  // captured same-name entities as disambiguation, and stay free of promise
+  // language and the spaced/retired name forms.
+  const identityBlockMatch = siteHome.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i);
+  if (!identityBlockMatch) {
+    failures.push("Homepage must carry the machine-readable identity block (application/ld+json).");
+  } else {
+    let identityBlock = null;
+    try {
+      identityBlock = JSON.parse(identityBlockMatch[1]);
+    } catch {
+      failures.push("Homepage identity block must be valid JSON.");
+    }
+    if (identityBlock) {
+      if (identityBlock["@type"] !== "Organization") failures.push("Homepage identity block must declare @type Organization.");
+      if (identityBlock.name !== "TinyStudio") failures.push("Homepage identity block must name the business TinyStudio.");
+      if (identityBlock.url !== "https://tinystudio.io/") failures.push("Homepage identity block must anchor the canonical URL.");
+      const description = String(identityBlock.description || "");
+      for (const phrase of [
+        "leak audit",
+        "human-reviewed",
+        "tinystudio.ai",
+        "tinystudio.ch",
+        "fiberygoodness.com",
+        "tinystudio.tv",
+        "states no base city or office address"
+      ]) {
+        if (!description.includes(phrase)) failures.push(`Homepage identity block must state: ${phrase}`);
+      }
+      if (/\bTiny Studio\b/i.test(description) || /Agent Desk/i.test(description)) {
+        failures.push("Homepage identity block must not use the spaced name or the retired product name.");
+      }
+      for (const pattern of [
+        /\bguarantee\w*\b/i,
+        /\bautonomous\b/i,
+        /\bpublish\w*\b/i,
+        /\bwill\s+(rank|publish|deliver|generate)\b/i,
+        /\brank\s*(#\s*\d|number\s+one|first)\b/i
+      ]) {
+        if (pattern.test(description)) failures.push(`Forbidden claim in homepage identity block: ${pattern}`);
+      }
+    }
+  }
+  if (!siteHome.includes('href="audit.html#ai-search"')) {
+    failures.push("Homepage identity block must link the controlled evidence (audit.html#ai-search).");
   }
 
   const fixtureText = JSON.stringify(aiQuestions) + "\n" + JSON.stringify(aiEvidence);

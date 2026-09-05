@@ -539,6 +539,106 @@ test("homepage disambiguation block answers every controlled question", () => {
   }
 });
 
+test("fixture truths are grounded in the owned pages they cite", () => {
+  for (const question of AI_QUESTIONS.questions) {
+    const grounding = question.grounding;
+    assert.ok(Array.isArray(grounding) && grounding.length, `${question.id} must carry grounding phrases`);
+    const pages = [...question.truth.matchAll(/\(([^)]+)\)/g)]
+      .flatMap((match) => match[1].split(","))
+      .map((token) => token.trim())
+      .filter(Boolean);
+    assert.ok(pages.length, `${question.id} truth must cite the owned pages it draws from`);
+    for (const page of pages) {
+      assert.doesNotThrow(
+        () => readFileSync(new URL(`../public/${page}`, import.meta.url), "utf8"),
+        `${question.id} truth cites an owned page: ${page}`
+      );
+    }
+    const pageText = pages
+      .map((page) => readFileSync(new URL(`../public/${page}`, import.meta.url), "utf8"))
+      .join("\n");
+    for (const token of grounding) {
+      assert.ok(
+        question.truth.toLowerCase().includes(token.toLowerCase()),
+        `${question.id} truth states its grounding phrase: ${token}`
+      );
+      assert.ok(
+        pageText.toLowerCase().includes(token.toLowerCase()),
+        `a cited page states the grounding phrase for ${question.id}: ${token}`
+      );
+    }
+  }
+});
+
+test("homepage identity rows state the grounded facts, not just the question ids", () => {
+  const section = HOME_HTML.match(/<section[^>]*id="identity"[\s\S]*?<\/section>/i)?.[0] ?? "";
+  const rows = [...section.matchAll(/<div class="q"[^>]*\bdata-ai-question="([^"]+)"[^>]*>([\s\S]*?)<\/div>/gi)];
+  for (const question of AI_QUESTIONS.questions) {
+    const row = rows.find((match) => match[1].trim().split(/\s+/).includes(question.id));
+    assert.ok(row, `homepage carries an answer row for ${question.id}`);
+    const rowText = row[2].toLowerCase();
+    for (const token of question.grounding) {
+      assert.ok(rowText.includes(token.toLowerCase()), `homepage row answers ${question.id} with: ${token}`);
+    }
+  }
+});
+
+test("homepage identity row headings name the question they answer", () => {
+  const section = HOME_HTML.match(/<section[^>]*id="identity"[\s\S]*?<\/section>/i)?.[0] ?? "";
+  const rows = [...section.matchAll(/<div class="q"[^>]*\bdata-ai-question="([^"]+)"[^>]*>([\s\S]*?)<\/div>/gi)];
+  const covered = new Set(rows.flatMap((match) => match[1].trim().split(/\s+/)));
+  for (const question of AI_QUESTIONS.questions) {
+    assert.ok(covered.has(question.id), `every controlled question has an answer row: ${question.id}`);
+  }
+  for (const match of rows) {
+    const ids = match[1].trim().split(/\s+/);
+    const heading = match[2].match(/<h4>([\s\S]*?)<\/h4>/i)?.[1].trim() ?? "";
+    assert.ok(heading, `answer row for ${ids.join(", ")} carries a heading`);
+    const labels = AI_QUESTIONS.questions
+      .filter((question) => ids.includes(question.id))
+      .flatMap((question) => [question.name, question.prompt])
+      .map((label) => label.replace(/[?.]\s*$/, "").trim());
+    assert.ok(labels.includes(heading), `heading "${heading}" names one of the row's questions: ${ids.join(", ")}`);
+  }
+});
+
+test("homepage machine-readable identity block parses and states the disambiguation facts", () => {
+  const block = HOME_HTML.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i);
+  assert.ok(block, "homepage carries a machine-readable identity block");
+  let ld;
+  assert.doesNotThrow(() => {
+    ld = JSON.parse(block[1]);
+  }, "identity block must be valid JSON");
+  assert.equal(ld["@type"], "Organization");
+  assert.equal(ld.name, "TinyStudio");
+  assert.equal(ld.url, "https://tinystudio.io/");
+  assert.equal(ld.email, "hello@tinystudio.io");
+  const description = String(ld.description || "");
+  for (const phrase of [
+    "leak audit",
+    "human-reviewed",
+    "tinystudio.ai",
+    "tinystudio.ch",
+    "fiberygoodness.com",
+    "tinystudio.tv",
+    "states no base city or office address"
+  ]) {
+    assert.ok(description.includes(phrase), `identity block description states: ${phrase}`);
+  }
+  assert.doesNotMatch(description, /\bTiny Studio\b/i, "identity block must not use the spaced name form");
+  assert.doesNotMatch(description, /Agent Desk/i, "identity block must not use the retired product name");
+  for (const pattern of [
+    /\bguarantee\w*\b/i,
+    /\bautonomous\b/i,
+    /\bpublish\w*\b/i,
+    /\bwill\s+(rank|publish|deliver|generate)\b/i,
+    /\brank\s*(#\s*\d|number\s+one|first)\b/i
+  ]) {
+    assert.doesNotMatch(description, pattern, `identity block carries no promise language: ${pattern}`);
+  }
+  assert.match(HOME_HTML, /href="audit\.html#ai-search"/, "identity block links the controlled evidence");
+});
+
 test("every owned identity surface states the human-reviewed outcome", () => {
   for (const [name, text] of [
     ["homepage", HOME_HTML],

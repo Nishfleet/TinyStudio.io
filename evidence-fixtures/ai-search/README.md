@@ -9,8 +9,11 @@ fails if the embedded copy drifts from these files.
 
 - `controlled-questions.json` — the registry of named controlled questions.
   Each question carries a stable `id`, a short `name`, the exact `prompt`
-  sent to each engine, and a `truth` the verdict is checked against. The truth
-  statements are drawn from the live site, not from what we wish were true.
+  sent to each engine, a `truth` the verdict is checked against, and
+  `grounding` — the exact fact phrases the truth draws from the cited pages.
+  The truth statements are drawn from the live site, not from what we wish
+  were true; the checks fail if a grounding phrase disappears from the cited
+  page, the truth, or the homepage answer row.
 - `evidence.json` — the captured runs. One `run` per question-and-engine
   pair, with the verbatim answer (or observation), the pages the engine cited,
   and a remediation note.
@@ -43,10 +46,15 @@ tests in `scripts/test-agent-ui.mjs` enforce the difference.
    sufficient: when the answer's content does not match what the cited page
    actually says, the remediation says so and claims no page-specific fix.
    Otherwise remediation says plainly that no page-specific fix is claimed.
-5. The fixture never promises ranking, leads, visibility, or autonomous
+5. Every `truth` cites the owned page(s) it draws from, named in parentheses,
+   and carries `grounding` phrases. The checks require each grounding phrase
+   verbatim on at least one cited page, inside the truth itself, and inside
+   the homepage's answer row for that question — so the fixture's facts stay
+   pinned to the site copy they were drawn from, in both directions.
+6. The fixture never promises ranking, leads, visibility, or autonomous
    publishing. It records what was observed on one day on one set of engines,
    and it changes when the evidence changes.
-6. Nothing here captures customer briefs, emails, phones, or credentials —
+7. Nothing here captures customer briefs, emails, phones, or credentials —
    the controlled-test business is first-party and non-client.
 
 ## Tied surfaces
@@ -59,6 +67,16 @@ is not answered on the homepage or if a referenced id does not exist in the
 fixture, and the same invariant is asserted in `scripts/test-agent-ui.mjs`. The
 fixture never changes to match the site — the site is what gets edited to
 answer the questions the evidence asks.
+
+The homepage also carries a machine-readable identity block
+(`<script type="application/ld+json">`, `@type: Organization`) that states the
+same disambiguation facts in structured form — name, canonical URL, and a
+description that names the same-name entities the evidence captured
+(`tinystudio.ai`, `fiberygoodness.com`, `tinystudio.ch`, `tinystudio.tv`).
+The checks require the block to parse, to name the business and its URL, to
+carry the disambiguation facts, and to stay free of promise language. The
+identity section links to the controlled evidence on the audit page
+(`audit.html#ai-search`), so the answers are citable first-party.
 
 ## Adding a run
 
