@@ -55,6 +55,14 @@
     return found;
   }
 
+  function baselineRun(data, questionId, engine) {
+    var found = null;
+    (data.evidence.runs || []).forEach(function (run) {
+      if (!found && run.questionId === questionId && run.engine === engine) found = run;
+    });
+    return found;
+  }
+
   function sameSiteSource(run, siteHost) {
     return (run.sources || []).some(function (source) {
       var url = safeUrl(source.url);
@@ -126,14 +134,49 @@
     return out.join('');
   }
 
+  // A retest is a rerun of a baseline question on the same engine, recorded
+  // after a site change. Only the checks in scripts/check-site.mjs can judge
+  // whether a retest is a valid before/after pair; the renderer shows the
+  // before state from the bound baseline run and the after state from the
+  // retest itself, escaping everything exactly like a baseline run.
+  function renderRetest(data, retest) {
+    var question = findById(data.questions.questions, retest.questionId);
+    var engine = findById(data.evidence.engines, retest.engine);
+    var baseline = baselineRun(data, retest.questionId, retest.engine);
+    var name = escapeHtml(question ? question.name : retest.questionId) + ' &mdash; ' + escapeHtml(engine ? engine.name : retest.engine);
+    if (engine && engine.surface) name += ' &middot; ' + escapeHtml(engine.surface);
+    var prompt = escapeHtml(question ? question.prompt : '');
+    var before = escapeHtml(baseline ? (AI_LABELS[baseline.state] || baseline.state) : 'n/a');
+    var after = escapeHtml(AI_LABELS[retest.state] || retest.state);
+    var out = [
+      '<div class="row" data-state="' + escapeHtml(retest.state) + '">',
+      '<span class="t" title="Prompt: ' + prompt + '">' + name + '</span>',
+      '<span class="v">Before: ' + before + ' &rarr; After: ' + after + '</span></div>',
+      '<p class="micro">Retested ' + escapeHtml(retest.retestedAt || '') + '. ' + (retest.state === 'absent' ? 'Observed: ' : 'Answer (verbatim): ') + '&ldquo;' + escapeHtml(retest.captured || '') + '&rdquo;</p>'
+    ];
+    if (retest.sources && retest.sources.length) {
+      out.push('<p class="micro">Sources: ' + linkList(retest.sources) + '</p>');
+    }
+    if (retest.remediation) {
+      var remediation = '<p class="micro">Remediation: ' + escapeHtml(retest.remediation.text || '');
+      var pageHref = sitePageHref(data, retest, retest.remediation.page);
+      if (pageHref) {
+        remediation += ' &mdash; <a class="xa1" href="' + pageHref + '">' + escapeHtml(retest.remediation.page) + '</a>';
+      }
+      out.push(remediation + '</p>');
+    }
+    return out.join('');
+  }
+
   function renderArtifact(data) {
     if (!data || !data.questions || !data.evidence) return '';
     var business = data.evidence.business || {};
     var questions = data.questions.questions || [];
     var engines = data.evidence.engines || [];
     var runs = data.evidence.runs || [];
+    var retests = Array.isArray(data.evidence.retests) ? data.evidence.retests : [];
     var out = [];
-    out.push('<p class="micro"><b>Controlled test, ' + escapeHtml(data.evidence.testedOn || '') + '.</b> ' + escapeHtml(business.name || '') + ' (' + escapeHtml(business.site || '') + '), ' + engines.length + ' engines, ' + runs.length + ' runs. Every answer below is quoted verbatim; the sources are the pages the engine cited.</p>');
+    out.push('<p class="micro"><b>Controlled test, ' + escapeHtml(data.evidence.testedOn || '') + '.</b> ' + escapeHtml(business.name || '') + ' (' + escapeHtml(business.site || '') + '), ' + engines.length + ' engines, ' + runs.length + ' runs, ' + retests.length + ' retests. Every answer below is quoted verbatim; the sources are the pages the engine cited.</p>');
     out.push('<p class="micro"><b>The questions, exactly as asked:</b></p>');
     questions.forEach(function (question, index) {
       out.push('<p class="micro">Q' + (index + 1) + ' &mdash; ' + escapeHtml(question.name) + '. Prompt: &ldquo;' + escapeHtml(question.prompt) + '&rdquo;.</p>');
@@ -143,6 +186,16 @@
       out.push(renderRun(data, run));
     });
     out.push('</div>');
+    if (retests.length) {
+      out.push('<p class="micro"><b>Retests &mdash; before/after pairs:</b> each retest reruns a baseline question on the same engine after a site change and records what actually changed.</p>');
+      out.push('<div class="rows">');
+      retests.forEach(function (retest) {
+        out.push(renderRetest(data, retest));
+      });
+      out.push('</div>');
+    } else {
+      out.push('<p class="micro"><b>No retests recorded yet.</b> Every run above is a baseline capture. This artifact claims no Found transition until a before/after pair is actually recorded.</p>');
+    }
     return out.join('');
   }
 

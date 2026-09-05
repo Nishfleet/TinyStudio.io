@@ -511,8 +511,9 @@ const OFFER_MD = readFileSync(new URL("../public/offer.md", import.meta.url), "u
 const OFFER_FACTS = [
   "human-reviewed managed service",
   "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "founder-led Managed IT, MSP and cybersecurity companies",
+  "free leak audit of high-ticket service homepages",
+  "pricing.html",
   "not autonomous software",
   "Client-side code does not call model providers",
   "No campaign publishing",
@@ -586,4 +587,129 @@ test("found runs must cite the tested business's own site", () => {
     });
     assert.ok(citesOwnSite, `found run must cite the site: ${run.questionId}/${run.engine}`);
   }
+});
+
+test("AI-search fixture keeps found verdicts in retests with before/after provenance", () => {
+  for (const run of AI_EVIDENCE.runs) {
+    assert.notEqual(run.state, "found", `baseline run must not claim found: ${run.questionId}/${run.engine}`);
+  }
+  assert.ok(Array.isArray(AI_EVIDENCE.retests), "evidence carries a retests array");
+
+  const pairs = [];
+  for (const retest of AI_EVIDENCE.retests) {
+    assert.ok(["found", "wrong", "absent"].includes(retest.state), `retest outcome: ${retest.questionId}/${retest.engine}`);
+    assert.ok(retest.captured, `retest captures what was observed: ${retest.questionId}/${retest.engine}`);
+    assert.match(retest.retestedAt, /^\d{4}-\d{2}-\d{2}$/, `retest carries an ISO date: ${retest.questionId}/${retest.engine}`);
+
+    const baseline = AI_EVIDENCE.runs.find(
+      (run) => run.questionId === retest.questionId && run.engine === retest.engine
+    );
+    assert.ok(baseline, `retest references a baseline run: ${retest.questionId}/${retest.engine}`);
+    assert.ok(["wrong", "absent"].includes(baseline.state), `transition from a non-found baseline: ${retest.questionId}/${retest.engine}`);
+    assert.match(baseline.testedAt, /^\d{4}-\d{2}-\d{2}$/, `baseline carries an ISO date: ${retest.questionId}/${retest.engine}`);
+    assert.ok(retest.retestedAt >= baseline.testedAt, `retest not before its baseline: ${retest.questionId}/${retest.engine}`);
+
+    const pair = `${retest.questionId}/${retest.engine}`;
+    assert.ok(!pairs.includes(pair), `at most one retest per question/engine pair: ${pair}`);
+    pairs.push(pair);
+  }
+});
+
+test("AI-search renderer shows retest before/after pairs and stays honest with none", async () => {
+  globalThis.document = auditDocumentStub();
+  const api = await loadAuditScript();
+  const base = {
+    questions: { questions: [{ id: "q1", name: "Q", prompt: "p", truth: "t" }] },
+    evidence: {
+      testedOn: "2026-08-06",
+      business: { name: "B", site: "https://tinystudio.io/" },
+      engines: [{ id: "e1", name: "E" }],
+      runs: [
+        {
+          questionId: "q1",
+          engine: "e1",
+          state: "wrong",
+          testedAt: "2026-08-06",
+          captured: "before",
+          sources: [{ title: "x", url: "https://x.example/" }]
+        }
+      ]
+    }
+  };
+
+  const noRetests = api.renderArtifact(base);
+  assert.match(noRetests, /No retests recorded yet/);
+  assert.match(noRetests, /claims no Found transition/);
+  assert.doesNotMatch(noRetests, /Before: Wrong &rarr; After: Found/);
+
+  const withRetest = {
+    ...base,
+    evidence: {
+      ...base.evidence,
+      retests: [
+        {
+          questionId: "q1",
+          engine: "e1",
+          state: "found",
+          retestedAt: "2026-09-01",
+          captured: "after",
+          sources: [{ title: "me", url: "https://tinystudio.io/" }],
+          remediation: { page: "/", text: "fixed" }
+        }
+      ]
+    }
+  };
+  const html = api.renderArtifact(withRetest);
+  assert.match(html, /Before: Wrong &rarr; After: Found/);
+  assert.match(html, /Retested 2026-09-01/);
+  assert.match(html, /Answer \(verbatim\):/);
+  assert.match(html, /Sources:/);
+  assert.match(html, /Remediation: fixed/);
+  assert.match(html, /href="https:\/\/tinystudio\.io\/"/);
+  assert.doesNotMatch(html, /No retests recorded yet/);
+});
+
+test("AI-search renderer escapes retest text and only links safe retest URLs", async () => {
+  globalThis.document = auditDocumentStub();
+  const api = await loadAuditScript();
+  const data = {
+    questions: { questions: [{ id: "q1", name: "Q", prompt: "p", truth: "t" }] },
+    evidence: {
+      testedOn: "2026-08-06",
+      business: { name: "B", site: "https://tinystudio.io/" },
+      engines: [{ id: "e1", name: "E" }],
+      runs: [
+        {
+          questionId: "q1",
+          engine: "e1",
+          state: "wrong",
+          testedAt: "2026-08-06",
+          captured: "b",
+          sources: [{ title: "x", url: "https://x.example/" }]
+        }
+      ],
+      retests: [
+        {
+          questionId: "q1",
+          engine: "e1",
+          state: "found",
+          retestedAt: "2026-09-01",
+          captured: "<script>alert(2)</script>",
+          sources: [
+            { title: "<b>me</b>", url: "javascript:alert(1)" },
+            { title: "site", url: "https://tinystudio.io/" }
+          ],
+          remediation: { page: "https://evil.example/", text: "fix" }
+        }
+      ]
+    }
+  };
+
+  const html = api.renderArtifact(data);
+  assert.doesNotMatch(html, /<script>/);
+  assert.doesNotMatch(html, /<b>me|javascript:/);
+  assert.match(html, /&lt;script&gt;alert\(2\)&lt;\/script&gt;/);
+  assert.match(html, /&lt;b&gt;me&lt;\/b&gt;/);
+  assert.match(html, /href="https:\/\/tinystudio\.io\/"/);
+  assert.doesNotMatch(html, /evil\.example/);
 });

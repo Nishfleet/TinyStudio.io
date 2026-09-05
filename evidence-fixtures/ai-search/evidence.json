@@ -1,5 +1,5 @@
 {
-  "schema": "ai-search-evidence/v1",
+  "schema": "ai-search-evidence/v2",
   "testedOn": "2026-08-06",
   "business": {
     "name": "TinyStudio",
@@ -177,5 +177,6 @@
       "testedAt": "2026-08-06",
       "reason": "The engine blocked the session with an automated-session challenge, so the question was not run."
     }
-  ]
+  ],
+  "retests": []
 }

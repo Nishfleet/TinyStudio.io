@@ -125,8 +125,9 @@ const requiredWorkerCopy = [
 const requiredPublicArtifacts = [
   "human-reviewed managed service",
   "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "founder-led Managed IT, MSP and cybersecurity companies",
+  "free leak audit of high-ticket service homepages",
+  "pricing.html",
   "not autonomous software",
   "Client-side code does not call model providers",
   "No campaign publishing",
@@ -547,6 +548,111 @@ if (aiQuestions && aiEvidence) {
     }
   }
 
+  // ---- Before/after retests: a Found verdict needs provenance --------------
+  // A "found" verdict is a transition claim, so in this packet it is only
+  // recordable as a retest bound to a baseline run that was NOT found. The
+  // rules below reject mismatched identity (a retest that does not bind to the
+  // same question/engine baseline), unsafe cross-host citations (the same URL
+  // rules as any run), impossible state transitions (not-tested -> found,
+  // found -> found, not-tested retests), and missing provenance (a found
+  // claim with no before, or a retest with no baseline). The public artifact
+  // therefore can never display a Found transition that this gate would not
+  // accept.
+  if (typeof aiEvidence.business?.name !== "string" || !aiEvidence.business.name) {
+    failures.push("AI-search business must carry a name (identity anchor for before/after pairs).");
+  }
+  const baselinePairs = new Set();
+  for (const run of runs) {
+    const pair = `${run.questionId}\u0000${run.engine}`;
+    if (baselinePairs.has(pair)) {
+      failures.push(`AI-search baseline runs must be unique per question/engine pair (provenance binding): ${run.questionId}/${run.engine}`);
+    }
+    baselinePairs.add(pair);
+    if (run.state === "found") {
+      failures.push(`AI-search baseline run must not claim found without a before/after retest: ${run.questionId}/${run.engine}`);
+    }
+  }
+
+  const retests = Array.isArray(aiEvidence.retests) ? aiEvidence.retests : [];
+  const RETEST_STATES = ["found", "wrong", "absent"];
+  const retestPairs = new Set();
+  for (const retest of retests) {
+    if (!questionIds.has(retest.questionId)) failures.push(`AI-search retest references an unknown question: ${retest.questionId}`);
+    if (!engines.has(retest.engine)) failures.push(`AI-search retest references an unknown engine: ${retest.engine}`);
+    if (!RETEST_STATES.includes(retest.state)) {
+      failures.push(`AI-search retest must record a rerun outcome (found/wrong/absent), not ${JSON.stringify(retest.state)}: ${retest.questionId}/${retest.engine}`);
+    }
+    if (typeof retest.retestedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(retest.retestedAt)) {
+      failures.push(`AI-search retest must carry an ISO retestedAt date: ${retest.questionId}/${retest.engine}`);
+    }
+    if (!retest.captured) failures.push(`AI-search retest must capture what was observed: ${retest.questionId}/${retest.engine}`);
+    const pair = `${retest.questionId}\u0000${retest.engine}`;
+    if (retestPairs.has(pair)) {
+      failures.push(`AI-search retests must be unique per question/engine pair (no result shopping): ${retest.questionId}/${retest.engine}`);
+    }
+    retestPairs.add(pair);
+
+    // The retest must bind to the exact baseline run for the same question and
+    // engine — before and after must answer the same controlled question about
+    // the same tested business, or the pair is meaningless.
+    const baseline = runs.find((run) => run.questionId === retest.questionId && run.engine === retest.engine);
+    if (!baseline) {
+      failures.push(`AI-search retest must reference a captured baseline run (missing before provenance): ${retest.questionId}/${retest.engine}`);
+    } else {
+      if (!["wrong", "absent"].includes(baseline.state)) {
+        failures.push(`AI-search retest has an impossible state transition from baseline state ${JSON.stringify(baseline.state)}: ${retest.questionId}/${retest.engine}`);
+      }
+      if (typeof baseline.testedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(baseline.testedAt)) {
+        failures.push(`AI-search baseline run must carry an ISO testedAt date: ${retest.questionId}/${retest.engine}`);
+      } else if (typeof aiEvidence.testedOn === "string" && retest.retestedAt < aiEvidence.testedOn) {
+        failures.push(`AI-search retest cannot predate the panel session (testedOn): ${retest.questionId}/${retest.engine}`);
+      } else if (retest.retestedAt < baseline.testedAt) {
+        failures.push(`AI-search retest must not precede its baseline run: ${retest.questionId}/${retest.engine}`);
+      }
+    }
+
+    // Citation rules are the same as any run: absolute http(s) URLs only, and
+    // a found verdict must cite the tested business's own site.
+    if (retest.state !== "absent" && !(retest.sources || []).length) {
+      failures.push(`AI-search retest must cite its sources: ${retest.questionId}/${retest.engine}`);
+    }
+    for (const source of retest.sources || []) {
+      let parsedUrl = null;
+      try {
+        parsedUrl = new URL(source.url);
+      } catch {
+        parsedUrl = null;
+      }
+      if (!parsedUrl || !/^https?:$/.test(parsedUrl.protocol) || !parsedUrl.hostname || !parsedUrl.hostname.includes(".") || /\s/.test(source.url)) {
+        failures.push(`AI-search retest source URL must be a valid absolute http(s) URL: ${retest.questionId}/${retest.engine} ${JSON.stringify(source.url)}`);
+      }
+    }
+    if (retest.state === "found" && businessHost) {
+      const citesOwnSite = (retest.sources || []).some((source) => {
+        try {
+          return new URL(source.url).hostname === businessHost;
+        } catch {
+          return false;
+        }
+      });
+      if (!citesOwnSite) {
+        failures.push(`found retest must cite the tested business's own site: ${retest.questionId}/${retest.engine}`);
+      }
+    }
+    if (retest.remediation && retest.remediation.page) {
+      const sameDomain = (retest.sources || []).some((source) => {
+        try {
+          return new URL(source.url).hostname === businessHost;
+        } catch {
+          return false;
+        }
+      });
+      if (businessHost && !sameDomain) {
+        failures.push(`page-specific retest remediation needs same-domain evidence: ${retest.questionId}/${retest.engine}`);
+      }
+    }
+  }
+
   // The homepage disambiguation block must answer every controlled question:
   // each fixture question id appears in a data-ai-question attribute inside the
   // id="identity" section, and every referenced id must exist in the fixture.
@@ -598,6 +704,9 @@ if (aiQuestions && aiEvidence) {
   runs.forEach((run) => {
     if (run.remediation) narrativeFields.push(run.remediation.text);
     if (run.reason) narrativeFields.push(run.reason);
+  });
+  (Array.isArray(aiEvidence.retests) ? aiEvidence.retests : []).forEach((retest) => {
+    if (retest.remediation) narrativeFields.push(retest.remediation.text);
   });
   (aiEvidence.engines || []).forEach((engine) => narrativeFields.push(engine.note));
   narrativeFields.push(aiEvidence.business?.note || "");
