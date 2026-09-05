@@ -218,3 +218,35 @@
 .xi20{max-width:18ch}
 
 .xh1{color:var(--brass)}
+
+/* mobile — leak audit page */
+@media (max-width:760px){
+  .wrap{padding:0 20px}
+  nav{flex-wrap:wrap;row-gap:14px}
+  .navlinks{flex-wrap:wrap;gap:10px 14px}
+  header{padding:56px 0 0}
+  .meta{grid-template-columns:1fr;gap:18px}
+  .meta div{border-right:0}
+  .finding{grid-template-columns:1fr;gap:28px;padding:36px 26px}
+  .finding .stat{font-size:56px}
+  .spec{grid-template-columns:1fr;gap:34px}
+  .specbody h2{font-size:34px}
+  .lead{flex-direction:column;align-items:flex-start;gap:18px}
+  .checks h2{font-size:36px}
+  .checkgrid{grid-template-columns:1fr;gap:26px}
+  .check{padding-right:0;padding-bottom:26px;border-right:0;border-bottom:1px solid var(--hair)}
+  .check:not(:first-child){padding-left:0}
+  .check:last-child{border-bottom:0;padding-bottom:0}
+  .method h2{font-size:36px}
+  .track{grid-template-columns:1fr;gap:26px}
+  .track::before{display:none}
+  .stop{padding-right:0}
+  .stop .d{margin-top:0}
+  .who{flex-direction:column;align-items:flex-start;gap:16px;padding:30px 26px}
+  .offer{flex-direction:column;gap:32px}
+  .price{flex-shrink:1;text-align:left}
+  .price .big{font-size:52px}
+  .faq h2{font-size:34px}
+  .q{grid-template-columns:1fr;gap:14px}
+  footer{flex-direction:column;align-items:flex-start;gap:10px}
+}

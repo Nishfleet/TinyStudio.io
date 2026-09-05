@@ -29,3 +29,17 @@
   .stack div:not(:first-child){padding-left:30px}
   .stack .k{font-family:'Fraunces',serif;font-size:21px;font-weight:300;letter-spacing:-.015em}
   .stack .v{margin-top:8px;font-size:14px;line-height:1.65;color:var(--muted)}
+
+/* mobile — agents page */
+@media (max-width:760px){
+  .ag{grid-template-columns:1fr;gap:12px;padding:28px 0}
+  .ag .n{font-size:26px}
+  .ag .gate{padding-top:0}
+  .gatebox{grid-template-columns:1fr}
+  .gatebox>div{padding:30px 26px}
+  .gatebox>div:first-child{border-right:0;border-bottom:1px solid var(--line)}
+  .stack{grid-template-columns:1fr}
+  .stack div{padding:22px 0;border-right:0;border-bottom:1px solid var(--hair)}
+  .stack div:not(:first-child){padding-left:0}
+  .stack div:last-child{border-bottom:0}
+}
