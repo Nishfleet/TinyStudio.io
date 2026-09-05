@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 
 const SAMPLE_SECTIONS = {
   pipelineBrief: "# Pipeline Brief\n\n## Assumptions\n- **Offer**: <script>alert(1)</script>\n\nBrief body",
@@ -8,15 +9,33 @@ const SAMPLE_SECTIONS = {
 };
 
 class FakeElement {
-  constructor({ textContent = "", dataset = {}, disabled = false, hidden = false, value = "" } = {}) {
+  constructor({ textContent = "", dataset = {}, disabled = false, hidden = false, value = "", tag = "", isText = false, isFragment = false } = {}) {
     this.textContent = textContent;
     this.dataset = dataset;
     this.disabled = disabled;
     this.hidden = hidden;
     this.value = value;
+    this.tag = tag;
+    this.isText = isText;
+    this.isFragment = isFragment;
+    this.children = [];
     this.tabIndex = 0;
     this.attributes = new Map();
     this.listeners = new Map();
+  }
+
+  appendChild(child) {
+    this.children.push(child);
+    return child;
+  }
+
+  replaceChildren(...nodes) {
+    const flat = [];
+    for (const node of nodes) {
+      if (node && node.isFragment) flat.push(...node.children);
+      else flat.push(node);
+    }
+    this.children = flat;
   }
 
   addEventListener(type, listener) {
@@ -189,4 +208,109 @@ test("agent UI renders generated sections, switches tabs, supports keyboard tabs
 
   await dom.copyButton.dispatch("click");
   assert.equal(dom.clipboardText(), SAMPLE_SECTIONS.weeklyFixReport);
+});
+
+// --- AI-search visibility pass (audit page ledger) ---
+
+const AI_SEARCH_FIXTURE = JSON.parse(
+  readFileSync(new URL("../evidence-fixtures/ai-search/ledger.json", import.meta.url), "utf8")
+);
+
+function setupAuditDom() {
+  const rowsHost = new FakeElement({ tag: "div" });
+  const selectorMap = new Map([["[data-ai-search-rows]", rowsHost]]);
+
+  globalThis.document = {
+    readyState: "complete",
+    activeElement: null,
+    createElement(tag) {
+      return new FakeElement({ tag });
+    },
+    createTextNode(text) {
+      return new FakeElement({ textContent: text, isText: true });
+    },
+    createDocumentFragment() {
+      return new FakeElement({ tag: "fragment", isFragment: true });
+    },
+    querySelector(selector) {
+      return selectorMap.get(selector) || null;
+    },
+    querySelectorAll() {
+      return [];
+    }
+  };
+  globalThis.window = globalThis;
+
+  let fetchCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    throw new Error("audit.js must not fetch");
+  };
+
+  return { rowsHost, fetchCalls: () => fetchCalls };
+}
+
+async function loadAuditScript() {
+  const url = new URL("../public/audit.js", import.meta.url);
+  url.searchParams.set("testRun", crypto.randomUUID());
+  await import(url.href);
+}
+
+function auditTextOf(element) {
+  if (Array.isArray(element)) return element.map(auditTextOf).join("");
+  if (element.isText) return element.textContent;
+  if (element.children.length) return element.children.map(auditTextOf).join("");
+  return element.textContent || "";
+}
+
+function auditRowParts(row) {
+  const t = row.children[0];
+  const state = row.children[1].textContent;
+  const head = auditTextOf(t.children[0]);
+  const fixElement = t.children.find((child) => child.tag === "i");
+  return {
+    state,
+    head,
+    body: auditTextOf(t.children.slice(2)),
+    fix: fixElement ? auditTextOf(fixElement.children) : null
+  };
+}
+
+test("audit page ledger renders every captured question with a state label, evidence, and a fix only where supported", async () => {
+  const dom = setupAuditDom();
+  await loadAuditScript();
+
+  assert.equal(dom.rowsHost.children.length, AI_SEARCH_FIXTURE.questions.length);
+  assert.equal(dom.fetchCalls(), 0);
+
+  AI_SEARCH_FIXTURE.questions.forEach((question, index) => {
+    const row = auditRowParts(dom.rowsHost.children[index]);
+    assert.ok(row.head.includes(question.question), `row ${question.id} must show the named question`);
+    if (question.state === "not-tested") {
+      assert.equal(row.state, "not tested");
+      assert.ok(row.body.includes("Not run in this pass."), `row ${question.id} must say the question was not run`);
+      assert.equal(row.fix, null, `not-tested row ${question.id} must not carry a fix`);
+    } else {
+      assert.ok(row.body.includes(question.answer), `row ${question.id} must quote the captured answer`);
+      if (question.fix) {
+        assert.ok(row.fix.startsWith("Fix \u2014 "), `row ${question.id} fix must be labeled`);
+      } else {
+        assert.equal(row.fix, null, `row ${question.id} must not invent a fix`);
+      }
+    }
+  });
+
+  const expectedStates = AI_SEARCH_FIXTURE.questions.map((question) =>
+    question.state === "not-tested" ? "not tested" : question.state
+  );
+  const renderedStates = dom.rowsHost.children.map((row) => row.children[1].textContent);
+  assert.deepEqual(renderedStates, expectedStates);
+});
+
+test("audit page embedded ledger matches the captured-evidence fixture", async () => {
+  const dom = setupAuditDom();
+  await loadAuditScript();
+
+  assert.deepEqual(globalThis.AI_SEARCH_LEDGER, AI_SEARCH_FIXTURE);
+  assert.equal(dom.fetchCalls(), 0);
 });

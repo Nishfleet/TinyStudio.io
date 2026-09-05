@@ -219,6 +219,65 @@ for (const optionalName of [
 
 const siteHome = read("public/index.html");
 const siteAudit = read("public/audit.html");
+const auditScript = read("public/audit.js");
+const aiSearchLedger = JSON.parse(read("evidence-fixtures/ai-search/ledger.json"));
+const AI_SEARCH_STATES = ["found", "wrong", "absent", "not-tested"];
+
+// AI-search visibility pass: the audit page ledger is a frozen render of the
+// captured-evidence fixture. The page must not drift from the fixture, the
+// state vocabulary is bounded, and fixes exist only where the fixture says
+// the finding supports one.
+const ledgerEmbed = auditScript.match(/AI_SEARCH_LEDGER_RAW = `([\s\S]*?)`;/);
+if (!ledgerEmbed) {
+  failures.push("audit.js must embed the AI-search ledger as AI_SEARCH_LEDGER_RAW.");
+} else {
+  let embeddedLedger = null;
+  try {
+    embeddedLedger = JSON.parse(ledgerEmbed[1]);
+  } catch {
+    failures.push("audit.js AI_SEARCH_LEDGER_RAW must contain valid JSON.");
+  }
+  if (embeddedLedger && JSON.stringify(embeddedLedger) !== JSON.stringify(aiSearchLedger)) {
+    failures.push("audit.js embedded AI-search ledger must match evidence-fixtures/ai-search/ledger.json.");
+  }
+}
+
+const aiSearchSeenIds = new Set();
+for (const question of aiSearchLedger.questions) {
+  if (aiSearchSeenIds.has(question.id)) failures.push(`Duplicate AI-search question id: ${question.id}`);
+  aiSearchSeenIds.add(question.id);
+  if (!/^q\d+$/.test(question.id || "")) failures.push(`AI-search question id must be q<N>: ${question.id}`);
+  if (!question.name || !question.question) failures.push(`AI-search question ${question.id} needs a name and question text.`);
+  if (!AI_SEARCH_STATES.includes(question.state)) failures.push(`AI-search question ${question.id} has invalid state: ${question.state}`);
+  if (!Array.isArray(question.sources)) failures.push(`AI-search question ${question.id} needs a sources array.`);
+  if (question.state === "not-tested") {
+    if (question.answer !== "") failures.push(`Not-tested AI-search question ${question.id} must have an empty answer.`);
+    if (question.fix !== null) failures.push(`Not-tested AI-search question ${question.id} must not carry a fix.`);
+  } else {
+    if (!question.answer) failures.push(`Tested AI-search question ${question.id} must carry a captured answer.`);
+    if (!question.page) failures.push(`Tested AI-search question ${question.id} must carry a page-level observation.`);
+  }
+}
+if (aiSearchLedger.questions.length < 5) failures.push("AI-search pass needs a bounded set of named questions.");
+if (!aiSearchLedger.captured_on || !aiSearchLedger.tool) failures.push("AI-search ledger needs capture date and tool provenance.");
+
+for (const text of [
+  "id=\"ai-search\"",
+  "data-ai-search-rows",
+  "not a ranking",
+  "not a live check",
+  "not a guarantee",
+  "never guessed",
+  "answers captured not recalled",
+  "Duck.ai",
+  "tinystudio.io"
+]) {
+  if (!siteAudit.includes(text)) failures.push(`Missing AI-search pass copy or hook: ${text}`);
+}
+
+if (/fetch\s*\(/.test(auditScript)) {
+  failures.push("audit.js must not call fetch; the AI-search ledger is fixture-embedded.");
+}
 
 // Conversion-friction regression: the signup website field must accept a bare
 // business domain (example.com) at the browser level instead of requiring a
@@ -262,7 +321,7 @@ if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"o
 }
 
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = `${index}\n${script}\n${llms}\n${offer}\n${siteAudit}\n${auditScript}\n${JSON.stringify(aiSearchLedger)}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }
