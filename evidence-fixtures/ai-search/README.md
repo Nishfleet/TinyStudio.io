@@ -60,6 +60,21 @@ fixture, and the same invariant is asserted in `scripts/test-agent-ui.mjs`. The
 fixture never changes to match the site — the site is what gets edited to
 answer the questions the evidence asks.
 
+The machine-readable mirror pair — `public/llms.txt` and `public/offer.md` —
+carries the identity facts a machine reader needs to tell TinyStudio apart
+from the same-name businesses the wrong answers were built from: the
+disambiguation list, the operator, and the no-base-city statement. The checks
+fail if any mirrored identity or disambiguation fact drifts between the two
+files, or if the pair stops linking each other, and `llms.txt` must point at
+the audit page that embeds this evidence artifact. The pair also carries the
+current offer in the site's own words — the free leak audit, the
+human-reviewed desk that closes findings, and high-ticket service buyers —
+and points at pricing.html for price and terms instead of restating them: the
+checks fail if either file carries a dollar amount or refund language, or
+revives the retired Website Correction or founder-pilot framing. Same rule as
+above: the site files are what get edited; the fixture's captured runs never
+change to match them.
+
 ## Adding a run
 
 1. Add or reuse a question in `controlled-questions.json` (stable id, name,

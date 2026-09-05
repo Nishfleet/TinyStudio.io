@@ -509,14 +509,17 @@ const LLMS_TXT = readFileSync(new URL("../public/llms.txt", import.meta.url), "u
 const OFFER_MD = readFileSync(new URL("../public/offer.md", import.meta.url), "utf8");
 
 const OFFER_FACTS = [
-  "human-reviewed managed service",
-  "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "The Website Appraisal",
+  "free leak audit of high-ticket service homepages",
+  "human-reviewed desk",
+  "clinics, surgeons, dentists, spas",
+  "clients are never named",
   "not autonomous software",
+  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
   "Client-side code does not call model providers",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "https://tinystudio.io/pricing.html"
 ];
 
 test("homepage disambiguation block answers every controlled question", () => {
@@ -550,18 +553,66 @@ test("every owned identity surface states the human-reviewed outcome", () => {
   }
 });
 
-test("offer facts are mirrored by llms.txt and offer.md", () => {
-  // Case-insensitive, matching the check-site guard: one file may head a fact
-  // while the other embeds it mid-sentence.
-  for (const fact of OFFER_FACTS) {
+const IDENTITY_MIRROR_FACTS = [
+  "Mac subtitle app",
+  "fibre-arts magazine",
+  "design agency",
+  "video production studio",
+  "Los Angeles venue",
+  "unrelated studio LLC",
+  "states no base city or office address",
+  "run by Nish"
+];
+
+test("identity disambiguation facts are mirrored by llms.txt and offer.md", () => {
+  // The engines' wrong answers (evidence.json) were built from exactly these
+  // same-name businesses, so the disambiguation list must live in both files
+  // of the machine-readable pair, and the pair must link each other.
+  for (const fact of IDENTITY_MIRROR_FACTS) {
     assert.ok(LLMS_TXT.toLowerCase().includes(fact.toLowerCase()), `llms.txt must state: ${fact}`);
     assert.ok(OFFER_MD.toLowerCase().includes(fact.toLowerCase()), `offer.md must state: ${fact}`);
   }
+  assert.match(LLMS_TXT, /^## Identity$/m, "llms.txt must carry the machine-readable Identity section");
+  assert.ok(LLMS_TXT.includes("https://tinystudio.io/offer.md"), "llms.txt must link offer.md as its mirror");
+  assert.ok(OFFER_MD.includes("https://tinystudio.io/llms.txt"), "offer.md must link llms.txt as its mirror");
+  assert.ok(LLMS_TXT.includes("https://tinystudio.io/audit.html"), "llms.txt must point at the audit page's evidence artifact");
 });
 
-test("every cited source URL is a valid absolute http(s) URL", () => {
+test("offer facts are mirrored by llms.txt and offer.md", () => {
+  // Whitespace- and case-insensitive, matching the check-site guard: one file
+  // may head a fact while the other embeds it mid-sentence, and llms.txt
+  // wraps its prose across lines.
+  const normalized = (text) => text.toLowerCase().replace(/\s+/g, " ");
+  for (const fact of OFFER_FACTS) {
+    assert.ok(normalized(LLMS_TXT).includes(normalized(fact)), `llms.txt must state: ${fact}`);
+    assert.ok(normalized(OFFER_MD).includes(normalized(fact)), `offer.md must state: ${fact}`);
+  }
+});
+
+test("llms.txt and offer.md point at pricing.html and never restate price or refund terms", () => {
+  // The pricing page owns price, refund and guarantee terms; the machine-
+  // readable pair points at it instead of restating dollar amounts, refund
+  // language, or the retired Website Correction / founder-pilot framing.
+  for (const [name, text] of [
+    ["llms.txt", LLMS_TXT],
+    ["offer.md", OFFER_MD]
+  ]) {
+    assert.ok(text.includes("https://tinystudio.io/pricing.html"), `${name} must point at pricing.html`);
+    assert.doesNotMatch(text, /\$\s?\d/, `${name} must not restate a dollar amount`);
+    assert.doesNotMatch(text, /\brefund\w*\b/i, `${name} must not restate refund terms`);
+    assert.doesNotMatch(text, /Website Correction/i, `${name} must not revive the retired offer framing`);
+    assert.doesNotMatch(text, /founder[- ]?pilot/i, `${name} must not revive the founder-pilot pricing`);
+    assert.doesNotMatch(text, /Managed IT, MSP/i, `${name} must not revive the MSP-only buyer framing`);
+  }
+});
+
+test("every cited source has a title and a valid absolute http(s) URL, unique within its run", () => {
   for (const run of AI_EVIDENCE.runs) {
+    const citedUrls = new Set();
     for (const source of run.sources || []) {
+      assert.ok(source.title && String(source.title).trim(), `source title for ${run.questionId}/${run.engine}`);
+      assert.ok(!citedUrls.has(source.url), `source URL unique within run (${run.questionId}/${run.engine}): ${source.url}`);
+      citedUrls.add(source.url);
       assert.doesNotMatch(source.url, /\s/, `source URL must not contain whitespace (${run.questionId}/${run.engine})`);
       let parsed;
       assert.doesNotThrow(() => {

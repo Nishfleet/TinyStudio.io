@@ -123,14 +123,17 @@ const requiredWorkerCopy = [
 ];
 
 const requiredPublicArtifacts = [
-  "human-reviewed managed service",
-  "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
-  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "The Website Appraisal",
+  "free leak audit of high-ticket service homepages",
+  "human-reviewed desk",
+  "clinics, surgeons, dentists, spas",
+  "clients are never named",
   "not autonomous software",
+  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
   "Client-side code does not call model providers",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "https://tinystudio.io/pricing.html"
 ];
 
 const forbiddenClaims = [
@@ -172,9 +175,12 @@ for (const text of requiredWorkerCopy) {
 for (const text of requiredPublicArtifacts) {
   // llms.txt and offer.md are mirrors of the same offer contract. A fact must
   // appear in BOTH (case-insensitively, since one file may head it while the
-  // other embeds it mid-sentence), so neither file can silently drift.
-  if (!llms.toLowerCase().includes(text.toLowerCase())) failures.push(`Missing offer fact in llms.txt: ${text}`);
-  if (!offer.toLowerCase().includes(text.toLowerCase())) failures.push(`Missing offer fact in offer.md: ${text}`);
+  // other embeds it mid-sentence, and llms.txt wraps prose across lines), so
+  // neither file can silently drift.
+  const normalized = (content) => content.toLowerCase().replace(/\s+/g, " ");
+  const needle = normalized(text);
+  if (!normalized(llms).includes(needle)) failures.push(`Missing offer fact in llms.txt: ${text}`);
+  if (!normalized(offer).includes(needle)) failures.push(`Missing offer fact in offer.md: ${text}`);
 }
 
 function formFieldTags(html) {
@@ -505,9 +511,15 @@ if (aiQuestions && aiEvidence) {
   }
 
   // Source-host validation: every source is a page the engine actually cited,
-  // so its URL must be a well-formed absolute http(s) URL with a real host.
+  // so its URL must be a well-formed absolute http(s) URL with a real host, it
+  // must carry a title a machine reader can cite, and a run must not cite the
+  // same page twice.
   for (const run of runs) {
+    const citedUrls = new Set();
     for (const source of run.sources || []) {
+      if (typeof source.title !== "string" || !source.title.trim()) {
+        failures.push(`AI-search source must carry a title: ${run.questionId}/${run.engine} ${JSON.stringify(source.url)}`);
+      }
       let parsedUrl = null;
       try {
         parsedUrl = new URL(source.url);
@@ -517,6 +529,10 @@ if (aiQuestions && aiEvidence) {
       if (!parsedUrl || !/^https?:$/.test(parsedUrl.protocol) || !parsedUrl.hostname || !parsedUrl.hostname.includes(".") || /\s/.test(source.url)) {
         failures.push(`AI-search source URL must be a valid absolute http(s) URL: ${run.questionId}/${run.engine} ${JSON.stringify(source.url)}`);
       }
+      if (citedUrls.has(source.url)) {
+        failures.push(`AI-search source URLs must be unique within a run: ${run.questionId}/${run.engine} ${JSON.stringify(source.url)}`);
+      }
+      citedUrls.add(source.url);
     }
   }
 
@@ -616,9 +632,9 @@ if (aiQuestions && aiEvidence) {
 // One precise identity must run through every owned public surface: TinyStudio
 // is the business behind tinystudio.io — the free leak audit of high-ticket
 // service homepages plus the human-reviewed desk that closes what it finds. The
-// clarification must be present on the homepage, the audit page, and in
-// offer.md, and the ambiguous or retired framings ("The Tiny Studio", the
-// spaced name form, and the self-serve Agent Desk product names) must not
+// clarification must be present on the homepage, the audit page, in llms.txt
+// and in offer.md, and the ambiguous or retired framings ("The Tiny Studio",
+// the spaced name form, and the self-serve Agent Desk product names) must not
 // reappear in visible copy. The embedded AI-search evidence bundle is a
 // verbatim record of captured engine answers that legitimately quotes other
 // businesses' names, so script blocks are stripped before the stale-string
@@ -639,10 +655,82 @@ const identityFacts = [
   "states no base city or office address"
 ];
 
+// llms.txt is the machine-readable surface; offer.md is its mirror. A fact a
+// machine reader needs to tell TinyStudio apart must appear in BOTH files, so
+// neither file can silently drift while the other keeps answering.
 for (const phrase of identityFacts) {
   if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
   if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
+  if (!llms.includes(phrase)) failures.push(`llms.txt must state the TinyStudio identity: ${phrase}`);
   if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
+}
+
+// The same-name disambiguation list is the load-bearing part of the identity:
+// the engines' wrong answers (evidence-fixtures/ai-search/evidence.json) were
+// built from exactly these other businesses. The list must be mirrored between
+// llms.txt and offer.md, and the machine-readable pair must link each other.
+const identityDisambiguation = [
+  "Mac subtitle app",
+  "fibre-arts magazine",
+  "design agency",
+  "video production studio",
+  "Los Angeles venue",
+  "unrelated studio LLC",
+  "states no base city or office address",
+  "run by Nish"
+];
+
+for (const phrase of identityDisambiguation) {
+  if (!llms.toLowerCase().includes(phrase.toLowerCase())) {
+    failures.push(`llms.txt must mirror the disambiguation fact: ${phrase}`);
+  }
+  if (!offer.toLowerCase().includes(phrase.toLowerCase())) {
+    failures.push(`offer.md must mirror the disambiguation fact: ${phrase}`);
+  }
+}
+
+if (!/^## Identity$/m.test(llms)) {
+  failures.push("llms.txt must carry the machine-readable Identity section.");
+}
+if (!llms.includes("https://tinystudio.io/offer.md")) {
+  failures.push("llms.txt must link its machine-readable mirror: offer.md.");
+}
+if (!offer.includes("https://tinystudio.io/llms.txt")) {
+  failures.push("offer.md must link its machine-readable mirror: llms.txt.");
+}
+if (!llms.includes("https://tinystudio.io/audit.html")) {
+  failures.push("llms.txt must point at the audit page that carries the AI-search evidence artifact.");
+}
+
+// The machine-readable pair states the current offer in the site's own words
+// and points at pricing.html for price and terms. It must not restate the
+// pricing page's specifics (dollar amounts, refund language) or revive the
+// retired Website Correction / founder-pilot / MSP-buyer framing.
+const staleOfferPhrases = [
+  "Website Correction",
+  "founder pilot",
+  "founder-pilot",
+  "Managed IT, MSP"
+];
+for (const phrase of staleOfferPhrases) {
+  if (llms.toLowerCase().includes(phrase.toLowerCase())) {
+    failures.push(`llms.txt must not revive the retired offer framing: ${phrase}`);
+  }
+  if (offer.toLowerCase().includes(phrase.toLowerCase())) {
+    failures.push(`offer.md must not revive the retired offer framing: ${phrase}`);
+  }
+}
+if (/\$\s?\d/.test(llms)) {
+  failures.push("llms.txt must not restate a dollar amount; pricing.html owns the price.");
+}
+if (/\$\s?\d/.test(offer)) {
+  failures.push("offer.md must not restate a dollar amount; pricing.html owns the price.");
+}
+if (/\brefund\w*\b/i.test(llms)) {
+  failures.push("llms.txt must not restate refund terms; pricing.html owns them.");
+}
+if (/\brefund\w*\b/i.test(offer)) {
+  failures.push("offer.md must not restate refund terms; pricing.html owns them.");
 }
 
 if (!siteHome.includes('id="identity"')) {

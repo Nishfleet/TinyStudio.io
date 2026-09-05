@@ -1,38 +1,28 @@
-# The Website Correction
+# The Website Appraisal
 
-TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
+TinyStudio's current offer: The Website Appraisal — the free leak audit of high-ticket service homepages — and the human-reviewed desk that closes what the audit finds. The audit is free and yours to keep; the desk's price and terms are on pricing.html.
 
 ## Identity
 
 TinyStudio is the business behind tinystudio.io: the free leak audit of high-ticket service homepages and the human-reviewed desk that closes what the audit finds, run by Nish, who signs every audit. Other businesses share the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a video production studio, a Los Angeles venue, an unrelated studio LLC. None of them are this TinyStudio. The site states no base city or office address. Contact: hello@tinystudio.io.
 
+Machine-readable mirror: https://tinystudio.io/llms.txt
+
+## Current Offer
+
+The Website Appraisal is the free leak audit of high-ticket service homepages, reviewed by a person, not autonomous software. The human-reviewed desk closes what the audit finds: month one corrects the costliest fault; months two and three build the loop that keeps the standard up.
+
+The appraisal is a written report on one page of your choosing — each fault named, in order of what it costs you, with the fix beside each. It is yours to keep and to hand to any developer, including one who is not us.
+
+Six appraisals a month, done by hand. When the sixth is taken, the intake closes until the next.
+
 ## Buyer
 
-Founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
+High-ticket service businesses — clinics, surgeons, dentists, spas, dealers, brokers — and clients are never named.
 
-## Promise
+## Price And Terms
 
-In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
-
-## Included
-
-- fault map for the selected page
-- rewrite or redesign of that page
-- one implementation pass or a dev-ready handoff
-- search-trust basics
-- before/after proof
-- Loom walkthrough
-- measurement plan
-- one revision
-- 14-day implementation tracking
-
-## Day 0
-
-The clock starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
-
-## Price
-
-The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
+https://tinystudio.io/pricing.html
 
 ## Review Boundary
 
