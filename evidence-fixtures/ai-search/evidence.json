@@ -109,7 +109,7 @@
         { "title": "tinystudio.io - TinyStudio Agent Desk", "url": "https://tinystudio.io/" }
       ],
       "remediation": {
-        "text": "The answer named tinystudio.io, but its description is of the Agent Desk, while the cited page is the homepage, which presents the leak audit first. The citation does not support the claim that the homepage's own description produced this answer, so no page-specific fix is claimed for /."
+        "text": "The answer named tinystudio.io, but its description is of the legacy product this site no longer sells, while the cited page is the homepage, which presents the leak audit first. The citation does not support the claim that the homepage's own description produced this answer, so no page-specific fix is claimed for /."
       }
     },
     {
@@ -131,7 +131,6 @@
       "state": "absent",
       "testedAt": "2026-08-06",
       "captured": "No AI-generated answer was produced. The result page returned organic links only; tinystudio.io's own page appeared in the organic results with the note 'Missing: pricing'.",
-      "sources": [],
       "remediation": {
         "text": "There was no AI answer to correct, and no tinystudio.io page was read to produce one, so no page-specific fix is claimed."
       }

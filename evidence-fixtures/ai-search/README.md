@@ -21,8 +21,14 @@ fails if the embedded copy drifts from these files.
 |---|---|---|
 | `found` | An AI answer existed, named the tested business, and its facts checked out against the site. | `captured` verbatim answer, `sources` the engine cited |
 | `wrong` | An AI answer existed but described a different business, or contradicted the site. | `captured` verbatim answer, `sources` the engine cited |
-| `absent` | We ran the question and no AI answer came back at all. | `captured` observation of what came back instead, no `sources` expected |
+| `absent` | We ran the question and no AI answer came back at all. | `captured` observation of what came back instead — never `sources` |
 | `not-tested` | We did not run the question. | `reason` — never `captured` or `sources` |
+
+Every run, in every state, also carries `testedAt` in `YYYY-MM-DD` form. The
+state-to-fields rules are enforced as hard checks: `absent` never carries a
+`sources` key at all (not even an empty list), `not-tested` never carries
+`captured` or `sources`, and `found`/`wrong` always carry both a verbatim
+`captured` answer and at least one cited `source`.
 
 `absent` and `not-tested` are deliberately impossible to confuse: `absent`
 records what we observed after running the question; `not-tested` records why
@@ -48,6 +54,15 @@ tests in `scripts/test-agent-ui.mjs` enforce the difference.
    and it changes when the evidence changes.
 6. Nothing here captures customer briefs, emails, phones, or credentials —
    the controlled-test business is first-party and non-client.
+7. Every cited `source.url` must be a well-formed `http(s)` URL with a real
+   hostname, and `business.site` is locked to `https://tinystudio.io/`. The
+   checks reject anything the renderer could not safely link.
+8. Narrative fields — `purpose`, question `name`/`prompt`/`truth`,
+   `remediation.text`, `reason`, engine `note`, business `note` — never name
+   the retired self-serve offer ("Agent Desk", "Pipeline Brief", "self-serve")
+   or the spaced name forms of other businesses ("Tiny Studio",
+   "The Tiny Studio"). `captured` answers and cited source titles are verbatim
+   records of what the engines said, and are exempt from that rule.
 
 ## Adding a run
 

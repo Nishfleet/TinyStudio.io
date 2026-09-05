@@ -221,6 +221,7 @@ for (const optionalName of [
 
 const siteHome = read("public/index.html");
 const siteAudit = read("public/audit.html");
+const siteDesk = read("public/agents.html");
 
 // Conversion-friction regression: the signup website field must accept a bare
 // business domain (example.com) at the browser level instead of requiring a
@@ -464,12 +465,28 @@ if (aiQuestions && aiEvidence) {
     if (!engine.id || !engine.name) failures.push("AI-search engine entries must carry id and name.");
   }
 
+  // Source-host validation: the tested business's site is locked to the
+  // canonical origin, and every cited source must be a URL the renderer can
+  // actually link — a well-formed http(s) URL with a real hostname.
+  let siteUrl = null;
+  try {
+    siteUrl = new URL(aiEvidence.business.site);
+  } catch {
+    siteUrl = null;
+  }
+  if (!siteUrl || siteUrl.protocol !== "https:" || siteUrl.hostname !== "tinystudio.io" || siteUrl.pathname !== "/") {
+    failures.push("AI-search business site must be locked to https://tinystudio.io/.");
+  }
+
   const runs = aiEvidence.runs || [];
   if (!runs.length) failures.push("AI-search fixture must carry at least one captured run.");
   for (const run of runs) {
     if (!AI_STATES.includes(run.state)) failures.push(`AI-search run has an unknown state: ${run.state}`);
     if (!questionIds.has(run.questionId)) failures.push(`AI-search run references an unknown question: ${run.questionId}`);
     if (!engines.has(run.engine)) failures.push(`AI-search run references an unknown engine: ${run.engine}`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(run.testedAt || "")) {
+      failures.push(`AI-search run must carry a testedAt date (YYYY-MM-DD): ${run.questionId}/${run.engine}`);
+    }
     if (run.state === "not-tested") {
       if (!run.reason) failures.push(`not-tested run must state a reason: ${run.questionId}/${run.engine}`);
       if (run.captured || (run.sources || []).length) {
@@ -479,6 +496,22 @@ if (aiQuestions && aiEvidence) {
       if (!run.captured) failures.push(`run must capture what was observed: ${run.questionId}/${run.engine}`);
       if (run.state !== "absent" && !(run.sources || []).length) {
         failures.push(`run must cite its sources: ${run.questionId}/${run.engine}`);
+      }
+      // absent records what came back instead of an answer; it never cites
+      // sources, so the state stays mechanically distinct from the others.
+      if (run.state === "absent" && run.sources !== undefined) {
+        failures.push(`absent run must not carry a sources key: ${run.questionId}/${run.engine}`);
+      }
+    }
+    for (const source of run.sources || []) {
+      let sourceUrl = null;
+      try {
+        sourceUrl = new URL(source.url);
+      } catch {
+        sourceUrl = null;
+      }
+      if (!sourceUrl || !/^https?:$/.test(sourceUrl.protocol) || !sourceUrl.hostname || sourceUrl.hostname.indexOf(".") === -1) {
+        failures.push(`AI-search source must be a valid http(s) URL with a hostname: ${run.questionId}/${run.engine}`);
       }
     }
     if (run.remediation && run.remediation.page) {
@@ -526,7 +559,8 @@ if (aiQuestions && aiEvidence) {
   }
 
   const narrativeFields = [];
-  questions.forEach((question) => narrativeFields.push(question.truth));
+  narrativeFields.push(aiQuestions.purpose || "");
+  questions.forEach((question) => narrativeFields.push(question.name, question.prompt, question.truth));
   runs.forEach((run) => {
     if (run.remediation) narrativeFields.push(run.remediation.text);
     if (run.reason) narrativeFields.push(run.reason);
@@ -541,6 +575,17 @@ if (aiQuestions && aiEvidence) {
     /\brank\s*(#\s*\d|number\s+one|first)\b/i
   ]) {
     if (pattern.test(narrativeText)) failures.push(`Forbidden claim in AI-search fixture narrative: ${pattern}`);
+  }
+
+  // The fixture's own narrative must never re-introduce the retired offer or
+  // the spaced name forms of other businesses. Captured answers and cited
+  // source titles are verbatim records of what engines said, so only the
+  // narrative fields above are scanned.
+  const staleFixtureStrings = ["The Tiny Studio", "Tiny Studio", "self-serve", "Pipeline Brief", "Agent Desk"];
+  for (const stale of staleFixtureStrings) {
+    if (narrativeText.toLowerCase().includes(stale.toLowerCase())) {
+      failures.push(`Stale identity string in AI-search fixture narrative: ${stale}`);
+    }
   }
 }
 
@@ -557,7 +602,7 @@ if (aiQuestions && aiEvidence) {
 const ownedPages = [
   ["homepage", siteHome],
   ["audit page", siteAudit],
-  ["desk page", read("public/agents.html")],
+  ["desk page", siteDesk],
   ["specimen page", read("public/specimen.html")]
 ];
 
@@ -571,7 +616,9 @@ const identityFacts = [
 for (const phrase of identityFacts) {
   if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
   if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
+  if (!siteDesk.includes(phrase)) failures.push(`Desk page must state the TinyStudio identity: ${phrase}`);
   if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
+  if (!llms.includes(phrase)) failures.push(`llms.txt must state the TinyStudio identity: ${phrase}`);
 }
 
 if (!siteHome.includes('id="identity"')) {
@@ -583,8 +630,32 @@ if (!siteAudit.includes('id="identity"')) {
 if (!offer.includes("## Identity")) {
   failures.push("offer.md must carry the machine-readable Identity section.");
 }
+if (!llms.includes("## Identity")) {
+  failures.push("llms.txt must carry the machine-readable Identity section.");
+}
 if (!offer.includes("is not the current offer")) {
   failures.push("offer.md must keep the legacy Agent Desk demotion statement.");
+}
+
+// ---- Offer facts -------------------------------------------------------
+// The human-reviewed finished outcome must be stated consistently wherever
+// owned: the offer name, the human-review boundary, and the explicit
+// no-guarantee line. Prices and terms are not invented or rewritten here;
+// this only locks that the same offer is identifiable on every surface.
+const offerFactsByPage = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", siteDesk]
+];
+for (const [pageName, pageHtml] of offerFactsByPage) {
+  for (const phrase of ["The Website Correction", "human-reviewed", "No revenue, ranking or booking guarantees"]) {
+    if (!pageHtml.includes(phrase)) {
+      failures.push(`Offer fact on ${pageName} must state: ${phrase}`);
+    }
+  }
+}
+if (!llms.includes("is not the product TinyStudio sells")) {
+  failures.push("llms.txt must keep the legacy Agent Desk demotion statement.");
 }
 
 const staleIdentityStrings = [

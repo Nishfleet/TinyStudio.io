@@ -6,7 +6,7 @@
       "id": "q1-what-tinystudio-does",
       "name": "What TinyStudio does",
       "prompt": "What does TinyStudio do?",
-      "truth": "TinyStudio runs a free leak audit of high-ticket service homepages and a desk that closes the leaks the audit finds (audit.html, pricing.html)."
+      "truth": "TinyStudio runs a free leak audit of high-ticket service homepages and a desk — the human-reviewed managed service The Website Correction — that closes the leaks the audit finds (audit.html, pricing.html)."
     },
     {
       "id": "q2-what-tinystudio-charges",
@@ -30,7 +30,7 @@
       "id": "q5-what-is-tinystudio-io",
       "name": "Whether tinystudio.io is named",
       "prompt": "What is tinystudio.io?",
-      "truth": "tinystudio.io is TinyStudio's own site: the leak audit, plus the Agent Desk behind it."
+      "truth": "tinystudio.io is TinyStudio's own site: the free leak audit of high-ticket service homepages and the desk that closes what the audit finds — The Website Correction, a human-reviewed managed service."
     },
     {
       "id": "q6-client-work",

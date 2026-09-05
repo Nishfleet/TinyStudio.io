@@ -233,6 +233,7 @@ test("AI-search fixture runs carry the right structure for their states", () => 
   for (const run of AI_EVIDENCE.runs) {
     assert.ok(questionIds.has(run.questionId), `known question for ${run.questionId}/${run.engine}`);
     assert.ok(engineIds.has(run.engine), `known engine for ${run.questionId}/${run.engine}`);
+    assert.match(run.testedAt, /^\d{4}-\d{2}-\d{2}$/, `testedAt date for ${run.questionId}/${run.engine}`);
     if (run.state === "not-tested") {
       assert.ok(run.reason, `not-tested reason for ${run.questionId}/${run.engine}`);
       assert.equal(run.captured, undefined, `not-tested must not capture an answer for ${run.questionId}/${run.engine}`);
@@ -241,12 +242,73 @@ test("AI-search fixture runs carry the right structure for their states", () => 
       assert.ok(run.captured, `captured observation for ${run.questionId}/${run.engine}`);
       if (run.state !== "absent") {
         assert.ok(run.sources.length, `cited sources for ${run.questionId}/${run.engine}`);
+      } else {
+        assert.equal(run.sources, undefined, `absent must never carry a sources key for ${run.questionId}/${run.engine}`);
       }
     }
   }
 
   for (const question of AI_QUESTIONS.questions) {
     assert.ok(question.id && question.name && question.prompt && question.truth, `named question ${question.id}`);
+  }
+});
+
+test("AI-search fixture sources are valid http(s) URLs and the business site is canonical", () => {
+  for (const run of AI_EVIDENCE.runs) {
+    for (const source of run.sources || []) {
+      assert.match(source.url, /^https?:\/\//, `http(s) source for ${run.questionId}/${run.engine}`);
+      assert.ok(!/\s/.test(source.url), `no whitespace in source URL for ${run.questionId}/${run.engine}`);
+      let parsed = null;
+      assert.doesNotThrow(() => {
+        parsed = new URL(source.url);
+      }, `parseable source URL for ${run.questionId}/${run.engine}`);
+      assert.ok(parsed.hostname.includes("."), `hostname for ${run.questionId}/${run.engine}`);
+    }
+  }
+  const site = new URL(AI_EVIDENCE.business.site);
+  assert.equal(site.protocol, "https:");
+  assert.equal(site.hostname, "tinystudio.io");
+  assert.equal(site.pathname, "/");
+});
+
+test("AI-search fixture narrative never names the retired offer or other businesses' spaced name forms", () => {
+  const narratives = [AI_QUESTIONS.purpose];
+  for (const question of AI_QUESTIONS.questions) {
+    narratives.push(question.name, question.prompt, question.truth);
+  }
+  for (const run of AI_EVIDENCE.runs) {
+    if (run.remediation) narratives.push(run.remediation.text);
+    if (run.reason) narratives.push(run.reason);
+  }
+  for (const engine of AI_EVIDENCE.engines) narratives.push(engine.note);
+  narratives.push(AI_EVIDENCE.business.note);
+  const text = narratives.filter(Boolean).join("\n");
+  for (const stale of ["The Tiny Studio", "Tiny Studio", "self-serve", "Pipeline Brief", "Agent Desk"]) {
+    assert.ok(!text.toLowerCase().includes(stale.toLowerCase()), `fixture narrative must not name: ${stale}`);
+  }
+});
+
+test("Owned pages and machine files state the identity and the human-reviewed offer consistently", () => {
+  const pages = {
+    homepage: readFileSync(new URL("../public/index.html", import.meta.url), "utf8"),
+    "audit page": readFileSync(new URL("../public/audit.html", import.meta.url), "utf8"),
+    "desk page": readFileSync(new URL("../public/agents.html", import.meta.url), "utf8")
+  };
+  for (const [name, html] of Object.entries(pages)) {
+    assert.ok(html.includes("The Website Correction"), `${name} names the offer`);
+    assert.ok(html.includes("human-reviewed"), `${name} states the human review boundary`);
+    assert.ok(html.includes("No revenue, ranking or booking guarantees"), `${name} states what is not claimed`);
+    assert.ok(html.includes("tinystudio.io"), `${name} anchors identity to the domain`);
+  }
+  const llms = readFileSync(new URL("../public/llms.txt", import.meta.url), "utf8");
+  const offer = readFileSync(new URL("../public/offer.md", import.meta.url), "utf8");
+  for (const [file, content] of [["llms.txt", llms], ["offer.md", offer]]) {
+    assert.ok(content.includes("The Website Correction"), `${file} names the offer`);
+    assert.ok(content.includes("human-review"), `${file} states the human review boundary`);
+    assert.ok(content.includes("Mac subtitle app"), `${file} disambiguates identity`);
+    assert.ok(content.includes("fibre-arts magazine"), `${file} disambiguates identity`);
+    assert.ok(content.includes("states no base city or office address"), `${file} states the no-address fact`);
+    assert.ok(content.includes("is not the"), `${file} keeps the legacy demotion framing`);
   }
 });
 
