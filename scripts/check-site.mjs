@@ -466,10 +466,58 @@ if (aiQuestions && aiEvidence) {
 
   const runs = aiEvidence.runs || [];
   if (!runs.length) failures.push("AI-search fixture must carry at least one captured run.");
+  if (typeof aiEvidence.testedOn !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(aiEvidence.testedOn)) {
+    failures.push("AI-search fixture must carry a YYYY-MM-DD testedOn date.");
+  }
+
+  // Source-host validation: the business site must be a real URL, every cited
+  // source must be a real http(s) URL, and same-domain comparisons are exact
+  // hostname matches against it.
+  let siteHost = "";
+  try {
+    siteHost = new URL(aiEvidence.business?.site || "").hostname;
+  } catch {
+    failures.push("AI-search business site must be a valid URL.");
+  }
+  const sameDomainSource = (sources) => (sources || []).some((source) => {
+    try {
+      return new URL(source.url).hostname === siteHost;
+    } catch {
+      return false;
+    }
+  });
+
+  // Strict state transitions: every run belongs to the fixture's single
+  // capture date, exactly one run exists per question/engine pair, and a
+  // verdict cannot be relabelled in place — a changed state needs a new
+  // capture, which moves the fixture's date. A "found" verdict additionally
+  // requires the business's own site among the cited sources, so an answer
+  // built on other businesses' pages can never be recorded as found.
+  const seenCaptures = new Set();
   for (const run of runs) {
     if (!AI_STATES.includes(run.state)) failures.push(`AI-search run has an unknown state: ${run.state}`);
     if (!questionIds.has(run.questionId)) failures.push(`AI-search run references an unknown question: ${run.questionId}`);
     if (!engines.has(run.engine)) failures.push(`AI-search run references an unknown engine: ${run.engine}`);
+    if (typeof run.testedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(run.testedAt)) {
+      failures.push(`run must carry a YYYY-MM-DD testedAt: ${run.questionId}/${run.engine}`);
+    } else if (run.testedAt !== aiEvidence.testedOn) {
+      failures.push(`run testedAt must equal the fixture testedOn date: ${run.questionId}/${run.engine} (${run.testedAt} vs ${aiEvidence.testedOn})`);
+    }
+    const captureKey = `${run.questionId}\u0000${run.engine}\u0000${run.testedAt}`;
+    if (seenCaptures.has(captureKey)) {
+      failures.push(`duplicate capture for one question/engine/date (verdicts must not be relabelled in place): ${run.questionId}/${run.engine} on ${run.testedAt}`);
+    }
+    seenCaptures.add(captureKey);
+    for (const source of run.sources || []) {
+      let sourceOk = false;
+      try {
+        const parsed = new URL(source.url);
+        sourceOk = /^https?:$/.test(parsed.protocol) && parsed.hostname.includes(".");
+      } catch {
+        sourceOk = false;
+      }
+      if (!sourceOk) failures.push(`source must be a valid http(s) URL: ${run.questionId}/${run.engine}`);
+    }
     if (run.state === "not-tested") {
       if (!run.reason) failures.push(`not-tested run must state a reason: ${run.questionId}/${run.engine}`);
       if (run.captured || (run.sources || []).length) {
@@ -481,21 +529,11 @@ if (aiQuestions && aiEvidence) {
         failures.push(`run must cite its sources: ${run.questionId}/${run.engine}`);
       }
     }
+    if (run.state === "found" && siteHost && !sameDomainSource(run.sources)) {
+      failures.push(`found verdict needs the business's own site among its sources: ${run.questionId}/${run.engine}`);
+    }
     if (run.remediation && run.remediation.page) {
-      let siteHost = "";
-      try {
-        siteHost = new URL(aiEvidence.business.site).hostname;
-      } catch {
-        failures.push("AI-search business site must be a valid URL.");
-      }
-      const sameDomain = (run.sources || []).some((source) => {
-        try {
-          return new URL(source.url).hostname === siteHost;
-        } catch {
-          return false;
-        }
-      });
-      if (siteHost && !sameDomain) {
+      if (siteHost && !sameDomainSource(run.sources)) {
         failures.push(`page-specific remediation needs same-domain evidence: ${run.questionId}/${run.engine}`);
       }
     }
@@ -572,6 +610,49 @@ for (const phrase of identityFacts) {
   if (!siteHome.includes(phrase)) failures.push(`Homepage must state the TinyStudio identity: ${phrase}`);
   if (!siteAudit.includes(phrase)) failures.push(`Audit page must state the TinyStudio identity: ${phrase}`);
   if (!offer.includes(phrase)) failures.push(`offer.md must state the TinyStudio identity: ${phrase}`);
+  if (!llms.includes(phrase)) failures.push(`llms.txt must state the TinyStudio identity: ${phrase}`);
+}
+
+// ---- TinyStudio machine-readable identity block ---------------------------
+// Candidate-1 direction: the machine-readable identity block leads — an
+// Organization JSON-LD block on the homepage and an Identity section at the
+// top of llms.txt — and the same facts are repeated in the visible site
+// introduction (the homepage <header>). The offer name stated there must be
+// the machine files' name, so no contradictory contract can form between
+// llms.txt/offer.md and the visible pages.
+const homeHead = siteHome.match(/<head>[\s\S]*?<\/head>/i)?.[0] || "";
+const ldBlocks = [...homeHead.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)];
+if (!ldBlocks.length) {
+  failures.push("Homepage must lead with a machine-readable identity block (application/ld+json in <head>).");
+} else {
+  let ldJson = null;
+  try {
+    ldJson = JSON.parse(ldBlocks[0][1]);
+  } catch (error) {
+    failures.push(`Homepage identity JSON-LD must be valid JSON: ${error.message}`);
+  }
+  if (ldJson) {
+    if (ldJson["@type"] !== "Organization") failures.push("Homepage identity JSON-LD must be an Organization.");
+    if (ldJson.name !== "TinyStudio") failures.push("Homepage identity JSON-LD must name TinyStudio (not the spaced form or another business).");
+    if (ldJson.url !== "https://tinystudio.io/") failures.push("Homepage identity JSON-LD must anchor to https://tinystudio.io/.");
+    const ldText = JSON.stringify(ldJson);
+    for (const needle of ["human-reviewed", "The Website Correction", "Mac subtitle app", "fibre-arts magazine", "states no base city or office address"]) {
+      if (!ldText.includes(needle)) failures.push(`Homepage identity JSON-LD must state: ${needle}`);
+    }
+  }
+}
+
+if (!llms.includes("## Identity")) {
+  failures.push("llms.txt must lead with the machine-readable Identity section.");
+}
+
+const homeIntro = siteHome.match(/<header>[\s\S]*?<\/header>/i)?.[0] || "";
+if (!homeIntro) {
+  failures.push("Homepage must carry a <header> introduction.");
+} else {
+  for (const needle of [...identityFacts, "human-reviewed", "The Website Correction"]) {
+    if (!homeIntro.includes(needle)) failures.push(`Homepage introduction must state: ${needle}`);
+  }
 }
 
 if (!siteHome.includes('id="identity"')) {

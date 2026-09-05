@@ -29,6 +29,30 @@ records what we observed after running the question; `not-tested` records why
 we did not run it. The checks in `scripts/check-site.mjs` and the renderer
 tests in `scripts/test-agent-ui.mjs` enforce the difference.
 
+## Strict state transitions
+
+A run belongs to the fixture's single capture date: every `testedAt` must
+equal the fixture's `testedOn`, and there is exactly one run per
+question-and-engine pair. A verdict cannot be relabelled in place — changing
+a run's state means recording a new capture, which moves the fixture's date.
+A `found` verdict additionally requires the business's own site among the
+run's cited sources: an answer that never read tinystudio.io cannot be
+recorded as found. Every cited `source.url` must be a real http(s) URL so
+host comparisons stay meaningful. These rules are enforced by
+`scripts/check-site.mjs` and pinned by the tests in
+`scripts/test-agent-ui.mjs` (including the verbatim 2026-08-06 q5 capture).
+
+## Identity and offer consistency
+
+The business under test is tinystudio.io's TinyStudio, and the machine-
+readable identity block must keep saying so: the homepage carries an
+Organization JSON-LD block, `public/llms.txt` leads with an `## Identity`
+section, and the homepage `<header>` repeats the same facts — tinystudio.io,
+the same-name businesses that are none of them, no base city or office
+address, and The Website Correction as the human-reviewed managed service.
+`scripts/check-site.mjs` refuses to let these drift apart, so the offer
+cannot be restated differently on one surface than on another.
+
 ## Honesty rules
 
 1. `captured` is quoted verbatim from the engine's answer, truncated with `...`

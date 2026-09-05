@@ -267,6 +267,50 @@ test("AI-search q5 wrong run under-claims instead of over-claiming its citation"
   assert.match(run.remediation.text, /no page-specific fix is claimed/);
 });
 
+test("AI-search fixture preserves the 2026-08-06 record verbatim", () => {
+  assert.equal(AI_EVIDENCE.testedOn, "2026-08-06");
+  assert.equal(AI_EVIDENCE.business.name, "TinyStudio");
+  assert.equal(AI_EVIDENCE.business.site, "https://tinystudio.io/");
+
+  const q5 = AI_EVIDENCE.runs.find(
+    (candidate) => candidate.questionId === "q5-what-is-tinystudio-io" && candidate.engine === "google"
+  );
+  assert.ok(q5, "google/q5 run exists");
+  assert.equal(q5.state, "wrong");
+  assert.equal(q5.testedAt, "2026-08-06");
+  assert.equal(
+    q5.captured,
+    "TinyStudio is an AI agent platform designed to turn business strategies-such as your offer, target audience, marketing funnels, and CRM context-into practical lead-to-call execution plans."
+  );
+  assert.deepEqual(q5.sources, [
+    { title: "tinystudio.io - TinyStudio Agent Desk", url: "https://tinystudio.io/" }
+  ]);
+
+  const pairCounts = new Map();
+  for (const run of AI_EVIDENCE.runs) {
+    assert.match(run.testedAt, /^\d{4}-\d{2}-\d{2}$/, `run is dated: ${run.questionId}/${run.engine}`);
+    assert.equal(run.testedAt, AI_EVIDENCE.testedOn, `run date matches the fixture's testedOn: ${run.questionId}/${run.engine}`);
+    const pair = `${run.questionId}/${run.engine}`;
+    pairCounts.set(pair, (pairCounts.get(pair) || 0) + 1);
+  }
+  for (const [pair, count] of pairCounts) {
+    assert.equal(count, 1, `exactly one run per question/engine pair: ${pair}`);
+  }
+});
+
+test("AI-search fixture sources are real http(s) URLs", () => {
+  for (const run of AI_EVIDENCE.runs) {
+    for (const source of run.sources || []) {
+      let parsed;
+      assert.doesNotThrow(() => {
+        parsed = new URL(source.url);
+      }, `source URL parses for ${run.questionId}/${run.engine}: ${source.url}`);
+      assert.match(parsed.protocol, /^https?:$/, `http(s) source for ${run.questionId}/${run.engine}`);
+      assert.ok(parsed.hostname.includes("."), `dotted hostname for ${run.questionId}/${run.engine}`);
+    }
+  }
+});
+
 test("AI-search renderer shows all four states and keeps not-tested distinct from absent", async () => {
   globalThis.document = auditDocumentStub();
   const api = await loadAuditScript();
