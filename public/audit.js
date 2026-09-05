@@ -1,4 +1,4 @@
-(function(){var S='.phead h1,.phead .sub,form.lead,.micro,.urg,.band,section h2,section .lede,.check,.row';
+(function(){var S='.phead h1,.phead .sub,form.lead,.micro,.urg,.band,section h2,section .lede,.check,.row,.run';
 function r(){var e=[].slice.call(document.querySelectorAll(S));e.forEach(function(x){x.setAttribute('data-r','')});
 var io=new IntersectionObserver(function(en){en.forEach(function(v){if(!v.isIntersecting)return;
 var s=[].slice.call(v.target.parentNode.children).filter(function(n){return n.hasAttribute&&n.hasAttribute('data-r')});

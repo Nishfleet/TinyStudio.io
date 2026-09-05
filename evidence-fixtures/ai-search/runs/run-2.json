@@ -1,0 +1,12 @@
+{
+  "id": "run-2",
+  "state": "misrepresented",
+  "fixture": "evidence-fixtures/ai-search/fixture.json",
+  "prompt": "What does a made-to-measure suit at Wolsey & Hare cost?",
+  "engine": "Perplexity",
+  "source": "https://www.perplexity.ai",
+  "date": "2026-07-28",
+  "capture": "Around £850 for a two-piece, fitting included.",
+  "againstPage": "Business fee page: made-to-measure two-piece from £1,900. The capture is wrong against the business's own published price.",
+  "notes": "The figure is published on the fee page but never stated on the homepage the engines read — the misrepresentation is provable, and the fix is page-level."
+}

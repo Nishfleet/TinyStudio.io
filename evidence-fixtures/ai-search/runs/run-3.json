@@ -1,0 +1,12 @@
+{
+  "id": "run-3",
+  "state": "absent",
+  "fixture": "evidence-fixtures/ai-search/fixture.json",
+  "prompt": "Where should I book a made-to-measure suit in London?",
+  "engine": "ChatGPT",
+  "source": "https://chatgpt.com",
+  "date": "2026-07-28",
+  "capture": "The houses buyers mention most are Gieves & Hawkes, Huntsman and Richard James.",
+  "againstPage": "The business is not named in an answer it should win. The homepage sells made-to-measure but never says the phrase — it says 'bespoke tailoring'.",
+  "notes": "The fix is page-level and evidence-bound: the exact phrase a buyer asks has to appear where the page describes what is sold."
+}

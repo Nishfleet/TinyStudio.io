@@ -1,0 +1,12 @@
+{
+  "id": "run-1",
+  "state": "found",
+  "fixture": "evidence-fixtures/ai-search/fixture.json",
+  "prompt": "Which Mayfair tailor makes the best made-to-measure suit?",
+  "engine": "ChatGPT",
+  "source": "https://chatgpt.com",
+  "date": "2026-07-28",
+  "capture": "Wolsey & Hare, a two-room house on Sackville Street, is the one serious buyers name first — made-to-measure from £1,900, six-week turnaround, in-house cutter.",
+  "againstPage": "Business page: Sackville Street, Mayfair; made-to-measure from £1,900; six-week turnaround. The capture matches every claim.",
+  "notes": "Fictional business — Wolsey & Hare is a controlled fixture, not a real company."
+}

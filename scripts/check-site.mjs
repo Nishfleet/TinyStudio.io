@@ -261,8 +261,73 @@ if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"o
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }
 
+// AI-search visibility section: the audit page must state every prompt, engine,
+// capture and evidence citation named in the controlled fixture, and the four
+// run states must stay distinct and complete. The fixture is fictional by
+// design, so nothing customer-private can leak into it.
+const aiSearchCopy = [
+  "The AI-search check",
+  "found correctly",
+  "misrepresented",
+  "absent",
+  "not tested",
+  "controlled fixture",
+  "page-level and evidence-bound",
+  "No ranking or lead guarantee",
+  "publish anything on your behalf",
+  "signup email"
+];
+
+for (const text of aiSearchCopy) {
+  if (!siteAudit.includes(text)) failures.push(`Missing AI-search section copy: ${text}`);
+}
+
+let aiFixture = null;
+try {
+  aiFixture = JSON.parse(read("evidence-fixtures/ai-search/fixture.json"));
+} catch {
+  failures.push("AI-search fixture must be valid JSON.");
+}
+
+// The page entity-escapes ampersands; compare against the decoded page so a
+// capture containing "&" still has to appear verbatim.
+const siteAuditDecoded = siteAudit.replace(/&amp;/g, "&");
+
+if (aiFixture) {
+  if (!aiFixture.business || aiFixture.business.fictional !== true) {
+    failures.push("AI-search fixture must declare a fictional business.");
+  }
+  const runs = aiFixture.runs || [];
+  const states = runs.map((run) => run.state);
+  if (runs.length !== 4) failures.push("AI-search fixture must carry exactly four runs, one per state.");
+  if (new Set(states).size !== runs.length) failures.push("AI-search fixture states must be distinct.");
+  for (const allowed of ["found", "misrepresented", "absent", "not-tested"]) {
+    if (!states.includes(allowed)) failures.push(`AI-search fixture must include the ${allowed} state.`);
+  }
+  for (const run of runs) {
+    if (!run.id) failures.push("AI-search runs must carry an id.");
+    if (!run.prompt) failures.push(`AI-search run ${run.id} must name the prompt asked.`);
+    if (!run.evidenceFile) failures.push(`AI-search run ${run.id} must cite an evidence file.`);
+    if (run.evidenceFile && !existsSync(new URL(`../${run.evidenceFile}`, import.meta.url))) {
+      failures.push(`Missing AI-search evidence artifact: ${run.evidenceFile}`);
+    }
+    if (run.state !== "not-tested") {
+      if (!run.engine) failures.push(`AI-search run ${run.id} must name the engine checked.`);
+      if (!run.source) failures.push(`AI-search run ${run.id} must cite the source URL.`);
+      if (!run.date) failures.push(`AI-search run ${run.id} must carry the capture date.`);
+      if (!run.capture) failures.push(`AI-search run ${run.id} must carry the captured answer.`);
+    }
+    if (!siteAuditDecoded.includes(run.prompt)) failures.push(`Audit page must state the prompt for ${run.id}.`);
+    if (run.capture && !siteAuditDecoded.includes(run.capture)) failures.push(`Audit page must cite the capture for ${run.id}.`);
+    if (run.evidenceFile && !siteAuditDecoded.includes(run.evidenceFile)) {
+      failures.push(`Audit page must cite the evidence file for ${run.id}.`);
+    }
+    if (run.engine && !siteAuditDecoded.includes(run.engine)) failures.push(`Audit page must name the engine for ${run.id}.`);
+  }
+}
+
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = `${index}\n${script}\n${llms}\n${offer}\n${siteAudit}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }

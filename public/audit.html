@@ -71,6 +71,55 @@
     </div>
   </section>
 
+  <section id="ai-search">
+    <span class="sc">The AI-search check</span>
+    <h2>What an AI says about you is the new front door.</h2>
+    <p class="lede">Buyers who used to land on your page now land on an answer first. This check asks the engines the questions a buyer actually asks, captures what comes back word for word, and marks each run against your own page — <b>found correctly</b>, <b>misrepresented</b>, <b>absent</b>, or <b>not tested</b>. Every run below names what was asked, which engine was checked, and where the captured answer lives, so nothing has to be taken on faith.</p>
+
+    <div class="runs">
+      <article class="run" data-run="found">
+        <h3 class="sc">Run one — found correctly</h3>
+        <p class="lede">Asked: "Which Mayfair tailor makes the best made-to-measure suit?"</p>
+        <p class="micro">Checked: ChatGPT — chatgpt.com — 28 July 2026.</p>
+        <blockquote class="micro">"Wolsey &amp; Hare, a two-room house on Sackville Street, is the one serious buyers name first — made-to-measure from £1,900, six-week turnaround, in-house cutter."</blockquote>
+        <p class="micro"><b>Verdict:</b> the capture matches the business's own page — the street, the price and the turnaround are all right. Named, and named correctly.</p>
+        <p class="micro">Evidence: evidence-fixtures/ai-search/runs/run-1.json</p>
+      </article>
+
+      <article class="run" data-run="misrepresented">
+        <h3 class="sc">Run two — found, misrepresented</h3>
+        <p class="lede">Asked: "What does a made-to-measure suit at Wolsey &amp; Hare cost?"</p>
+        <p class="micro">Checked: Perplexity — perplexity.ai — 28 July 2026.</p>
+        <blockquote class="micro">"Around £850 for a two-piece, fitting included."</blockquote>
+        <p class="micro"><b>Verdict:</b> the business's own fee page says made-to-measure from £1,900 — named, and wrong. The price is published but never stated on the homepage the engines read, so the answer repeated a stale figure. The fix is page-level: state the number on the page the engines read.</p>
+        <p class="micro">Evidence: evidence-fixtures/ai-search/runs/run-2.json</p>
+      </article>
+
+      <article class="run" data-run="absent">
+        <h3 class="sc">Run three — absent</h3>
+        <p class="lede">Asked: "Where should I book a made-to-measure suit in London?"</p>
+        <p class="micro">Checked: ChatGPT — chatgpt.com — 28 July 2026.</p>
+        <blockquote class="micro">"The houses buyers mention most are Gieves &amp; Hawkes, Huntsman and Richard James."</blockquote>
+        <p class="micro"><b>Verdict:</b> a question the business should win, and it is not in the answer. The homepage sells made-to-measure but never says "made-to-measure suit" in the first screen — it says "bespoke tailoring" — so nothing links the phrase to the business. The fix is page-level and evidence-bound: the exact phrase a buyer asks has to appear where the page describes what is sold.</p>
+        <p class="micro">Evidence: evidence-fixtures/ai-search/runs/run-3.json</p>
+      </article>
+
+      <article class="run" data-run="not-tested">
+        <h3 class="sc">Run four — not tested</h3>
+        <p class="lede">Asked: "Are Wolsey &amp; Hare's suits worth the price?" — not run.</p>
+        <p class="micro"><b>Why:</b> an honest answer would rest on customer reviews, and the fixture has none. The run is left visibly blank rather than guessed — a not-tested mark is not a finding, and it never becomes one.</p>
+        <p class="micro">Evidence: evidence-fixtures/ai-search/runs/run-4.json</p>
+      </article>
+    </div>
+
+    <h3 class="sc">The demonstration above is a controlled fixture</h3>
+    <p class="lede">Wolsey &amp; Hare is a made-up business — a fictional Mayfair tailor — so you can see the format without a real name in it. Nothing about a real business appears in this section. When this check runs for you, the captured answers go into your audit document and nowhere else; the only thing this site keeps is the signup email you used to ask for it.</p>
+
+    <h3 class="sc">What the fix looks like, and the limits</h3>
+    <p class="lede"><b>The fix is page-level and evidence-bound.</b> Every change is to the business's own page — the sentence, section or structure that would have produced a correct answer — and it is written against the captured quote, never against what we hope an engine will do.</p>
+    <p class="lede"><b>No ranking or lead guarantee.</b> A captured answer is a fact we observed on a named date, not a promise about tomorrow. We do not contact engines, buy placement, or publish anything on your behalf.</p>
+  </section>
+
   <section>
     <h2>Then it is entirely your call</h2>
     <p class="lede">Most of what we find is fixable by a competent developer in an afternoon — including one who is not us. If you would rather have it closed than merely found, the desk runs at $2,500 a month on a three-month minimum, with a delivery guarantee behind it. <a class="xa1" href="pricing.html">See the terms →</a></p>

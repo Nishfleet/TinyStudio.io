@@ -1,0 +1,12 @@
+{
+  "id": "run-4",
+  "state": "not-tested",
+  "fixture": "evidence-fixtures/ai-search/fixture.json",
+  "prompt": "Are Wolsey & Hare's suits worth the price?",
+  "engine": null,
+  "source": null,
+  "date": null,
+  "capture": null,
+  "reason": "An honest answer would rest on customer reviews, and the fixture has none. Left visibly blank rather than guessed.",
+  "notes": "A not-tested run carries no capture and is never counted as a finding. It is a distinct state, not a verdict."
+}

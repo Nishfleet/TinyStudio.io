@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
+
+const AI_FIXTURE = JSON.parse(
+  readFileSync(new URL("../evidence-fixtures/ai-search/fixture.json", import.meta.url), "utf8")
+);
+const AUDIT_HTML = readFileSync(new URL("../public/audit.html", import.meta.url), "utf8").replace(/&amp;/g, "&");
+const ALLOWED_STATES = ["found", "misrepresented", "absent", "not-tested"];
 
 const SAMPLE_SECTIONS = {
   pipelineBrief: "# Pipeline Brief\n\n## Assumptions\n- **Offer**: <script>alert(1)</script>\n\nBrief body",
@@ -189,4 +196,67 @@ test("agent UI renders generated sections, switches tabs, supports keyboard tabs
 
   await dom.copyButton.dispatch("click");
   assert.equal(dom.clipboardText(), SAMPLE_SECTIONS.weeklyFixReport);
+});
+
+test("ai-search fixture is a controlled, fictional business with four distinct states", () => {
+  assert.equal(AI_FIXTURE.business.fictional, true, "the fixture business must be fictional");
+  assert.equal(AI_FIXTURE.runs.length, 4, "one run per state, four states");
+  const states = AI_FIXTURE.runs.map((run) => run.state);
+  assert.equal(new Set(states).size, 4, "the four states must be distinct");
+  for (const state of states) {
+    assert.ok(ALLOWED_STATES.includes(state), `unexpected state ${state}`);
+  }
+});
+
+test("ai-search fixture: every tested run names prompt, engine, source, date and capture", () => {
+  for (const run of AI_FIXTURE.runs) {
+    assert.ok(run.id, "each run must carry an id");
+    assert.ok(run.prompt, `${run.id} must state the prompt asked`);
+    if (run.state === "not-tested") {
+      assert.equal(run.capture, null, `${run.id} must carry no capture`);
+      assert.equal(run.engine, null, `${run.id} must name no engine`);
+      assert.ok(run.reason, `${run.id} must say why it was not tested`);
+      continue;
+    }
+    assert.ok(run.engine, `${run.id} must name the engine checked`);
+    assert.ok(run.source, `${run.id} must cite the source URL`);
+    assert.match(run.date, /^\d{4}-\d{2}-\d{2}$/, `${run.id} date must be ISO`);
+    assert.ok(run.capture, `${run.id} must carry the captured answer`);
+    assert.ok(run.evidenceFile, `${run.id} must cite an evidence file`);
+    const artifact = JSON.parse(readFileSync(new URL(`../${run.evidenceFile}`, import.meta.url), "utf8"));
+    assert.equal(artifact.id, run.id, "evidence artifact id must match the fixture");
+    assert.equal(artifact.state, run.state, "evidence artifact state must match the fixture");
+    assert.equal(artifact.prompt, run.prompt, "evidence artifact prompt must match the fixture");
+    assert.equal(artifact.capture, run.capture, "evidence artifact capture must match the fixture");
+    assert.equal(artifact.engine, run.engine, "evidence artifact engine must match the fixture");
+    assert.equal(artifact.date, run.date, "evidence artifact date must match the fixture");
+    assert.equal(artifact.source, run.source, "evidence artifact source must match the fixture");
+  }
+});
+
+test("ai-search evidence citations survive validation against the audit page", () => {
+  for (const run of AI_FIXTURE.runs) {
+    assert.ok(AUDIT_HTML.includes(run.prompt), `audit page must state the prompt for ${run.id}`);
+    if (run.capture) {
+      assert.ok(AUDIT_HTML.includes(run.capture), `audit page must cite the capture for ${run.id}`);
+    }
+    if (run.engine) {
+      assert.ok(AUDIT_HTML.includes(run.engine), `audit page must name the engine for ${run.id}`);
+    }
+    if (run.evidenceFile) {
+      assert.ok(AUDIT_HTML.includes(run.evidenceFile), `audit page must cite the evidence file for ${run.id}`);
+    }
+  }
+  for (const label of ["found correctly", "misrepresented", "absent", "not tested"]) {
+    assert.ok(AUDIT_HTML.includes(label), `audit page must state the ${label} state`);
+  }
+  for (const boundary of [
+    "No ranking or lead guarantee",
+    "page-level and evidence-bound",
+    "publish anything on your behalf",
+    "controlled fixture",
+    "signup email"
+  ]) {
+    assert.ok(AUDIT_HTML.includes(boundary), `audit page must state: ${boundary}`);
+  }
 });

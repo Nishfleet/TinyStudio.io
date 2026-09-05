@@ -1,0 +1,70 @@
+{
+  "title": "AI-search visibility — controlled fixture",
+  "business": {
+    "name": "Wolsey & Hare",
+    "fictional": true,
+    "about": "A fictional Mayfair made-to-measure tailor, invented so the demonstration carries no real name.",
+    "page": {
+      "homepage": "Sackville Street, Mayfair. In-house cutter. Six-week turnaround. The first screen says 'bespoke tailoring', never 'made-to-measure suit'.",
+      "feePage": "Made-to-measure two-piece: from £1,900."
+    }
+  },
+  "states": ["found", "misrepresented", "absent", "not-tested"],
+  "runs": [
+    {
+      "id": "run-1",
+      "state": "found",
+      "prompt": "Which Mayfair tailor makes the best made-to-measure suit?",
+      "engine": "ChatGPT",
+      "source": "https://chatgpt.com",
+      "date": "2026-07-28",
+      "capture": "Wolsey & Hare, a two-room house on Sackville Street, is the one serious buyers name first — made-to-measure from £1,900, six-week turnaround, in-house cutter.",
+      "verdict": "The capture matches the business's own page: the street, the price and the turnaround are all right. Named, and named correctly.",
+      "evidenceFile": "evidence-fixtures/ai-search/runs/run-1.json"
+    },
+    {
+      "id": "run-2",
+      "state": "misrepresented",
+      "prompt": "What does a made-to-measure suit at Wolsey & Hare cost?",
+      "engine": "Perplexity",
+      "source": "https://www.perplexity.ai",
+      "date": "2026-07-28",
+      "capture": "Around £850 for a two-piece, fitting included.",
+      "againstPage": "The business's own fee page states made-to-measure from £1,900.",
+      "verdict": "Named, and wrong. The price is published on the fee page but never stated on the homepage the engines read, so the answer repeated a stale figure.",
+      "evidenceFile": "evidence-fixtures/ai-search/runs/run-2.json"
+    },
+    {
+      "id": "run-3",
+      "state": "absent",
+      "prompt": "Where should I book a made-to-measure suit in London?",
+      "engine": "ChatGPT",
+      "source": "https://chatgpt.com",
+      "date": "2026-07-28",
+      "capture": "The houses buyers mention most are Gieves & Hawkes, Huntsman and Richard James.",
+      "verdict": "A question the business should win, and it is not in the answer. The homepage sells made-to-measure but never says the phrase — it says bespoke tailoring.",
+      "evidenceFile": "evidence-fixtures/ai-search/runs/run-3.json"
+    },
+    {
+      "id": "run-4",
+      "state": "not-tested",
+      "prompt": "Are Wolsey & Hare's suits worth the price?",
+      "engine": null,
+      "source": null,
+      "date": null,
+      "capture": null,
+      "reason": "An honest answer would rest on customer reviews, and the fixture has none. Left visibly blank rather than guessed.",
+      "evidenceFile": "evidence-fixtures/ai-search/runs/run-4.json"
+    }
+  ],
+  "remediation": {
+    "pageLevel": true,
+    "evidenceBound": true,
+    "text": "Every fix is a change to the business's own page — the sentence, section or structure that would have produced a correct answer — written against the captured quote, never against what an engine might do."
+  },
+  "boundaries": [
+    "no ranking or lead guarantee",
+    "no publishing on the business's behalf",
+    "no storage of captured answers"
+  ]
+}
