@@ -257,6 +257,29 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
 }
 
+const auditCss = read("public/audit.css");
+
+// /audit mobile horizontal overflow regression (measured at 390x844, scrollWidth
+// 569 vs clientWidth 375): the fix keeps component-level shrink/wrap constraints
+// in audit.css — fluid stat size, minmax(0,1fr) grid tracks, wrapping nav — so
+// the page must not lose them. Static guardrails only, no network or browser.
+const auditOverflowGuards = [
+  "grid-template-columns:auto minmax(0,1fr)",
+  "grid-template-columns:minmax(0,1fr)",
+  "clamp(56px,11vw,128px)",
+  "clamp(40px,9vw,70px)",
+  "flex-wrap:wrap",
+  "@media (max-width:900px)",
+  "@media (max-width:760px)",
+  "@media (max-width:560px)"
+];
+for (const guard of auditOverflowGuards) {
+  if (!auditCss.includes(guard)) failures.push(`Audit CSS is missing a 390px overflow guardrail: ${guard}`);
+}
+if (!siteAudit.includes("name=\"viewport\"")) {
+  failures.push("Audit page must keep the responsive viewport meta tag.");
+}
+
 if (!index.includes("role=\"tabpanel\"") || !index.includes("aria-labelledby=\"output-tab-pipelineBrief\"")) {
   failures.push("Agent output must expose a proper tabpanel relationship.");
 }

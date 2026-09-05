@@ -1,7 +1,7 @@
-.stat{font-family:'Fraunces',serif;font-weight:200;font-size:128px;line-height:.84;
+.stat{font-family:'Fraunces',serif;font-weight:200;font-size:clamp(56px,11vw,128px);line-height:.84;
     letter-spacing:-.05em;color:#F2EADC;white-space:nowrap}
   .stat s{text-decoration:none;color:var(--brass-lt)}
-  .bandgrid{display:grid;grid-template-columns:auto 1fr;gap:66px;align-items:center}
+  .bandgrid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:66px;align-items:center}
   .checks{margin-top:54px;display:grid;grid-template-columns:repeat(4,1fr)}
   .check{padding-right:32px;border-right:1px solid var(--hair)}
   .check:last-child{border-right:0;padding-right:0}
@@ -19,3 +19,33 @@
 
 /* extracted from inline style attributes — CSP style-src 'self' blocks those */
 .xa1{color:var(--brass)}
+
+/* 390px-width hardening: allow the nav, stat band, checks and heading to wrap
+   and size fluidly at the component level instead of overflowing the viewport.
+   Desktop (>= 1280px) resolves the clamps to their previous fixed sizes. */
+@media (max-width:900px){
+  nav{flex-wrap:wrap;row-gap:14px}
+  .navlinks{flex-wrap:wrap;row-gap:12px}
+  .navlinks .navcta{margin-left:auto}
+  .band{padding:48px 32px}
+  .bandgrid{grid-template-columns:minmax(0,1fr);gap:34px}
+  .checks{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:36px}
+  .check{padding:0}
+  .check:nth-child(odd){padding-right:32px;border-right:1px solid var(--hair)}
+  .check:nth-child(even){padding-left:32px;border-right:0}
+  .check:last-child{border-right:0;padding-right:0}
+}
+@media (max-width:760px){
+  .wrap{padding:0 24px}
+  .navlinks{gap:14px}
+  .navlinks a{white-space:nowrap}
+}
+@media (max-width:560px){
+  .checks{grid-template-columns:minmax(0,1fr);row-gap:0}
+  .check{padding:0 0 30px}
+  .check:nth-child(odd){padding-right:0;border-right:0}
+  .check:nth-child(even){padding-left:0;border-right:0}
+  .check{border-bottom:1px solid var(--hair)}
+  .check:last-child{border-bottom:0;padding-bottom:0}
+}
+.phead h1{font-size:clamp(40px,9vw,70px)}
