@@ -123,12 +123,18 @@ const requiredWorkerCopy = [
 ];
 
 const requiredPublicArtifacts = [
-  "self-serve AI Agent Desk",
-  "Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side",
-  "Client-side code does not call model providers",
-  "does not promise revenue, ROAS, profit, booked calls",
+  "human-reviewed leak audit",
+  "Growth Desk",
+  "$2,500 per month",
+  "three-month minimum",
+  "delivery guarantee",
+  "does not promise revenue",
+  "specialist agents",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "Cloudflare D1",
+  "no public endpoint",
+  "hello@tinystudio.io"
 ];
 
 const forbiddenClaims = [
@@ -562,4 +568,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("TinyStudio.io Agent Desk checks passed.");
+console.log("TinyStudio.io checks passed.");

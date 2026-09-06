@@ -1,31 +1,46 @@
-# TinyStudio Agent Desk
+# TinyStudio.io
 
-TinyStudio Agent Desk is a self-serve AI workspace for high-ticket pipeline setup.
+TinyStudio.io runs a free, human-reviewed leak audit of high-ticket service homepages, and a monthly desk that closes the leaks the audit finds.
 
-It helps build the operating system around an offer before a business spends more on ads: offer diagnosis, funnel path, ad angles, qualification, follow-up, CRM stages, tracking checklist, implementation tasks, and weekly decision rules.
+## The Audit
 
-The customer can start with only an email and a rough business snapshot. The agents infer missing context, state assumptions, and ask only true blocker questions when more information is genuinely needed.
+- Free, done by hand, and yours to keep either way
+- Four passes: the money page, the paid creative, the unanswered questions, the reach
+- Named leaks in priority order, each with the fix beside it
+- Findings within five working days; no call required
+- Six audits a month; when the sixth is taken, intake closes until the next month
 
-## What It Generates
+## The Growth Desk
 
-- Pipeline Brief
-- Implementation Checklist
-- Weekly Fix Report
+- $2,500 per month, three-month minimum
+- Month one: the highest-leverage page rewritten or rebuilt, with a dev-ready handoff
+- Months two and three: weekly checks, one revision, tracking that shows whether the fix held
+- Delivery guarantee: if the month-one deliverables are not delivered within fourteen working days of Day 0, month one is refunded in full
+- Day 0 begins only once payment, access and both named owners are recorded; the clock pauses while waiting on the customer
 
-Those artifacts can include readiness diagnosis, recommended funnel path, audience and pain map, first four creative tests, lead qualification form, follow-up and setter flow, CRM and tracking checklist, 7-day or 15-day decision plan, metric tracker, and approval gates.
+## Who Does The Work
 
-## What It Does Not Do
+- Seven specialist agents research, draft and check, each with one job, a fixed input list and a checklist
+- A person reviews fit, every claim, all client-facing work, delivery and renewal, and signs every output
+- Automation never sends, publishes, spends or approves its own work
 
-- No revenue guarantee
-- No ROAS guarantee
-- No booked-call guarantee
-- No sales-lift guarantee
+## What Is Never Promised
+
+- No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantee
+- The delivery guarantee is the only promise about outcomes, and it is a promise about the work, not the market
 - No campaign publishing
 - No ad spend changes
-- No ad account connection
-- No prospect message sending
-- No storage of submitted business snapshots, optional details, weekly metrics, or generated artifacts
-- No replacement for a sales team
+
+## Evidence Boundaries
+
+- No client logos, case studies or testimonials; client work is never published
+- Market research reads public homepages of businesses with no relationship to TinyStudio and is shared freely
+- Nothing belonging to someone who paid TinyStudio is ever shared
+
+## Data Handling
+
+- The public app stores email signups and lightweight usage metadata in Cloudflare D1, including daily rate-limit counters and a daily IP-derived rate-limit key
+- There is no public endpoint for reading collected emails or usage metadata
 
 ## Contact
 
