@@ -1,6 +1,8 @@
 # The Website Correction
 
-TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
+TinyStudio runs the free Website Appraisal — read by hand, yours to keep — and the human-reviewed desk that closes the faults it names.
+
+The Website Correction is the desk's paid deliverable: one finished, human-reviewed outcome — the highest-leverage page corrected, with before/after proof. It is a managed service with human review, not autonomous software.
 
 ## Buyer
 
@@ -37,15 +39,6 @@ Human review gates fit, claims, client-facing work, delivery/acceptance, and ren
 ## Not Promised
 
 There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
-
-## Legacy Agent Desk
-
-The earlier self-serve Agent Desk (one-shot Pipeline Brief) is demoted and is not the current offer. Its safety rails stand:
-
-- No campaign publishing
-- No ad spend changes
-- No ad account connection
-- No prospect message sending
 
 ## Contact
 

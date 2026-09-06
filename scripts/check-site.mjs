@@ -388,6 +388,35 @@ if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
 
+// ---- Entity identity and stale self-serve language guards -----------------
+// One canonical identity sentence is reused verbatim on every owned public
+// surface, and stale self-serve Agent Desk / generated-output phrasing must
+// never return to them. The audit page's AI-search artifact is a dated,
+// drift-locked evidence record (see evidence-fixtures/ai-search/), so its
+// embedded JSON bundle is excluded from the stale-phrase scan.
+const canonicalIdentity =
+  "TinyStudio runs the free Website Appraisal — read by hand, yours to keep — and the human-reviewed desk that closes the faults it names.";
+const siteAgents = read("public/agents.html");
+const siteSpecimen = read("public/specimen.html");
+const auditMarketing = siteAudit.replace(/<script type="application\/json" id="ai-search-evidence">[\s\S]*?<\/script>/, "");
+
+for (const [pageName, pageCopy] of [
+  ["homepage", siteHome],
+  ["agents page", siteAgents],
+  ["audit page", auditMarketing],
+  ["specimen page", siteSpecimen],
+  ["offer.md", offer]
+]) {
+  if (!pageCopy.includes(canonicalIdentity)) {
+    failures.push(`Canonical identity missing on ${pageName}.`);
+  }
+  for (const phrase of ["self-serve", "one-shot", "Pipeline Brief", "Agent Desk"]) {
+    if (pageCopy.toLowerCase().includes(phrase.toLowerCase())) {
+      failures.push(`Stale self-serve agent language on ${pageName}: ${phrase}`);
+    }
+  }
+}
+
 // ---- AI-search evidence artifact ---------------------------------------
 // The audit page carries a controlled-test evidence artifact for AI-search
 // discoverability. Fixtures in evidence-fixtures/ai-search/ are the single
