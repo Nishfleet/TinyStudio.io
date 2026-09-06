@@ -2,6 +2,10 @@
 
 TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
 
+## Identity
+
+TinyStudio is the business behind tinystudio.io: the free leak audit of high-ticket service homepages and the desk that closes what the audit finds, run by Nish, who signs every audit. Other businesses share the name — a Mac subtitle app, a fibre-arts magazine, a design agency, a video production studio, a Los Angeles venue, an unrelated studio LLC. None of them are this TinyStudio. The site states no base city or office address. Contact: hello@tinystudio.io.
+
 ## Buyer
 
 Founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
