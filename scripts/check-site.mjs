@@ -123,12 +123,37 @@ const requiredWorkerCopy = [
 ];
 
 const requiredPublicArtifacts = [
-  "self-serve AI Agent Desk",
+  "free leak audit",
+  "six a month",
+  "The Growth Desk",
+  "$2,500 a month",
+  "three-month minimum",
+  "Delivery guarantee",
+  "fourteen working days",
+  "Seven specialist agents",
+  "reads and signs every client-facing output",
+  "Automation never sends, publishes, spends, or approves",
+  "no logos, no case studies, no testimonials",
+  "No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees",
+  "legacy",
+  "not the product TinyStudio sells",
   "Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side",
   "Client-side code does not call model providers",
-  "does not promise revenue, ROAS, profit, booked calls",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "No ad account connection",
+  "No prospect message sending",
+  "not stored by this app",
+  "no public endpoint for reading collected emails or usage metadata"
+];
+
+// The stale self-serve positioning sold the demoted Agent Desk as the current
+// product. These exact strings from the retired pitch must not reappear.
+const stalePublicArtifacts = [
+  "runs a self-serve AI Agent Desk",
+  "TinyStudio Agent Desk helps high-ticket coaches, consultants, service businesses, agencies, course sellers, and experts",
+  "The customer can start with only an email and a rough business snapshot",
+  "## Current Product"
 ];
 
 const forbiddenClaims = [
@@ -170,6 +195,11 @@ for (const text of requiredWorkerCopy) {
 for (const text of requiredPublicArtifacts) {
   const haystack = `${llms}\n${offer}`;
   if (!haystack.includes(text)) failures.push(`Missing public artifact copy: ${text}`);
+}
+
+for (const text of stalePublicArtifacts) {
+  const haystack = `${llms}\n${offer}`;
+  if (haystack.includes(text)) failures.push(`Stale public artifact copy must not return: ${text}`);
 }
 
 function formFieldTags(html) {

@@ -1,35 +1,40 @@
-# TinyStudio.io
+# TinyStudio
 
-TinyStudio.io runs a self-serve AI Agent Desk for high-ticket pipeline setup.
+TinyStudio runs a free leak audit of high-ticket service homepages and a human-reviewed desk that closes the leaks the audit finds. The self-serve Agent Desk at /agent-desk is legacy and is not the product TinyStudio sells.
 
 Canonical URL: https://tinystudio.io/
 Contact: hello@tinystudio.io
 
-## Current Product
+## Current Offer: The Leak Audit And The Growth Desk
 
-TinyStudio Agent Desk helps high-ticket coaches, consultants, service businesses, agencies, course sellers, and experts build a lead-to-call pipeline loop.
+The leak audit is free, done by hand, and capped at six a month; when the sixth is taken, the intake closes until the next month. Findings arrive inside five working days as a written document: named leaks in the order they cost the business money, with the fix beside each one. The deliverable is a document, not a call, and the audit is the client's to keep either way.
 
-The public workflow requires only email and a compact business snapshot. Offer, target buyer, proof/assets, market preference, current funnel, follow-up/CRM context, optional weekly lead-to-call metrics, bottleneck context, and constraints are optional detail inputs.
+The desk that closes the findings is The Growth Desk, at $2,500 a month on a three-month minimum. Month one fixes the highest-leverage page: the leak audit, then the page rewritten or rebuilt, a dev-ready handoff, and search-trust basics. Months two and three run weekly checks, one revision, and tracking that says whether the fix held.
 
-The agents are expected to infer missing context, label assumptions, and ask only true blocker questions when missing information would prevent a useful next step.
+Delivery guarantee: if the month-one deliverables are not in the client's hands within fourteen working days of Day 0, month one is refunded in full. Day 0 begins only after payment, access, and both named owners are recorded; client delay pauses the clock.
 
-Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side. Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
+## How The Work Runs
 
-## Agent Outputs
+Seven specialist agents do the research, drafting, and checking: one job each, with fixed inputs and a checklist, on the current frontier model tier chosen per job. A person reads and signs every client-facing output; fit, claims, client-facing work, delivery, and renewal are human decisions. Automation never sends, publishes, spends, or approves.
 
-The Agent Desk can generate:
+TinyStudio does not publish client work: no logos, no case studies, no testimonials. The market study of high-ticket homepages is shared freely, industry by industry, while client work is never named.
 
-- Pipeline Brief with readiness diagnosis, funnel path, audience and pain map, first four creative tests, lead qualification, follow-up, CRM, tracking, decision plan, and approval gates
-- Implementation Checklist for setup work across offer, funnel, creative, qualification, follow-up, booking/reminders, CRM stages, tracking events, and review cadence
-- Weekly Fix Report that uses supplied weekly metrics when available, otherwise provides contextual first-week guidance plus the metrics to collect
+## Not Promised
 
-## Safety And Limits
+No revenue, ranking, ROAS, conversion, booked-call or sales-volume guarantees. The delivery guarantee is the only promise about outcomes, and it is a promise about the work, not the client's market.
 
-TinyStudio Agent Desk does not promise revenue, ROAS, profit, booked calls, rankings, AI visibility, conversion lift, or sales lift.
+## Legacy Self-Serve Agent Desk
 
-The Agent Desk does not publish campaigns, change ad spend, connect to ad accounts, send prospect messages, sync CRM outcomes to ad platforms, or replace a sales team.
+The Agent Desk at /agent-desk is legacy and not the current offer. It is self-serve and Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side from an email and a business snapshot, with an optional detail pack. Client-side code does not call model providers, platform admin APIs, ad accounts, databases, or private credentials directly.
 
-Claims, ad spend, campaign publishing, platform connections, tracking implementation, and compliance-sensitive decisions remain approval-gated.
+The legacy surface keeps its safety rails:
+
+- No campaign publishing
+- No ad spend changes
+- No ad account connection
+- No prospect message sending
+- No CRM outcome syncing
+- Claims, ad spend, campaign publishing, platform connections, and compliance-sensitive decisions are approval-gated
 
 ## Data Handling
 
