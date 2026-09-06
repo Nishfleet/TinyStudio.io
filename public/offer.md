@@ -1,51 +1,46 @@
-# The Website Correction
+# TinyStudio
 
-TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
+TinyStudio is one specific business: the one at tinystudio.io. Other
+businesses share the name — a subtitling app, a fibre-arts magazine, a design
+agency, a video studio — and none of them is us. One person signs every
+client-facing output; we publish no client work and promise no revenue,
+ranking or booking guarantees.
 
-## Buyer
+## What TinyStudio delivers
 
-Founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
+TinyStudio runs one human-reviewed managed service: the free Website
+Appraisal and the Growth Desk that closes what the appraisal finds.
 
-## Promise
+The Website Appraisal — free and yours to keep: one page read by hand, each
+fault named in order of what it costs you, with the fix beside it. Six a
+month, findings inside five working days, no call at any point.
 
-In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
+The Growth Desk — $2,500 a month on a three-month minimum. Month one
+corrects the costliest fault; months two and three build the loop that keeps
+the standard up. The clock starts only once payment, access and both named
+owners are recorded; if we are waiting on you, the clock pauses.
 
-## Included
+## Who reviews it
 
-- fault map for the selected page
-- rewrite or redesign of that page
-- one implementation pass or a dev-ready handoff
-- search-trust basics
-- before/after proof
-- Loom walkthrough
-- measurement plan
-- one revision
-- 14-day implementation tracking
+Seven specialists do the research, drafting and checking; one person reads
+and signs every client-facing output before it reaches you. TinyStudio is a
+managed service with human review, not autonomous software. Automation never
+sends, publishes, spends, approves, accepts or renews.
 
-## Day 0
+## What TinyStudio does not do
 
-The clock starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
+- Not the other businesses named TinyStudio: not a subtitling app, not a
+  fibre-arts magazine, not a design agency, not a video studio.
+- No client-work publication: no logos, no case studies, no testimonials.
+- No campaign publishing. No ad spend changes. No ad account connection. No
+  prospect message sending.
+- There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees. The only promise about outcomes is the Growth Desk's delivery guarantee, and it is a promise about our work, never about your market.
 
-## Price
+## The AI-search record
 
-The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
-
-## Review Boundary
-
-Human review gates fit, claims, client-facing work, delivery/acceptance, and renewal. Automation may prepare research, drafts, QA, packages, and routing, but never autonomously sends, publishes, spends, approves, accepts, or renews.
-
-## Not Promised
-
-There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees.
-
-## Legacy Agent Desk
-
-The earlier self-serve Agent Desk (one-shot Pipeline Brief) is demoted and is not the current offer. Its safety rails stand:
-
-- No campaign publishing
-- No ad spend changes
-- No ad account connection
-- No prospect message sending
+The controlled AI-search runs are on the audit page: the exact prompts, the
+verbatim answers and the pages each engine cited. The runs were captured on
+one day and have not been re-run; this file changes none of them.
 
 ## Contact
 

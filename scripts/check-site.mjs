@@ -544,6 +544,89 @@ if (aiQuestions && aiEvidence) {
   }
 }
 
+// ---- Entity disambiguation pass -----------------------------------------
+// The recorded AI-search specimen shows engines conflating TinyStudio with
+// other businesses that share the name (a subtitling app, a fibre-arts
+// magazine, a design agency, a video studio). The owned surfaces must state
+// who TinyStudio is, what it delivers, who reviews it and what it does not
+// do — in agreement with each other — and must not claim the recorded panel
+// improved. The embedded AI-search evidence bundle quotes the engines
+// verbatim and is pinned byte-for-byte by the drift guard above, so the
+// framing checks exclude it.
+const disambiguationSurfaces = {
+  homepage: siteHome,
+  agents: read("public/agents.html"),
+  audit: siteAudit,
+  specimen: read("public/specimen.html"),
+  offer: read("public/offer.md")
+};
+
+// The evidence bundle may quote the engines' own words (including their
+// mention of the retired Agent Desk); it must not be treated as our framing.
+const auditNarrative = siteAudit.replace(/<script type="application\/json" id="ai-search-evidence">[\s\S]*?<\/script>/, "");
+
+const disambiguationNeedles = [
+  "one specific business",      // who TinyStudio is
+  "tinystudio.io",              // the canonical identity
+  "subtitling app",             // recorded lookalike entities the specimen
+  "fibre-arts",                 //   shows engines answering with instead
+  "design agency",              //   of TinyStudio
+  "video studio",
+  "signs",                      // who reviews it
+  "publish no client work",     // what it does not do
+  "The Website Appraisal"       // what it delivers
+];
+
+for (const [surfaceName, surfaceCopy] of Object.entries(disambiguationSurfaces)) {
+  const copy = (surfaceName === "audit" ? auditNarrative : surfaceCopy).toLowerCase();
+  for (const needle of disambiguationNeedles) {
+    if (!copy.includes(needle.toLowerCase())) {
+      failures.push(`Entity disambiguation copy missing on ${surfaceName}: ${needle}`);
+    }
+  }
+}
+
+// Delivery and boundary terms must agree between the public pages and the
+// machine-readable offer.
+const offerTerms = [
+  "six a month",
+  "$2,500",
+  "three-month minimum",
+  "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
+  "No campaign publishing",
+  "No ad spend changes"
+];
+const collapse = (text) => text.replace(/\s+/g, " ").trim().toLowerCase();
+for (const term of offerTerms) {
+  if (!collapse(disambiguationSurfaces.offer).includes(collapse(term))) {
+    failures.push(`Offer must state the agreed term: ${term}`);
+  }
+}
+const pageTerms = ["six a month", "$2,500", "three-month minimum", "No revenue, ranking or booking guarantees"];
+for (const term of pageTerms) {
+  const onPages = collapse(siteHome).includes(collapse(term)) || collapse(siteAudit).includes(collapse(term));
+  if (!onPages) failures.push(`Public pages must state the agreed term: ${term}`);
+}
+
+// The recorded panel must not be claimed improved: the audit narrative must
+// say the runs were captured once and have not been re-run.
+for (const phrase of ["captured on one day", "have not been re-run"]) {
+  if (!auditNarrative.includes(phrase)) {
+    failures.push(`Audit narrative must state the specimen is not re-run (${phrase}).`);
+  }
+}
+
+// No retired Agent Desk or generated Pipeline Brief framing may survive in
+// the owned surfaces' narrative copy.
+for (const [surfaceName, surfaceCopy] of Object.entries(disambiguationSurfaces)) {
+  const copy = surfaceName === "audit" ? auditNarrative : surfaceCopy;
+  for (const retired of ["Agent Desk", "Pipeline Brief"]) {
+    if (copy.includes(retired)) {
+      failures.push(`Retired Agent Desk framing must not survive on ${surfaceName}: ${retired}`);
+    }
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
@@ -564,4 +647,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("TinyStudio.io Agent Desk checks passed.");
+console.log("TinyStudio.io site checks passed.");
