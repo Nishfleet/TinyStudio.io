@@ -3,8 +3,8 @@ import { execFileSync } from "node:child_process";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-// The Agent Desk moved to /agent-desk when the leak-audit site took the root.
-// These checks are about the Desk's markup, so they follow it.
+// The retired self-serve Agent Desk lives at /agent-desk; the appraisal site
+// took the root. These checks are about the Desk's markup, so they follow it.
 const index = read("public/agent-desk.html");
 const styles = read("public/styles.css");
 const script = read("public/script.js");
@@ -221,6 +221,13 @@ for (const optionalName of [
 
 const siteHome = read("public/index.html");
 const siteAudit = read("public/audit.html");
+const siteAgents = read("public/agents.html");
+const siteSpecimen = read("public/specimen.html");
+
+// The dated AI-search evidence bundle embedded in the audit page is a record
+// of 2026-08-06 pinned to its fixtures; it is stripped before any scan that
+// judges current copy, so the historical record can never trip the guards.
+const auditVisible = siteAudit.replace(/<script type="application\/json" id="ai-search-evidence">[\s\S]*?<\/script>/, "");
 
 // Conversion-friction regression: the signup website field must accept a bare
 // business domain (example.com) at the browser level instead of requiring a
@@ -256,6 +263,51 @@ for (const [pageName, pageHtml] of [["homepage", siteHome], ["audit page", siteA
   }
   for (const value of INVALID_WEBSITES) {
     if (compiled.test(value)) failures.push(`Signup website pattern on ${pageName} must reject ${JSON.stringify(value)}.`);
+  }
+}
+
+// ---- Identity and offer invariants --------------------------------------
+// One entity sentence and one offer description must read identically on
+// every owned public page and in offer.md, so AI/search readers and humans
+// get the same coherent answer from every surface. A stale rewrite or drift
+// on any one surface is a contradiction and fails the build.
+const IDENTITY_COPY = "TinyStudio is a human-reviewed website studio.";
+const OFFER_COPY = "We read the one page your revenue depends on the way a customer with intent reads it, name each fault in order of what it costs you, and close what we find, with one name on everything that reaches you.";
+
+for (const [pageName, content] of [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", siteAgents],
+  ["specimen page", siteSpecimen],
+  ["offer.md", offer]
+]) {
+  for (const [label, invariant] of [["identity copy", IDENTITY_COPY], ["offer copy", OFFER_COPY]]) {
+    if (!content.includes(invariant)) failures.push(`Missing ${label} on ${pageName}: ${invariant}`);
+  }
+}
+
+// Stale self-serve / generated-artifact copy must not describe the current
+// offer on the public pages. The retired Agent Desk is guarded separately
+// above; offer.md documents it only as legacy, which is intentional.
+const STALE_PRODUCT_COPY = [
+  "self-serve",
+  "Agent Desk",
+  "leak audit",
+  "Pipeline Brief",
+  "Implementation Checklist",
+  "Weekly Fix Report",
+  "Generate Pipeline"
+];
+
+for (const [pageName, pageHtml] of [
+  ["homepage", siteHome],
+  ["audit page", auditVisible],
+  ["desk page", siteAgents],
+  ["specimen page", siteSpecimen]
+]) {
+  const lower = pageHtml.toLowerCase();
+  for (const stale of STALE_PRODUCT_COPY) {
+    if (lower.includes(stale.toLowerCase())) failures.push(`Stale self-serve copy on ${pageName}: ${stale}`);
   }
 }
 
@@ -307,7 +359,7 @@ for (const anchor of [
 }
 
 for (const claim of forbiddenClaims) {
-  const haystack = `${index}\n${script}\n${llms}\n${offer}`.toLowerCase();
+  const haystack = `${index}\n${script}\n${llms}\n${offer}\n${siteHome}\n${auditVisible}\n${siteAgents}\n${siteSpecimen}`.toLowerCase();
   if (haystack.includes(claim.toLowerCase())) {
     failures.push(`Forbidden claim found: ${claim}`);
   }
@@ -564,4 +616,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("TinyStudio.io Agent Desk checks passed.");
+console.log("TinyStudio.io site checks passed.");

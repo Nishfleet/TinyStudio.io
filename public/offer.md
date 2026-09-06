@@ -1,5 +1,7 @@
 # The Website Correction
 
+TinyStudio is a human-reviewed website studio. We read the one page your revenue depends on the way a customer with intent reads it, name each fault in order of what it costs you, and close what we find, with one name on everything that reaches you.
+
 TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
 
 ## Buyer
