@@ -766,11 +766,30 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
 }
 
+// ---- Meta descriptions ----------------------------------------------------
+// Every rendered public page must carry exactly one page-specific meta
+// description, so search previews identify the current offer instead of
+// leaving the field blank (dogfood finding: previously all five had none).
+const describedPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+for (const [pageName, pageHtml] of describedPages) {
+  const descriptionTags = [...pageHtml.matchAll(/<meta\s+name="description"[^>]*>/gi)];
+  if (descriptionTags.length !== 1) {
+    failures.push(`${pageName} must carry exactly one meta name="description" tag.`);
+  } else if (!/content="[^"]+"/i.test(descriptionTags[0][0])) {
+    failures.push(`${pageName} meta description must carry a non-empty content attribute.`);
+  }
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
   }
-
   try {
     execFileSync("git", ["ls-files", "--error-unmatch", migration], {
       cwd: new URL("..", import.meta.url),
