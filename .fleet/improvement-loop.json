@@ -1,0 +1,17 @@
+{
+  "items": {
+    "98c27adb61": {
+      "at": "2026-08-21T07:18:01.316Z",
+      "receipt": {
+        "commit": "885a7a9",
+        "note": "already resolved on main by PR #159 (885a7a9 in-content CTA) + PR #199 (guard); reverified live 2026-08-21",
+        "pr": 159,
+        "report": "/home/nish/workspaces/agent-worktrees/REPORT-.packet-tinystudio-io-lane1-1787296244180.md"
+      },
+      "reverify_count": 0,
+      "reverify_history": [],
+      "status": "resolved"
+    }
+  },
+  "version": 1
+}
