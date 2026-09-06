@@ -781,6 +781,38 @@ for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agen
   }
 }
 
+// ---- Meta description guard ------------------------------------------------
+// The dogfood finding that shipped this block: rendered pages carried no meta
+// description, so search results and link previews fell back to arbitrary
+// text. Every owned public page must carry exactly one non-empty
+// name="description" tag in <head>, and the five must not duplicate each other.
+const describedPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+const descriptions = [];
+for (const [pageName, pageHtml] of describedPages) {
+  const head = pageHtml.match(/<head>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const tags = [...head.matchAll(/<meta\b[^>]*\bname="description"[^>]*>/gi)].map((match) => match[0]);
+  if (tags.length !== 1) {
+    failures.push(`Meta description: ${pageName} must carry exactly one name="description" tag in <head> (found ${tags.length}).`);
+    continue;
+  }
+  const content = tags[0].match(/\bcontent="([^"]*)"/i)?.[1] ?? "";
+  if (!content.trim()) {
+    failures.push(`Meta description: ${pageName} description must not be empty.`);
+  }
+  descriptions.push(content.trim().toLowerCase());
+}
+
+if (new Set(descriptions).size !== descriptions.length) {
+  failures.push("Meta description: the five page descriptions must be unique.");
+}
+
 if (failures.length) {
   console.error(failures.map((failure) => `- ${failure}`).join("\n"));
   process.exit(1);
