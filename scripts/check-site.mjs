@@ -124,8 +124,6 @@ const requiredWorkerCopy = [
 
 const requiredPublicArtifacts = [
   "human-reviewed managed service",
-  "The Website Correction",
-  "founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer",
   "There are no revenue, ranking, ROAS, conversion, booked-call, or sales-volume guarantees",
   "not autonomous software",
   "Client-side code does not call model providers",
@@ -172,6 +170,68 @@ for (const text of requiredWorkerCopy) {
 for (const text of requiredPublicArtifacts) {
   const haystack = `${llms}\n${offer}`;
   if (!haystack.includes(text)) failures.push(`Missing public artifact copy: ${text}`);
+}
+
+// ---- Identity: one canonical sentence, one service boundary -----------------
+// TinyStudio shares its name with unrelated Tiny Studio businesses (the
+// subtitling app at tinystudio.ai, the fibre-arts magazine, the Swiss design
+// agency at tinystudio.ch, The Tiny Studio LA, Tiny Studio LLC, TinyStudio TV),
+// which the AI-search evidence captured. The canonical sentence ties the
+// wordmark, the house name, and the domain to the one thing TinyStudio does,
+// so a reader or an assistant can tell them apart from the sentence and the
+// offer facts alone. It must sit on every owned public page and in offer.md.
+const canonicalSentence =
+  "TinyStudio (The Tiny Studio, at tinystudio.io) runs free website appraisals of high-ticket service homepages and a human-signed monthly desk that closes what the appraisal finds.";
+
+const ownedPublicPages = {
+  "index.html": read("public/index.html"),
+  "agents.html": read("public/agents.html"),
+  "audit.html": read("public/audit.html"),
+  "specimen.html": read("public/specimen.html")
+};
+
+for (const [page, html] of Object.entries(ownedPublicPages)) {
+  if (!html.includes(canonicalSentence)) {
+    failures.push(`Missing canonical identity sentence on ${page}.`);
+  }
+}
+if (!offer.includes(canonicalSentence)) {
+  failures.push("Missing canonical identity sentence in offer.md.");
+}
+
+// Stale identity: the retired "The Website Correction" offer, its founder-pilot
+// price, and its Managed-IT/MSP buyer must not survive anywhere in the owned
+// set. (llms.txt is served but is outside this packet's owned files and still
+// carries the retired wording; the absence checks deliberately cover only the
+// owned artifacts: offer.md and the four pages above.)
+const ownedCopy = [offer, ...Object.values(ownedPublicPages)].join("\n");
+for (const stale of ["The Website Correction", "founder pilot", "Managed IT", "$1,000"]) {
+  if (ownedCopy.includes(stale)) {
+    failures.push(`Stale identity copy must not appear in the owned set: ${stale}`);
+  }
+}
+
+// Offer facts in offer.md must stay consistent with the site pages: free
+// appraisal, six a month, five working days, desk price and minimum, delivery
+// guarantee, human review boundary, legacy Agent Desk rails, contact.
+const requiredOfferFacts = [
+  canonicalSentence,
+  "The Website Appraisal",
+  "complimentary and yours to keep",
+  "Six a month",
+  "Findings inside five working days",
+  "$2,500 a month",
+  "three-month minimum",
+  "delivery guarantee",
+  "fourteen working days",
+  "Human review gates",
+  "never autonomously sends, publishes, spends, approves, accepts, or renews",
+  "Legacy Agent Desk",
+  "No ad account connection",
+  "hello@tinystudio.io"
+];
+for (const text of requiredOfferFacts) {
+  if (!offer.includes(text)) failures.push(`Missing offer.md fact: ${text}`);
 }
 
 function formFieldTags(html) {

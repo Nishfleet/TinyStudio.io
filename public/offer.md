@@ -1,16 +1,18 @@
-# The Website Correction
+# TinyStudio — The Tiny Studio at tinystudio.io
 
-TinyStudio sells one human-reviewed managed service: The Website Correction. It is a managed service with human review, not autonomous software.
+TinyStudio (The Tiny Studio, at tinystudio.io) runs free website appraisals of high-ticket service homepages and a human-signed monthly desk that closes what the appraisal finds.
 
-## Buyer
+The desk is TinyStudio's only paid service — a human-reviewed managed service, not autonomous software. The appraisal is free and is not sold.
 
-Founder-led Managed IT, MSP, and cybersecurity companies with a live site and a high-value offer.
+## The free appraisal: The Website Appraisal
 
-## Promise
+The Website Appraisal is complimentary and yours to keep, whether or not TinyStudio ever does the work. Six a month; when the sixth is taken, the intake closes until the next. Findings inside five working days. No call at any point.
 
-In seven working days, TinyStudio fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
+## The desk
 
-## Included
+In seven working days, the desk fixes one highest-leverage page and gives the team an implementation-ready, proof-backed next step.
+
+Included:
 
 - fault map for the selected page
 - rewrite or redesign of that page
@@ -22,13 +24,15 @@ In seven working days, TinyStudio fixes one highest-leverage page and gives the 
 - one revision
 - 14-day implementation tracking
 
-## Day 0
+### Price and start
 
-The clock starts only after payment, required context, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
+The desk runs at $2,500 a month on a three-month minimum, with a delivery guarantee: if the month-one deliverables are not in hand within fourteen working days of Day 0, month one is refunded in full.
 
-## Price
+Day 0 begins only after payment, access, an approval owner, and an implementation owner are confirmed. Client delay pauses the clock.
 
-The first 3 clients are exactly $1,000 founder pilots. No other active price is offered in this pilot lane.
+## Buyer
+
+High-ticket clinics, surgeons, dentists, spas, private members' clubs, property, dealers, brokers and similar businesses. Clients are never named.
 
 ## Review Boundary
 
