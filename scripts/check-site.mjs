@@ -766,6 +766,39 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
 }
 
+// ---- Meta descriptions ------------------------------------------------------
+// Every owned public page must carry exactly one valid, non-empty meta
+// description inside its head, and no two pages may share a description
+// string: a search reader must get a page-specific snippet for each surface.
+const describedPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+
+const seenDescriptions = new Map();
+for (const [pageName, pageHtml] of describedPages) {
+  const head = pageHtml.match(/<head>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const tags = [...head.matchAll(/<meta\b[^>]*\bname=["']description["'][^>]*>/gi)].map((match) => match[0]);
+  const contents = tags
+    .map((tag) => tag.match(/\bcontent=["']([^"']*)["']/i)?.[1] ?? "")
+    .filter((content) => content.trim().length > 0);
+  if (tags.length !== 1 || contents.length !== 1) {
+    failures.push(`Meta description on ${pageName} must be exactly one non-empty tag inside head.`);
+    continue;
+  }
+  const description = contents[0];
+  if (description !== description.trim()) {
+    failures.push(`Meta description on ${pageName} must not be padded with surrounding whitespace.`);
+  }
+  if (seenDescriptions.has(description)) {
+    failures.push(`Meta description on ${pageName} duplicates the one on ${seenDescriptions.get(description)}; each page needs its own description.`);
+  }
+  seenDescriptions.set(description, pageName);
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
