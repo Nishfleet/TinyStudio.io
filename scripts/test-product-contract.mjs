@@ -20,13 +20,16 @@
 //      checker proves it rejects the regressions it guards, not just that the
 //      current files pass.
 //
-// Status is only accepted in the leading status banner immediately after each
-// document's H1; conflicting status claims are rejected, an active Agent Desk
-// framing fails even when the required current-product terms also appear, and
-// the current plan's no-guarantees boundary requires an explicit negation tied
-// to guarantee/promise language rather than a frozen sentence — every clause
-// carrying guarantee/promise language must carry that negation itself, and a
-// demotion word never excuses an active Agent Desk claim elsewhere on the line.
+// Status is only accepted as the leading banner's actual bounded status
+// declaration immediately after each document's H1 (prose that merely mentions
+// the marker, like "Previously Status: CURRENT; now retired.", does not count);
+// conflicting status claims are rejected. Every active Agent Desk claim on a
+// line is evaluated and a demotion word never excuses one, so a negated first
+// clause cannot hide a later positive claim. The current plan's no-guarantees
+// boundary requires an explicit negation tied to each guarantee/promise claim
+// — a negation elsewhere in the clause (e.g. "with no refunds") does not excuse
+// a positive guarantee — and its Boundaries must disclose that `/api/signups`
+// persists the submitted website URL alongside the email, not just the email.
 //
 // The guard is deliberately scoped to repository contract truth. Runtime
 // behavior of public/ and src/ is owned by the application test suite, exact
@@ -87,11 +90,20 @@ function leadingStatusBanner(text) {
   return banner.join("\n");
 }
 
-// True when `marker` sits in the leading banner, not merely somewhere in the
-// document body.
+// True when `marker` sits in the leading banner as the banner's actual bounded
+// status declaration: the marker opens a banner line (after the blockquote and
+// optional bold) and closes at a declaration terminator — bold close, period,
+// em dash, or line end. Prose that merely mentions the marker, such as
+// "Previously Status: CURRENT; now retired.", does not declare status.
 function hasLeadingStatus(text, marker) {
   const banner = leadingStatusBanner(text);
-  return banner !== null && banner.includes(marker);
+  if (banner === null) return false;
+  const escaped = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const declaration = new RegExp(
+    `^>\\s*(?:\\*{1,2}\\s*)?${escaped}(?=\\s*(?:\\*{1,2}|\\.|\u2014)|$)`,
+    "im"
+  );
+  return declaration.test(banner);
 }
 
 // Status markers that contradict each expected marker wherever they appear:
@@ -111,11 +123,12 @@ function conflictingStatusMarkers(text, marker) {
 
 // Lines that mention the Agent Desk must never present it as current, active,
 // reopening, back, or the product/offer — even in a document that also names
-// The Website Appraisal and human-reviewed delivery. The active claim is
-// detected first: a demotion word ("retired", "legacy") elsewhere on the line
-// does not excuse a line that reactivates the desk; the line passes only when
-// the clause holding the active claim carries its own explicit negation
-// ("not", "never", "no longer", "without").
+// The Website Appraisal and human-reviewed delivery. Every active claim on a
+// line is evaluated, not just the first match: a demotion word elsewhere on
+// the line does not excuse a claim that reactivates the desk, and each claim
+// passes only when the clause holding it carries its own explicit negation
+// ("not", "never", "no longer", "without"). A negated first clause therefore
+// never hides a later positive claim on the same line.
 const AGENT_DESK_ACTIVE_PATTERNS = [
   /reopen/i,
   /Agent Desk[^\n.]{0,120}(current|active|alive|returning|back)/i,
@@ -129,12 +142,19 @@ function agentDeskFramingIssues(text) {
   const issues = [];
   for (const line of text.split(/\r?\n/)) {
     if (!/\bAgent Desk\b/i.test(line)) continue;
-    const activeMatch = AGENT_DESK_ACTIVE_PATTERNS
-      .map((pattern) => line.match(pattern))
-      .find((match) => match !== null);
-    if (activeMatch === undefined) continue;
-    const claimEnd = activeMatch.index + activeMatch[0].length;
-    if (!AGENT_DESK_NEGATED.test(clauseAround(line, claimEnd - 1))) {
+    let unnegatedClaim = false;
+    for (const pattern of AGENT_DESK_ACTIVE_PATTERNS) {
+      const globalPattern = new RegExp(pattern.source, `${pattern.flags}g`);
+      for (const match of line.matchAll(globalPattern)) {
+        const claimEnd = match.index + match[0].length;
+        if (!AGENT_DESK_NEGATED.test(clauseAround(line, claimEnd - 1))) {
+          unnegatedClaim = true;
+          break;
+        }
+      }
+      if (unnegatedClaim) break;
+    }
+    if (unnegatedClaim) {
       issues.push(`must not present the retired Agent Desk as current, reopening, or the product/offer: ${line.trim()}`);
     }
   }
@@ -184,12 +204,16 @@ function sectionText(text, heading) {
 }
 
 // The current plan keeps its no-guarantees boundary only when at least one
-// Boundaries clause ties an explicit negation (no, not, never, must not,
-// without) to guarantee/promise language — and every other clause carrying
-// guarantee/promise language is negated too. Clauses are split at contrast
+// Boundaries claim ties an explicit negation (no, not, never, must not,
+// without) to guarantee/promise language — and every other guarantee/promise
+// claim in the section is negated too. The negation must precede the
+// guarantee/promise term it governs inside the same clause: a negation
+// anywhere else in the surrounding clause (e.g. "We guarantee ten booked
+// calls, with no refunds.") excuses nothing. Clauses are split at contrast
 // words (but, however, yet) and sentence/semicolon boundaries, never inside
-// comma-separated outcome lists, so a negation in one clause does not excuse a
-// positive guarantee/promise claim in another. Exact sentences are not frozen.
+// comma-separated outcome lists, so a negation in one clause does not excuse
+// a positive guarantee/promise claim in another. Exact sentences are not
+// frozen.
 const GUARANTEE_TERMS = /\b(guarantee|guarantees|promise|promises)\b/i;
 const GUARANTEE_NEGATIONS = /\b(no|not|never|must not|without)\b/i;
 
@@ -202,18 +226,36 @@ function boundaryGuaranteeIssues(text) {
   let negated = false;
   for (const line of section.split(/\r?\n/)) {
     for (const clause of clausesOf(line)) {
-      if (!GUARANTEE_TERMS.test(clause)) continue;
-      if (GUARANTEE_NEGATIONS.test(clause)) {
-        negated = true;
-        continue;
+      const terms = clause.matchAll(new RegExp(GUARANTEE_TERMS.source, `${GUARANTEE_TERMS.flags}g`));
+      for (const term of terms) {
+        if (GUARANTEE_NEGATIONS.test(clause.slice(0, term.index))) {
+          negated = true;
+          continue;
+        }
+        issues.push(`spec 004 Boundaries must tie an explicit negation (no, not, never, must not, without) to guarantee/promise language: ${clause.trim()}`);
       }
-      issues.push(`spec 004 Boundaries must tie an explicit negation (no, not, never, must not, without) to guarantee/promise language: ${clause.trim()}`);
     }
   }
   if (!negated) {
     issues.push("spec 004 Boundaries must tie an explicit negation (no, not, never, must not, without) to guarantee/promise language");
   }
   return issues;
+}
+
+// --- Persisted signup data disclosure --------------------------------------
+
+// `/api/signups` persists the normalized submitted website URL in D1 alongside
+// the email and lightweight request metadata, so the Boundaries must disclose
+// that storage: an `email ... only` boundary that omits the website URL — or
+// claims the URL is not stored — under-discloses what the source implements.
+// Only the disclosure itself is asserted; exact wording is not frozen.
+const WEBSITE_STORED =
+  /(?:\bwebsite\b[^\n.;]{0,90}\b(?:persist|store|save|keep|kept|retain|record|write)[a-z]*\b|\b(?:persist|store|save|keep|kept|retain|record|write)[a-z]*\b[^\n.;]{0,90}\bwebsite\b)/i;
+const WEBSITE_NOT_STORED =
+  /\bwebsite\b[^\n.;]{0,90}\bnot\b[^\n.;]{0,25}\b(?:persist|store|save|keep|kept|retain|record|write)[a-z]*\b/i;
+
+function websiteStorageDisclosed(section) {
+  return WEBSITE_STORED.test(section) && !WEBSITE_NOT_STORED.test(section);
 }
 
 // Returns a list of human-readable violations for the top-level framing of a
@@ -292,6 +334,9 @@ test("the current plan exists at specs/004-website-appraisal/plan.md", () => {
   assert.ok(plan.includes(CURRENT_PRODUCT), "spec 004 must name The Website Appraisal");
   assert.ok(plan.includes(CURRENT_DELIVERY), "spec 004 must name human-reviewed delivery");
   assert.deepEqual(boundaryGuaranteeIssues(plan), [], boundaryGuaranteeIssues(plan).join("; "));
+  const boundaries = sectionText(plan, "## Boundaries");
+  assert.ok(boundaries !== null, "spec 004 must keep a Boundaries section");
+  assert.ok(websiteStorageDisclosed(boundaries), "spec 004 Boundaries must disclose that the normalized submitted website URL is persisted in D1");
   assert.ok(plan.includes("/audit"), "spec 004 must keep the /audit appraisal surface");
   assert.ok(plan.includes("/agents"), "spec 004 must keep the /agents desk surface");
   assert.ok(plan.includes("/pricing"), "spec 004 must keep the /pricing surface");
