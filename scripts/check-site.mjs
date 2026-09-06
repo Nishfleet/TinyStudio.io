@@ -393,6 +393,47 @@ for (const [file, needles] of responsiveCss) {
   }
 }
 
+// Render-blocking regression guard (dogfood b8f6046e942a): the Fraunces/Karla
+// stylesheet from fonts.googleapis.com is the only external render-blocking
+// resource on the shared public pages. Each page must load it through the
+// media="print" onload swap so first paint does not wait on the font round
+// trip, keep a noscript fallback so no-JS visitors still get the webfonts,
+// and shared.css must not reintroduce a CSS @import (which serializes behind
+// its own download and cannot start until shared.css arrives).
+const fontPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["agents page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")]
+];
+const sharedCss = read("public/shared.css");
+if (/@import[^;]*fonts\.googleapis\.com/i.test(sharedCss)) {
+  failures.push("shared.css must not load Google Fonts through a CSS @import (render-blocking).");
+}
+for (const [pageName, pageHtml] of fontPages) {
+  const head = pageHtml.match(/<head>[\s\S]*?<\/head>/i)?.[0] || "";
+  const headSansNoscript = head.replace(/<noscript>[\s\S]*?<\/noscript>/gi, "");
+  const activeLinks = [...headSansNoscript.matchAll(/<link\b[^>]*href="https:\/\/fonts\.googleapis\.com\/css2[^"]*"[^>]*>/gi)].map((match) => match[0]);
+  if (activeLinks.length !== 1) {
+    failures.push(`${pageName} must load exactly one Google Fonts stylesheet (found ${activeLinks.length}).`);
+  } else if (!/\bmedia="print"/.test(activeLinks[0]) || !/onload="this\.media='all'"/.test(activeLinks[0])) {
+    failures.push(`${pageName} Google Fonts stylesheet must load asynchronously (media="print" onload swap).`);
+  }
+  const noscript = head.match(/<noscript>[\s\S]*?<\/noscript>/i)?.[0] || "";
+  const hasNoscriptFontLink = /<link\b[^>]*>/i.test(noscript) &&
+    noscript.includes("fonts.googleapis.com/css2") &&
+    noscript.includes('rel="stylesheet"');
+  if (!hasNoscriptFontLink) {
+    failures.push(`${pageName} must keep a noscript Google Fonts fallback stylesheet.`);
+  }
+}
+// The Agent Desk surface (styles.css) uses a system font stack and no external
+// stylesheet; guard that it does not reintroduce a CSS @import of any kind.
+if (/@import[^;]*url\(/i.test(styles)) {
+  failures.push("styles.css must not load external stylesheets through a CSS @import.");
+}
+
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
