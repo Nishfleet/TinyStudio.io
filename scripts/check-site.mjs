@@ -766,6 +766,50 @@ for (const [pageName, pageHtml] of ownedPages) {
   }
 }
 
+// ---- Meta description regression guard --------------------------------------
+// Each owned page carries exactly one meta description: non-empty, inside the
+// head, and unique across the site. Each description also keeps an anchor
+// phrase taken from that page's own copy, so removing a description,
+// duplicating one, or recycling another page's fails loudly without pinning
+// the full sentence (which would force a review on any copy edit).
+const descriptionPages = [
+  ["homepage", "index.html", "revenue depends on"],
+  ["audit page", "audit.html", "four passes"],
+  ["desk page", "agents.html", "seven specialists"],
+  ["pricing page", "pricing.html", "$2,500"],
+  ["specimen page", "specimen.html", "clinic"]
+];
+
+const isDescriptionTag = (tag) => /\bname\s*=\s*["']description["']/i.test(tag);
+const descriptionContent = (tag) => tag.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i)?.[2] ?? "";
+
+const seenDescriptions = new Set();
+for (const [pageName, file, anchor] of descriptionPages) {
+  const pageHtml = read(`public/${file}`);
+  const tags = [...pageHtml.matchAll(/<meta\b[^>]*>/gi)].map((match) => match[0]);
+  const descriptions = tags.filter(isDescriptionTag);
+  if (descriptions.length !== 1) {
+    failures.push(`${pageName} (${file}) must carry exactly one meta description, found ${descriptions.length}.`);
+    continue;
+  }
+  const head = pageHtml.match(/<head\b[^>]*>[\s\S]*?<\/head>/i)?.[0] ?? "";
+  if (!head.includes(descriptions[0])) {
+    failures.push(`${pageName} (${file}) meta description must live in the head.`);
+  }
+  const content = descriptionContent(descriptions[0]);
+  if (!content.trim()) {
+    failures.push(`${pageName} (${file}) meta description must be non-empty.`);
+    continue;
+  }
+  if (!content.toLowerCase().includes(anchor.toLowerCase())) {
+    failures.push(`${pageName} (${file}) meta description must keep the page anchor "${anchor}" (drifted or recycled).`);
+  }
+  if (seenDescriptions.has(content)) {
+    failures.push(`${pageName} (${file}) reuses another page's meta description; descriptions must be page-specific.`);
+  }
+  seenDescriptions.add(content);
+}
+
 for (const migration of ["migrations/0002_agent_runs.sql", "migrations/0003_agent_usage_limits.sql"]) {  if (!existsSync(new URL(`../${migration}`, import.meta.url))) {
     failures.push(`Missing migration: ${migration}`);
     continue;
