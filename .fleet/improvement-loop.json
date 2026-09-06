@@ -1,0 +1,15 @@
+{
+  "items": {
+    "3a3f9e0892": {
+      "at": "2026-08-21T09:18:18.170Z",
+      "receipt": {
+        "note": "UpCity (upcity.com) was decommissioned by Gartner Digital Markets in late Nov 2025; domain now serves \"This site is no longer supported... visit Capterra\". No venue exists to create a truthful profile on; GMB blocker moot. Finding recorded in docs/service/upcity-manual-profile-2026-08-21.md and .lane/reports/docs-upcity-venue-shutdown-2026-08-21.md (branch docs/upcity-venue-shutdown-2026-08-21).",
+        "report": "docs/service/upcity-manual-profile-2026-08-21.md"
+      },
+      "reverify_count": 0,
+      "reverify_history": [],
+      "status": "retired"
+    }
+  },
+  "version": 1
+}
