@@ -393,6 +393,28 @@ for (const [file, needles] of responsiveCss) {
   }
 }
 
+// Render-blocking regression guard: the homepage's Google Fonts stylesheet
+// must stay on the non-blocking path. It is the only third-party resource on
+// the first-paint path (dogfood finding b8f6046e942a observed css2 blocking
+// first paint alongside index.css), so it must keep the media="print" swap
+// with a noscript fallback. Static source guard, not a network-timing
+// measurement: CI has no browser. index.css stays a blocking stylesheet on
+// purpose — it is first-party and carries first-paint styling.
+const fontsLink = siteHome.match(/<link\b[^>]*fonts\.googleapis\.com\/css2[^>]*>/i)?.[0] || "";
+if (!fontsLink) {
+  failures.push("Homepage must load Google Fonts through the css2 stylesheet URL.");
+} else {
+  if (!/\bmedia="print"/i.test(fontsLink)) {
+    failures.push("Homepage Google Fonts link must carry media=\"print\" so it does not block first paint.");
+  }
+  if (!/\bonload="this\.media='all'"/i.test(fontsLink)) {
+    failures.push("Homepage Google Fonts link must swap media to all onload so the fonts still apply.");
+  }
+}
+if (!siteHome.match(/<noscript><link\b[^>]*fonts\.googleapis\.com\/css2[^>]*><\/noscript>/i)) {
+  failures.push("Homepage Google Fonts link needs a noscript fallback so no-JS visitors still get the fonts.");
+}
+
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
