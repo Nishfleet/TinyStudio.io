@@ -9,4 +9,16 @@
   <url>
     <loc>https://tinystudio.io/llms.txt</loc>
   </url>
+  <url>
+    <loc>https://tinystudio.io/audit</loc>
+  </url>
+  <url>
+    <loc>https://tinystudio.io/agents</loc>
+  </url>
+  <url>
+    <loc>https://tinystudio.io/pricing</loc>
+  </url>
+  <url>
+    <loc>https://tinystudio.io/specimen</loc>
+  </url>
 </urlset>
