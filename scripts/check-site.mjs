@@ -397,6 +397,72 @@ if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }
 
+// ---- Render-blocking Google Fonts chain guard ---------------------------
+// Dogfood finding b8f6046e942a: on the shared pages (audit/agents/pricing/
+// specimen) the Google Fonts css2 stylesheet is loaded via an @import at the
+// top of shared.css, which the browser can only start AFTER shared.css has
+// finished loading — a strictly serialized critical path (measured live:
+// css2 requestStart > shared.css responseEnd; local harness reproduces it).
+// The @import cannot be removed from shared.css without also giving
+// brief-requested.html (not owned by this packet) its own font source, and
+// the site CSP (script-src 'self', no 'unsafe-inline') forbids the inline
+// onload media-swap that async-font patterns rely on. The sound owned-file
+// fix is a same-URL <link rel="preload" as="style"> in each shared page
+// head: the browser fetches css2 in parallel with shared.css and the
+// @import resolves from that preload, so first paint waits for
+// max(shared.css, css2) instead of shared.css + css2. The preload must
+// (a) match the @import URL exactly, (b) stay no-cors (no crossorigin) so
+// it dedupes with the @import fetch, or the stylesheet is downloaded twice.
+// These are static source guards (CI has no browser); the measured behavior
+// is recorded in the candidate report.
+const sharedCssBody = read("public/shared.css");
+const sharedCssFontImport = sharedCssBody.match(/@import url\('([^']+)'\)/)?.[1] || "";
+if (!sharedCssFontImport || !sharedCssFontImport.startsWith("https://fonts.googleapis.com/css2")) {
+  failures.push("shared.css must import the Google Fonts css2 stylesheet; it is the font source for the shared pages and brief-requested.html.");
+} else {
+  for (const pageName of ["audit.html", "agents.html", "pricing.html", "specimen.html"]) {
+    const pageHtml = read(`public/${pageName}`);
+    const preloadTags = [...pageHtml.matchAll(/<link\b[^>]*rel="preload"[^>]*>/gi)].map((m) => m[0]);
+    const fontPreload = preloadTags.find((tag) => tag.includes("fonts.googleapis.com/css2"));
+    if (!fontPreload) {
+      failures.push(`${pageName} must preload the Google Fonts css2 stylesheet so it loads in parallel with shared.css.`);
+      continue;
+    }
+    if (!fontPreload.includes(`href="${sharedCssFontImport}"`)) {
+      failures.push(`${pageName} font preload must match the shared.css @import URL exactly.`);
+    }
+    if (!fontPreload.includes('as="style"')) {
+      failures.push(`${pageName} font preload must declare as="style".`);
+    }
+    if (/\bcrossorigin\b/i.test(fontPreload)) {
+      failures.push(`${pageName} font preload must stay no-cors (no crossorigin) so it dedupes with the @import fetch.`);
+    }
+  }
+}
+
+// brief-requested.html (not owned by this packet) gets its fonts ONLY from
+// shared.css's @import. If the import is ever removed, that page must first
+// carry its own css2 link, or the conversion page silently loses its fonts.
+const briefRequested = read("public/brief-requested.html");
+const briefHasOwnFontLink = /<link\b[^>]*fonts\.googleapis\.com\/css2[^>]*rel="stylesheet"/.test(briefRequested);
+if (!sharedCssFontImport && !briefHasOwnFontLink) {
+  failures.push("brief-requested.html must carry its own Google Fonts css2 link when shared.css drops its @import; it currently has no font source.");
+}
+
+// Homepage: the css2 must stay a plain render-blocking stylesheet link. The
+// site CSP (script-src 'self', no 'unsafe-inline') blocks the inline onload
+// media-swap that async-font patterns rely on, and no external script on
+// this page is owned by this packet, so a media="print"/onload variant here
+// would leave the site's fonts permanently disabled. The homepage css2
+// already fetches in parallel with index.css (no serialization), so the
+// remaining render-blocking status is a CSP/file-scope constraint, not a
+// critical-chain defect.
+const homeLinkTags = [...siteHome.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]);
+const homeFontLink = homeLinkTags.find((tag) => tag.includes("fonts.googleapis.com/css2"));
+if (!homeFontLink || !/rel="stylesheet"/.test(homeFontLink) || /media="print"|\bonload\s*=/i.test(homeFontLink)) {
+  failures.push("Homepage must keep the Google Fonts css2 as a plain rel=stylesheet link; the CSP blocks the inline onload swap that async loading needs.");
+}
+
 // ---- AI-search evidence artifact ---------------------------------------
 // The audit page carries a controlled-test evidence artifact for AI-search
 // discoverability. Fixtures in evidence-fixtures/ai-search/ are the single
