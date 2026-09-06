@@ -122,13 +122,25 @@ const requiredWorkerCopy = [
   "noAutopublishing: true"
 ];
 
+// The machine-readable contract must describe the current human-reviewed
+// offer (free leak audit + Growth Desk), scope the Agent Desk as the engine
+// behind the free brief rather than the product, and keep the verified
+// limits and data handling accurate.
 const requiredPublicArtifacts = [
-  "self-serve AI Agent Desk",
+  "leak audit",
+  "six audits a month",
+  "five working days",
+  "one human signature",
+  "$2,500",
+  "three-month minimum",
+  "delivery guarantee",
+  "engine behind the free brief",
   "Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side",
   "Client-side code does not call model providers",
   "does not promise revenue, ROAS, profit, booked calls",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "are not stored by this app"
 ];
 
 const forbiddenClaims = [
