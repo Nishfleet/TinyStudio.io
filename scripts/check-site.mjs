@@ -123,12 +123,22 @@ const requiredWorkerCopy = [
 ];
 
 const requiredPublicArtifacts = [
-  "self-serve AI Agent Desk",
-  "Cloudflare Workers AI generates the Pipeline Brief, Implementation Checklist, and Weekly Fix Report server-side",
+  "Leak Audit",
+  "Growth Desk",
+  "The audit is free",
+  "Six a month",
+  "five working days",
+  "$2,500",
+  "three-month minimum",
+  "fourteen working days",
+  "Seven specialists",
+  "one human signature",
   "Client-side code does not call model providers",
   "does not promise revenue, ROAS, profit, booked calls",
   "No campaign publishing",
-  "No ad spend changes"
+  "No ad spend changes",
+  "are processed to generate the output and are not stored by this app",
+  "no public endpoint for reading collected emails"
 ];
 
 const forbiddenClaims = [
