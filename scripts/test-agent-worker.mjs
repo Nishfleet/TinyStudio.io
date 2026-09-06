@@ -1205,6 +1205,7 @@ test("retired API host frames the current offer as The Website Appraisal, not th
 
 class CountingStatement extends FakeStatement {
   async first() {
+    this.failIfInjected("first");
     this.db.calls.push({ method: "first", sql: this.sql, values: this.values });
     if (this.sql.includes("INSERT INTO agent_usage_limits")) {
       const bucketKey = this.values[0];
@@ -1214,11 +1215,21 @@ class CountingStatement extends FakeStatement {
     }
     return { count: 1 };
   }
+
+  async run() {
+    this.failIfInjected("run");
+    this.db.calls.push({ method: "run", sql: this.sql, values: this.values });
+    if (this.sql.includes("UPDATE agent_usage_limits") && this.sql.includes("count - 1")) {
+      const bucketKey = this.values[1];
+      this.db.counts.set(bucketKey, Math.max((this.db.counts.get(bucketKey) || 0) - 1, 0));
+    }
+    return { success: true };
+  }
 }
 
 class CountingDB extends FakeDB {
-  constructor() {
-    super();
+  constructor(options = {}) {
+    super(options);
     this.counts = new Map();
   }
 
@@ -1448,6 +1459,48 @@ test("storage failure: agent audit returns 503 storage_unavailable when a usage 
   );
 });
 
+test("storage failure: agent audit rolls back quota when the agent_runs insert throws", async () => {
+  const db = new CountingDB({
+    failures: { run: (sql) => sql.includes("INSERT INTO agent_runs") }
+  });
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(
+    agentRequest(validBody(), { "CF-Connecting-IP": "203.0.113.165" }),
+    { DB: db, AI: ai }
+  );
+  assert.equal(res.status, 503);
+  assert.equal((await res.json()).error, "storage_unavailable");
+  assert.equal(ai.calls.length, 0, "the model must not run when the usage write failed");
+  for (const [key, count] of db.counts) {
+    assert.equal(count, 0, `net usage for ${key} must be 0 after rollback, got ${count}`);
+  }
+});
+
+test("storage failure: agent audit rolls back the IP counter when the email counter write throws", async () => {
+  let usageFirsts = 0;
+  const db = new CountingDB({
+    failures: {
+      first: (sql) => {
+        if (!sql.includes("INSERT INTO agent_usage_limits")) return false;
+        usageFirsts += 1;
+        return usageFirsts === 2;
+      }
+    }
+  });
+  const ai = new FakeAI(VALID_AGENT_OUTPUT);
+  const res = await worker.fetch(
+    agentRequest(validBody(), { "CF-Connecting-IP": "203.0.113.166" }),
+    { DB: db, AI: ai }
+  );
+  assert.equal(res.status, 503);
+  assert.equal((await res.json()).error, "storage_unavailable");
+  assert.equal(ai.calls.length, 0);
+  assert.equal(usageFirsts, 2, "the email counter must have been the failing write");
+  for (const [key, count] of db.counts) {
+    assert.equal(count, 0, `net usage for ${key} must be 0 after rollback, got ${count}`);
+  }
+});
+
 test("storage failure: agent audit returns 503 storage_unavailable when the email_signups write throws and never runs the model", async () => {
   const db = failingDB({ runSql: "INSERT INTO email_signups" });
   const ai = new FakeAI(VALID_AGENT_OUTPUT);
@@ -1459,6 +1512,16 @@ test("storage failure: agent audit returns 503 storage_unavailable when the emai
   assert.equal(body.error, "storage_unavailable");
   assert.equal(ai.calls.length, 0, "no model call may happen when the signup write failed");
   assert.equal(body.model, undefined, "no success payload may claim a model");
+  assert.equal(
+    db.calls.some((call) => call.sql.includes("INSERT INTO agent_usage_limits")),
+    false,
+    "quota must not be consumed when the signup write failed"
+  );
+  assert.equal(
+    db.calls.some((call) => call.sql.includes("INSERT INTO agent_runs")),
+    false,
+    "no agent run may be recorded when the signup write failed"
+  );
 });
 
 // --- real D1 schema: the migrations must build the schema the worker SQL runs against ---
@@ -1630,6 +1693,11 @@ const WORKER_USAGE_COUNTER_SQL = `
     updated_at = excluded.updated_at
   RETURNING count`;
 
+const WORKER_USAGE_DECREMENT_SQL = `
+  UPDATE agent_usage_limits
+  SET count = MAX(count - 1, 0), updated_at = ?
+  WHERE bucket_key = ?`;
+
 const WORKER_AGENT_RUNS_SQL = `
   INSERT INTO agent_runs (id, email, source, page_path, ip_hash, user_agent, created_at)
   VALUES (?, ?, ?, ?, ?, ?, ?)`;
@@ -1696,6 +1764,13 @@ test("the exact worker agent SQL runs on the migrated schema: usage counters inc
   assert.equal(Number(first.count), 1, "first hit in the bucket must start the counter at 1");
   const second = db.prepare(WORKER_USAGE_COUNTER_SQL).get(bucketKey, now, now);
   assert.equal(Number(second.count), 2, "second hit in the bucket must increment the counter");
+  db.prepare(WORKER_USAGE_DECREMENT_SQL).run(now, bucketKey);
+  const afterDecrement = db.prepare("SELECT count FROM agent_usage_limits WHERE bucket_key = ?").get(bucketKey);
+  assert.equal(Number(afterDecrement.count), 1, "the worker decrement must lower the counter by one");
+  db.prepare(WORKER_USAGE_COUNTER_SQL).get(bucketKey, now, now);
+
+  const workerSource = readFileSync(new URL("../src/worker.js", import.meta.url), "utf8");
+  assert.equal(workerSource.includes("count = MAX(count - 1, 0)"), true, "worker must ship the decrement SQL the schema test just ran");
 
   db.prepare(WORKER_AGENT_RUNS_SQL).run(
     "6f0d0a5c-9a2e-4b1f-8c3d-1e2f3a4b5c6d", "nish+agent-test@tinystudio.io", "agent-self-serve", "/", "5d3d0e9e1f2a3b4c5d6e7f8a9b0c1d2e", "tinystudio-worker-test", now

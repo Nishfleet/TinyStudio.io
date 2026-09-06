@@ -410,7 +410,19 @@ async function incrementUsageCounter(env, bucketKey) {
   return Number(result?.count || 0);
 }
 
+async function decrementUsageCounter(env, bucketKey) {
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `UPDATE agent_usage_limits
+     SET count = MAX(count - 1, 0), updated_at = ?
+     WHERE bucket_key = ?`
+  )
+    .bind(now, bucketKey)
+    .run();
+}
+
 async function enforceAgentLimits(request, env, email, url) {
+  const committed = { ipKey: null, emailKey: null, runId: null };
   try {
     // Test-only clock override: production never binds AGENT_LIMITS_NOW, so
     // runtime behaviour is unchanged when it is absent. The worker test suite
@@ -421,6 +433,7 @@ async function enforceAgentLimits(request, env, email, url) {
 
     if (ipHash) {
       const ipCount = await incrementUsageCounter(env, `ip:${bucket}:${ipHash}`);
+      committed.ipKey = `ip:${bucket}:${ipHash}`;
 
       if (ipCount > MAX_AGENT_RUNS_PER_IP_PER_DAY) {
         return { ok: false, response: jsonResponse({ ok: false, error: "daily_ip_limit" }, { status: 429 }) };
@@ -428,17 +441,19 @@ async function enforceAgentLimits(request, env, email, url) {
     }
 
     const emailCount = await incrementUsageCounter(env, `email:${bucket}:${email}`);
+    committed.emailKey = `email:${bucket}:${email}`;
     if (emailCount > SOFT_AGENT_RUNS_PER_EMAIL_PER_DAY) {
       console.warn("tinystudio_agent_soft_email_limit", JSON.stringify({ emailCount }));
       return { ok: false, response: jsonResponse({ ok: false, error: "daily_email_limit" }, { status: 429 }) };
     }
 
+    const runId = crypto.randomUUID();
     await env.DB.prepare(
       `INSERT INTO agent_runs (id, email, source, page_path, ip_hash, user_agent, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
-        crypto.randomUUID(),
+        runId,
         email,
         "agent-self-serve",
         signupPagePath(request, url.pathname),
@@ -447,8 +462,22 @@ async function enforceAgentLimits(request, env, email, url) {
         new Date().toISOString()
       )
       .run();
+    committed.runId = runId;
   } catch (error) {
     console.warn("tinystudio_agent_storage_failed", error.message || "storage failed");
+    try {
+      if (committed.runId) {
+        await env.DB.prepare("DELETE FROM agent_runs WHERE id = ?").bind(committed.runId).run();
+      }
+      if (committed.emailKey) {
+        await decrementUsageCounter(env, committed.emailKey);
+      }
+      if (committed.ipKey) {
+        await decrementUsageCounter(env, committed.ipKey);
+      }
+    } catch (rollbackError) {
+      console.warn("tinystudio_agent_storage_rollback_failed", rollbackError.message || "rollback failed");
+    }
     return { ok: false, response: jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 }) };
   }
 
@@ -1130,15 +1159,15 @@ async function agentAuditResponse(request, env, url) {
     return jsonResponse({ ok: false, error: "invalid_input", message: validationError }, { status: 400 });
   }
 
-  const limit = await enforceAgentLimits(request, env, input.email, url);
-  if (!limit.ok) return limit.response;
-
   try {
     await saveEmailSignup(request, env, url, input.email, "agent-self-serve");
   } catch (error) {
     console.warn("tinystudio_agent_signup_storage_failed", error.message || "storage failed");
     return jsonResponse({ ok: false, error: "storage_unavailable" }, { status: 503 });
   }
+
+  const limit = await enforceAgentLimits(request, env, input.email, url);
+  if (!limit.ok) return limit.response;
 
   const messages = [
     { role: "system", content: agentSystemPrompt() },

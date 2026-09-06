@@ -197,6 +197,23 @@ if (worker.includes("checks.ai && checks.db")) {
   failures.push("Worker /health verdict must not gate on the retired Agent Desk AI binding");
 }
 
+// Agent-audit storage honesty: persist the email_signups lead BEFORE consuming
+// daily quota / writing agent_runs. Reversing that order records usage on a
+// 503 storage_unavailable response and can turn retries into 429.
+{
+  const start = worker.indexOf("async function agentAuditResponse");
+  const next = worker.indexOf("\nasync function healthResponse", start);
+  const body = start >= 0 && next > start ? worker.slice(start, next) : "";
+  const signupAt = body.indexOf("saveEmailSignup");
+  const limitsAt = body.indexOf("enforceAgentLimits");
+  if (!(signupAt >= 0 && limitsAt >= 0 && signupAt < limitsAt)) {
+    failures.push("Worker agent audit must persist email_signups before consuming agent usage limits");
+  }
+  if (!worker.includes("tinystudio_agent_storage_rollback_failed")) {
+    failures.push("Worker must roll back partial agent usage when a later storage write throws");
+  }
+}
+
 for (const text of requiredPublicArtifacts) {
   // llms.txt and offer.md are mirrors of the same offer contract. A fact must
   // appear in BOTH (case-insensitively, since one file may head it while the
