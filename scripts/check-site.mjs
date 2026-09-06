@@ -393,6 +393,106 @@ for (const [file, needles] of responsiveCss) {
   }
 }
 
+// Render-blocking font stylesheet guards (dogfood finding b8f6046e942a).
+// The Google Fonts css2 stylesheet was fetched render-blocking on every public
+// page — a <link rel="stylesheet"> in the homepage head, and an @import chain
+// inside shared.css for the shared pages (audit, agents, pricing, specimen,
+// brief-requested). The fix preloads the same css2 URL as a style resource,
+// promotes it via the same-origin public/fonts.js script, and removes the
+// @import from shared.css. An inline onload swap is FORBIDDEN: the worker's
+// Content-Security-Policy (script-src 'self', no 'unsafe-inline') blocks
+// inline event handlers, so that shape silently drops the fonts under the
+// production CSP. These are STATIC SOURCE GUARDS (regex over the served
+// files), not network-timing tests: CI has no browser, so they assert the
+// blocking shape cannot return, not that the font CDN is fast.
+const fontCssHref = "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;1,9..144,200;1,9..144,300&family=Karla:wght@300;400;500;600;700&display=swap";
+
+const fontPages = [
+  ["homepage", siteHome],
+  ["audit page", siteAudit],
+  ["desk page", read("public/agents.html")],
+  ["pricing page", read("public/pricing.html")],
+  ["specimen page", read("public/specimen.html")],
+  ["brief-requested page", read("public/brief-requested.html")]
+];
+
+const sharedCss = read("public/shared.css");
+let fontScript = "";
+try {
+  fontScript = read("public/fonts.js");
+} catch {
+  failures.push("public/fonts.js must exist (same-origin font promotion script).");
+}
+
+// The shared stylesheet must not carry the @import chain that blocked first
+// paint on every page that links it.
+if (/@import\b[^;]*fonts\.googleapis\.com/i.test(sharedCss)) {
+  failures.push("shared.css must not @import the Google Fonts stylesheet (render-blocking chain).");
+}
+
+// The same-origin promotion script must exist and re-insert the preloaded URL
+// as a real stylesheet (script-src 'self' allows it; inline onload does not),
+// and the worker must serve it — the PUBLIC_ASSET_PATHS allow-list is the
+// only path to /fonts.js, and an unlisted asset gets a 404.
+if (fontScript) {
+  if (!fontScript.includes('link[rel="preload"][as="style"][data-fonts-css]')) {
+    failures.push("fonts.js must select the preload link via [data-fonts-css].");
+  }
+  if (!fontScript.includes('link.rel = "stylesheet"') || !fontScript.includes('document.head.appendChild(link)')) {
+    failures.push("fonts.js must promote the preload link to a stylesheet.");
+  }
+}
+if (!worker.includes('"/fonts.js"')) {
+  failures.push("Worker must serve /fonts.js from the public asset allow-list.");
+}
+
+for (const [pageName, pageHtml] of fontPages) {
+  // Fonts must still load (visual contract): preload as style + promotion.
+  if (!pageHtml.includes(`rel="preload" as="style" data-fonts-css href="${fontCssHref}"`)) {
+    failures.push(`${pageName} must preload the font stylesheet (non-blocking): ${fontCssHref}`);
+  }
+  // The promotion must come from the same-origin script, never an inline
+  // handler: the production CSP blocks inline onload, silently dropping fonts.
+  if (/<link\b[^>]*data-fonts-css[^>]*\bonload=/i.test(pageHtml)) {
+    failures.push(`${pageName} must not use an inline onload for the font preload (blocked by the production CSP).`);
+  }
+  if (!pageHtml.includes('<script src="fonts.js" defer></script>')) {
+    failures.push(`${pageName} must load the same-origin font promotion script.`);
+  }
+  // No-JS fallback must keep a blocking link inside <noscript>.
+  if (!pageHtml.includes(`<noscript><link rel="stylesheet" href="${fontCssHref}"></noscript>`)) {
+    failures.push(`${pageName} must keep the font stylesheet as a noscript fallback.`);
+  }
+  // A render-blocking font link must not appear outside <noscript> (attribute
+  // order-insensitive, since rel= and href= may appear in either order).
+  const outsideNoscript = pageHtml.replace(/<noscript>[\s\S]*?<\/noscript>/gi, "");
+  const blockingFontLink = [...outsideNoscript.matchAll(/<link\b[^>]*>/gi)]
+    .map((match) => match[0])
+    .find((tag) => /\brel="stylesheet"/i.test(tag) && /href="https:\/\/fonts\.googleapis\.com[^"]*css2/i.test(tag));
+  if (blockingFontLink) {
+    failures.push(`${pageName} must not load the font stylesheet render-blocking (link rel=stylesheet): ${blockingFontLink}`);
+  }
+}
+
+// The behavioral font-timing proof (real Chromium measurement, local static
+// copies, simulated CDN delay) is checked in so the static guards above stay
+// distinguishable from it. Existence and section anchors only — this does not
+// re-verify measurements.
+const fontReceipt = read("docs/evidence/render-blocking-fonts-2026-08-08.md");
+for (const anchor of [
+  "unfixed",
+  "1500ms",
+  "non-blocking",
+  "waited for css2",
+  "Karla",
+  "not CI proof",
+  "Exact verification method"
+]) {
+  if (!fontReceipt.includes(anchor)) {
+    failures.push(`Font render-blocking evidence receipt must record the ${JSON.stringify(anchor)} section.`);
+  }
+}
+
 if (existsSync(new URL("../public/pipeline-sprint/index.html", import.meta.url))) {
   failures.push("Pipeline Sprint page should not remain as a separate stale public asset.");
 }

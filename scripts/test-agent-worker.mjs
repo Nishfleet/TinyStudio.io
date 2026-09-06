@@ -1017,3 +1017,31 @@ test("signup handler accepts a bare-domain website with a test email and stores 
   assert.equal(insert.values[0], "audit-check+test@example.com");
   assert.equal(insert.values[7], "https://example.com");
 });
+
+test("worker serves the same-origin font promotion script (render-blocking fix b8f6046e942a)", async () => {
+  // The production CSP (script-src 'self', no unsafe-inline) blocks inline
+  // onload handlers, so the pages promote the preloaded Google Fonts css2
+  // stylesheet through public/fonts.js. The worker must serve it (it sits in
+  // the PUBLIC_ASSET_PATHS allow-list) or the fonts silently never apply.
+  const served = new Map([
+    ["/fonts.js", "text/javascript;charset=UTF-8"]
+  ]);
+  const env = {
+    ASSETS: {
+      fetch(request) {
+        const path = new URL(request.url).pathname;
+        if (!served.has(path)) return Promise.resolve(new Response("missing", { status: 404 }));
+        return Promise.resolve(new Response("// font promotion", { status: 200, headers: { "Content-Type": served.get(path) } }));
+      }
+    }
+  };
+  const res = await worker.fetch(new Request("https://tinystudio.io/fonts.js"), env);
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("Content-Type") || "", /javascript/);
+});
+
+test("worker does not serve unlisted asset-like paths outside the public allow-list", async () => {
+  const env = { ASSETS: { fetch: async () => new Response("should not be reached", { status: 200 }) } };
+  const res = await worker.fetch(new Request("https://tinystudio.io/not-listed.js"), env);
+  assert.equal(res.status, 404);
+});
