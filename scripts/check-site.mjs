@@ -1782,6 +1782,25 @@ for (const [pageName, pageHtml] of intakePages) {
   }
 }
 
+// ---- Audit page in-content request CTA (sol-postmerge-159) -----------------
+// PR #159 added a closing dark band on /audit so a reader finishing the proof
+// has an in-content Request the appraisal pill to the page's own #start form,
+// not only the nav CTA. The top study-stats .band must stay untouched.
+// STATIC SOURCE GUARD (regex over HTML/CSS), same class as the /agents and
+// /specimen band guards. CI has no browser.
+const auditCtaBand = siteAudit.match(/<div class="band">\s*<h2>The evidence is above\. The read is free\.<\/h2>([\s\S]*?)<\/div>\s*<section id="confidential">/)?.[1] ?? "";
+if (!auditCtaBand) {
+  failures.push("Audit page must keep its closing request band (heading \"The evidence is above. The read is free.\") before #confidential.");
+} else if (!/<a\b[^>]*class="cta"[^>]*href="#start"[^>]*>Request the appraisal<\/a>/.test(auditCtaBand)) {
+  failures.push("Audit closing request band must carry a .cta link to #start labelled \"Request the appraisal\".");
+}
+if (!auditCss.includes(".band .cta")) {
+  failures.push("audit.css must style the band conversion CTA (.band .cta).");
+}
+if (!/\.band \.cta\{[^}]*padding:16px 24px/.test(auditCss)) {
+  failures.push("Audit band CTA must keep a >=44px tap target (padding:16px 24px).");
+}
+
 // ---- Specimen in-content conversion CTA ------------------------------------
 // The /specimen proof page is where the homepage routes its "Read the
 // specimen" call-out, so the reader who finishes the sample needs an
